@@ -14,7 +14,7 @@ import ru.l1ttleO.boyfriend.Boyfriend;
 import ru.l1ttleO.boyfriend.Duration;
 
 public class Ban {
-    public static String usage = "`!ban <@упоминание или ID> [<продолжительность>] <причина>`";
+    public static final String usage = "`!ban <@упоминание или ID> [<продолжительность>] <причина>`";
     public void run(MessageReceivedEvent event, String[] args) {
         Guild guild = event.getGuild();
         JDA jda = guild.getJDA();

@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import ru.l1ttleO.boyfriend.Boyfriend;
 
 public class Kick {
-    public static String usage = "`!kick <@упоминание или ID> <причина>`";
+    public static final String usage = "`!kick <@упоминание или ID> <причина>`";
     public void run(MessageReceivedEvent event, String[] args) {
         Guild guild = event.getGuild();
         Member author = event.getMember();

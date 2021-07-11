@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class Clear {
-    public static String usage = "`!clear <количество>`";
+    public static final String usage = "`!clear <количество>`";
     public void run(MessageReceivedEvent event, String[] args) {
         MessageChannel channel = event.getChannel();
         int requested;
