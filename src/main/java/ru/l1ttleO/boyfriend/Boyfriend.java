@@ -12,7 +12,7 @@ public class Boyfriend {
     public static final MemberActions memberActions = new MemberActions();
 
     public static void main(final String[] args) throws LoginException, InterruptedException, IOException {
-        final JDABuilder builder = JDABuilder.createDefault(Files.readString(Paths.get("token.txt")));
+        final JDABuilder builder = JDABuilder.createDefault(Files.readString(Paths.get("token.txt")).trim());
 
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
         builder.disableIntents(GatewayIntent.GUILD_PRESENCES);
