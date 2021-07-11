@@ -1,5 +1,11 @@
 plugins {
     id 'java'
+    id 'checkstyle'
+}
+
+checkstyle {
+    configFile = rootProject.file('.checkstyle/checkstyle.xml')
+    maxWarnings = 3
 }
 
 group 'ru.l1ttleO'

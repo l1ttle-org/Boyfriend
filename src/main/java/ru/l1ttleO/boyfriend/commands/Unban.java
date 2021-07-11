@@ -12,12 +12,13 @@ import ru.l1ttleO.boyfriend.Boyfriend;
 
 public class Unban {
     public static final String usage = "`!unban <@упоминание или ID> <причина>`";
-    public void run(MessageReceivedEvent event, String[] args) {
-        Guild guild = event.getGuild();
-        JDA jda = guild.getJDA();
-        Member author = event.getMember();
-        MessageChannel channel = event.getChannel();
-        User unbanned;
+
+    public void run(final MessageReceivedEvent event, final String[] args) {
+        final Guild guild = event.getGuild();
+        final JDA jda = guild.getJDA();
+        final Member author = event.getMember();
+        final MessageChannel channel = event.getChannel();
+        final User unbanned;
         assert author != null;
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
             channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
@@ -28,9 +29,9 @@ public class Unban {
             return;
         }
         try {
-            String id = args[0].replaceAll("[^0-9]", "").replace("!", "").replace(">", "");
+            final String id = args[0].replaceAll("[^0-9]", "").replace("!", "").replace(">", "");
             unbanned = jda.retrieveUserById(id).complete();
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             channel.sendMessage("Неправильно указан пользователь! " + usage).queue();
             return;
         }
@@ -38,7 +39,7 @@ public class Unban {
             channel.sendMessage("Указан недействительный пользователь!").queue();
             return;
         }
-        String reason = StringUtils.join(args, ' ', 1, args.length);
+        final String reason = StringUtils.join(args, ' ', 1, args.length);
         if (reason == null || reason.equals("")) {
             channel.sendMessage("Требуется указать причину!").queue();
             return;

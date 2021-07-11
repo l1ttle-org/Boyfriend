@@ -10,11 +10,12 @@ import ru.l1ttleO.boyfriend.Boyfriend;
 
 public class Kick {
     public static final String usage = "`!kick <@упоминание или ID> <причина>`";
-    public void run(MessageReceivedEvent event, String[] args) {
-        Guild guild = event.getGuild();
-        Member author = event.getMember();
-        Member kicked;
-        MessageChannel channel = event.getChannel();
+
+    public void run(final MessageReceivedEvent event, final String[] args) {
+        final Guild guild = event.getGuild();
+        final Member author = event.getMember();
+        final Member kicked;
+        final MessageChannel channel = event.getChannel();
         assert author != null;
         if (!author.hasPermission(Permission.KICK_MEMBERS)) {
             channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
@@ -25,9 +26,9 @@ public class Kick {
             return;
         }
         try {
-            String id = args[0].replaceAll("[^0-9]", "").replace("!", "").replace(">", "");
+            final String id = args[0].replaceAll("[^0-9]", "").replace("!", "").replace(">", "");
             kicked = guild.retrieveMemberById(id).complete();
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             channel.sendMessage("Неправильно указан пользователь! " + usage).queue();
             return;
         }
@@ -39,7 +40,7 @@ public class Kick {
             channel.sendMessage("У тебя недостаточно прав для бана этого пользователя!").queue();
             return;
         }
-        String reason = StringUtils.join(args, ' ', 1, args.length);
+        final String reason = StringUtils.join(args, ' ', 1, args.length);
         Boyfriend.memberActions.kickMember(channel, author, kicked, reason);
     }
 }

@@ -1,7 +1,6 @@
 package ru.l1ttleO.boyfriend.commands;
 
 import java.util.Objects;
-
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -9,9 +8,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class Clear {
     public static final String usage = "`!clear <количество>`";
-    public void run(MessageReceivedEvent event, String[] args) {
-        MessageChannel channel = event.getChannel();
-        int requested;
+
+    public void run(final MessageReceivedEvent event, final String[] args) {
+        final MessageChannel channel = event.getChannel();
+        final int requested;
         if (!Objects.requireNonNull(event.getMember()).hasPermission((GuildChannel) event.getChannel(), Permission.MESSAGE_MANAGE)) {
             channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
             return;
@@ -22,7 +22,7 @@ public class Clear {
         }
         try {
             requested = Integer.parseInt(args[0]) + 1;
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             channel.sendMessage("Неправильно указано количество! " + usage).queue();
             return;
         }

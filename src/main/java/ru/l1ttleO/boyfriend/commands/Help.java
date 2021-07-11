@@ -4,8 +4,8 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class Help {
-    public void run(MessageReceivedEvent event) {
-        MessageChannel channel = event.getChannel();
+    public void run(final MessageReceivedEvent event) {
+        final MessageChannel channel = event.getChannel();
         channel.sendMessage("""
                             Справка по командам:
                             `!ban` - Банит участника. Использование: %s;
