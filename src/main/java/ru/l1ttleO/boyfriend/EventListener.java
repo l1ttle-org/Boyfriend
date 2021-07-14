@@ -72,7 +72,7 @@ public class EventListener extends ListenerAdapter {
             try {
                 Boyfriend.memberActions.banMember(channel, guild.retrieveMemberById(jda.getSelfUser().getId()).complete(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда");
             } catch (final Exception e) {
-                channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: `%s`".formatted(e.getMessage())).queue();
+                channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: `%s`" + e.getMessage()).queue();
                 e.printStackTrace();
             }
             return;
@@ -108,7 +108,7 @@ public class EventListener extends ListenerAdapter {
             if (StringUtils.startsWithIgnoreCase(str, "!unMute"))
                 unmute.run(event, args);
         } catch (final Exception e) {
-            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команд: `%s`".formatted(e.getMessage())).queue();
+            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команд: `%s`" + e.getMessage()).queue();
             e.printStackTrace();
         }
     }
