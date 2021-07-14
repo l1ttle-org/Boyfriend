@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class Clear {
-    public static final String usage = "`!clear <количество, не менее 0 и не больше 100>`";
+    public static final String usage = "`!clear <количество, не менее 1 и не больше 99>`";
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final MessageChannel channel = event.getChannel();
@@ -26,11 +26,11 @@ public class Clear {
             channel.sendMessage("Неправильно указано количество! " + usage).queue();
             return;
         }
-        if (requested < 0) {
-            channel.sendMessage("Количество меньше ноля!").queue();
+        if (requested < 2) {
+            channel.sendMessage("Количество меньше 1! " + usage).queue();
             return;
         } else if (requested > 100) {
-            channel.sendMessage("Количество больше ста!").queue();
+            channel.sendMessage("Количество больше 99! " + usage).queue();
             return;
         }
         channel.purgeMessages(channel.getHistory().retrievePast(requested).complete());
