@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.apache.commons.lang3.StringUtils;
 import ru.l1ttleO.boyfriend.Boyfriend;
 
@@ -38,6 +40,14 @@ public class Unban {
         if (unbanned == null) {
             channel.sendMessage("Указан недействительный пользователь!").queue();
             return;
+        }
+        try {
+            guild.retrieveBan(unbanned).complete();
+        } catch (final ErrorResponseException e) {
+            if (e.getErrorResponse().equals(ErrorResponse.UNKNOWN_BAN)) {
+                channel.sendMessage("Пользователь не забанен!").queue();
+                return;
+            }
         }
         final String reason = StringUtils.join(args, ' ', 1, args.length);
         if (reason == null || reason.equals("")) {
