@@ -51,7 +51,7 @@ public class Mute {
             channel.sendMessage("Не найдена роль мута!").queue();
             return;
         }
-        Role role = roleList.get(0);
+        final Role role = roleList.get(0);
         final int duration = Duration.getDurationMultiplied(args[1]);
         int startIndex = 1;
         String durationString;

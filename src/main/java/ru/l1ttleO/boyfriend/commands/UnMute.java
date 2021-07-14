@@ -45,7 +45,7 @@ public class UnMute {
             channel.sendMessage("Не найдена роль мута!").queue();
             return;
         }
-        Role role = roleList.get(0);
+        final Role role = roleList.get(0);
         final String reason = StringUtils.join(args, ' ', 1, args.length);
         if (reason == null || reason.equals("")) {
             channel.sendMessage("Требуется указать причину!").queue();
