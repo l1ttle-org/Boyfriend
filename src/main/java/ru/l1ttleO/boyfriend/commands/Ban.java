@@ -60,7 +60,7 @@ public class Ban {
         final String reason = StringUtils.join(args, ' ', startIndex, args.length);
         try {
             guild.retrieveBan(banned).complete();
-        } catch (ErrorResponseException e) {
+        } catch (final ErrorResponseException e) {
             if (e.getErrorResponse().equals(ErrorResponse.UNKNOWN_BAN)) {
                 channel.sendMessage("Пользователь не забанен!").queue();
                 return;
