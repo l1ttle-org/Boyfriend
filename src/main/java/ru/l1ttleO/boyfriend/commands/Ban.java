@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.apache.commons.lang3.StringUtils;
 import ru.l1ttleO.boyfriend.Boyfriend;
 import ru.l1ttleO.boyfriend.Duration;
@@ -56,6 +58,14 @@ public class Ban {
             startIndex = 2;
         }
         final String reason = StringUtils.join(args, ' ', startIndex, args.length);
+        try {
+            guild.retrieveBan(banned).complete();
+        } catch (ErrorResponseException e) {
+            if (e.getErrorResponse().equals(ErrorResponse.UNKNOWN_BAN)) {
+                channel.sendMessage("Пользователь не забанен!").queue();
+                return;
+            }
+        }
         if (reason == null || reason.equals("")) {
             channel.sendMessage("Требуется указать причину!").queue();
             return;

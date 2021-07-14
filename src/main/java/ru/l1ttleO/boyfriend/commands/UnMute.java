@@ -46,6 +46,10 @@ public class UnMute {
             return;
         }
         final Role role = roleList.get(0);
+        if (!unMuted.getRoles().contains(role)) {
+            channel.sendMessage("Участник не заглушен!").queue();
+            return;
+        }
         final String reason = StringUtils.join(args, ' ', 1, args.length);
         if (reason == null || reason.equals("")) {
             channel.sendMessage("Требуется указать причину!").queue();
