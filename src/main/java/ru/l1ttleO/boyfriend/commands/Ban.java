@@ -62,6 +62,6 @@ public class Ban {
         }
         if (random.nextInt(101) == 100)
             channel.sendMessage("Я кастую бан!").queue();
-        Boyfriend.memberActions.banMember(jda, channel, author, banned, reason, duration, durationString);
+        Boyfriend.memberActions.banMember(channel, author, banned, reason, duration, durationString);
     }
 }

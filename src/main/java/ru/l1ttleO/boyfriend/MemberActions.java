@@ -1,16 +1,16 @@
 package ru.l1ttleO.boyfriend;
 
 import java.util.Objects;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
 public class MemberActions {
 
-    public void banMember(final JDA jda, final MessageChannel channel, final Member author, final User banned, final String reason, final int duration, final String durationString) {
+    public void banMember(final MessageChannel channel, final Member author, final User banned, final String reason, final int duration, final String durationString) {
         final Guild guild = author.getGuild();
         final TextChannel logChannel = guild.getSystemChannel();
         banned.openPrivateChannel().complete().sendMessage("""
@@ -32,7 +32,7 @@ public class MemberActions {
                         return;
                     }
                     guild.unban(banned).queue();
-                    logChannel.sendMessage("%s возвращает из бана %s: Время наказания истекло".formatted(jda.getSelfUser().getAsMention(), banned.getAsMention())).queue();
+                    logChannel.sendMessage("%s возвращает из бана %s: Время наказания истекло".formatted(channel.getJDA().getSelfUser().getAsMention(), banned.getAsMention())).queue();
                 } catch (final InterruptedException e) {
                     logChannel.sendMessage("[!] Прерван таймер разбана для %s".formatted(banned.getAsMention())).queue();
                 }
@@ -50,12 +50,42 @@ public class MemberActions {
 
     public void kickMember(final MessageChannel channel, final Member author, final Member kicked, final String reason) {
         kicked.getUser().openPrivateChannel().complete().sendMessage("""
-                                                           Тебя выгнал %s за `%s`.
+                                                                     Тебя выгнал %s за `%s`.
 
-                                                           Ты можешь перезайти по этой ссылке:
-                                                           https://discord.gg/7AErwavhvx""".formatted(author.getAsMention(), reason)).complete();
+                                                                     Ты можешь перезайти по этой ссылке:
+                                                                     https://discord.gg/7AErwavhvx""".formatted(author.getAsMention(), reason)).complete();
         author.getGuild().kick(kicked).queue();
         channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();
         Objects.requireNonNull(author.getGuild().getSystemChannel()).sendMessage("%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason)).queue();
+    }
+
+    public void muteMember(final MessageChannel channel, final Role role, final Member author, final Member muted, final String reason, final int duration, final String durationString) {
+        final Guild guild = author.getGuild();
+        final TextChannel logChannel = guild.getSystemChannel();
+        guild.addRoleToMember(muted, role).queue();
+        channel.sendMessage("Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason)).queue();
+        assert logChannel != null;
+        logChannel.sendMessage("%s банит %s на%s за `%s`".formatted(author.getAsMention(), muted.getAsMention(), durationString, reason)).queue();
+        if (duration != 0) {
+            final Runnable runnable = () -> {
+                try {
+                    Thread.sleep(duration * 1000L);
+                    if (muted.getRoles().contains(role)) {
+                        guild.removeRoleFromMember(muted, role).queue();
+                        logChannel.sendMessage("%s возвращает из карцера %s: Время наказания истекло".formatted(channel.getJDA().getSelfUser().getAsMention(), muted.getAsMention())).queue();
+                    }
+                } catch (final InterruptedException e) {
+                    logChannel.sendMessage("[!] Прерван таймер размута для %s".formatted(muted.getAsMention())).queue();
+                }
+            };
+            final Thread thread = new Thread(runnable);
+            thread.start();
+        }
+    }
+
+    public void unMuteMember(final MessageChannel channel, final Role role, final Member author, final Member unMuted, final String reason) {
+        author.getGuild().removeRoleFromMember(unMuted, role).queue();
+        channel.sendMessage("Возвращён из карцера %s за `%s`".formatted(unMuted.getAsMention(), reason)).queue();
+        Objects.requireNonNull(author.getGuild().getSystemChannel()).sendMessage("%s возвращает из карцера %s: `%s`".formatted(author.getAsMention(), unMuted.getAsMention(), reason)).queue();
     }
 }
