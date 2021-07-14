@@ -65,7 +65,7 @@ public class MemberActions {
         guild.addRoleToMember(muted, role).queue();
         channel.sendMessage("Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason)).queue();
         assert logChannel != null;
-        logChannel.sendMessage("%s банит %s на%s за `%s`".formatted(author.getAsMention(), muted.getAsMention(), durationString, reason)).queue();
+        logChannel.sendMessage("%s глушит %s на%s за `%s`".formatted(author.getAsMention(), muted.getAsMention(), durationString, reason)).queue();
         if (duration != 0) {
             final Runnable runnable = () -> {
                 try {
