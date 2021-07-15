@@ -14,7 +14,7 @@ public class Help {
                             `!ping` - Измеряет время обработки REST-запроса;
                             `!unban` - Возвращает пользователя из бана. Использование: %s
                             `!unmute` - Возвращает участника из карцера. Использование: %s"""
-                           .formatted(Ban.usage, Clear.usage, Kick.usage, Mute.usage, Unban.usage, UnMute.usage)).queue();
+                           .formatted(Ban.usage, Clear.usage, Kick.usage, Mute.usage, Unban.usage, Unmute.usage)).queue();
     }
 }
 

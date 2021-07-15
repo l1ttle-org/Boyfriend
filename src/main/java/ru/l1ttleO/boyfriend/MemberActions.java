@@ -83,9 +83,9 @@ public class MemberActions {
         }
     }
 
-    public void unMuteMember(final MessageChannel channel, final Role role, final Member author, final Member unMuted, final String reason) {
-        author.getGuild().removeRoleFromMember(unMuted, role).queue();
-        channel.sendMessage("Возвращён из карцера %s за `%s`".formatted(unMuted.getAsMention(), reason)).queue();
-        Objects.requireNonNull(author.getGuild().getSystemChannel()).sendMessage("%s возвращает из карцера %s: `%s`".formatted(author.getAsMention(), unMuted.getAsMention(), reason)).queue();
+    public void unmuteMember(final MessageChannel channel, final Role role, final Member author, final Member unmuted, final String reason) {
+        author.getGuild().removeRoleFromMember(unmuted, role).queue();
+        channel.sendMessage("Возвращён из карцера %s за `%s`".formatted(unmuted.getAsMention(), reason)).queue();
+        Objects.requireNonNull(author.getGuild().getSystemChannel()).sendMessage("%s возвращает из карцера %s: `%s`".formatted(author.getAsMention(), unmuted.getAsMention(), reason)).queue();
     }
 }

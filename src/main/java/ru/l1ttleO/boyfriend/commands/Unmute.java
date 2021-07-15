@@ -10,14 +10,14 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import ru.l1ttleO.boyfriend.Boyfriend;
 
-public class UnMute {
+public class Unmute {
     public static final String usage = "`!unmute <@упоминание или ID> <причина>`";
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
-        final Member unMuted;
+        final Member unmuted;
         assert author != null;
         if (!author.hasPermission(Permission.MESSAGE_MANAGE)) {
             channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
@@ -29,12 +29,12 @@ public class UnMute {
         }
         try {
             final String id = args[0].replaceAll("[^0-9]", "").replace("!", "").replace(">", "");
-            unMuted = guild.retrieveMemberById(id).complete();
+            unmuted = guild.retrieveMemberById(id).complete();
         } catch (final NumberFormatException e) {
             channel.sendMessage("Неправильно указан пользователь! " + usage).queue();
             return;
         }
-        if (unMuted == null) {
+        if (unmuted == null) {
             channel.sendMessage("Указан недействительный пользователь!").queue();
             return;
         }
@@ -46,7 +46,7 @@ public class UnMute {
             return;
         }
         final Role role = roleList.get(0);
-        if (!unMuted.getRoles().contains(role)) {
+        if (!unmuted.getRoles().contains(role)) {
             channel.sendMessage("Участник не заглушен!").queue();
             return;
         }
@@ -55,6 +55,6 @@ public class UnMute {
             channel.sendMessage("Требуется указать причину!").queue();
             return;
         }
-        Boyfriend.memberActions.unMuteMember(channel, role, author, unMuted, reason);
+        Boyfriend.memberActions.unmuteMember(channel, role, author, unmuted, reason);
     }
 }

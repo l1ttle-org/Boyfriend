@@ -16,15 +16,14 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.apache.commons.lang3.StringUtils;
 import ru.l1ttleO.boyfriend.commands.Ban;
 import ru.l1ttleO.boyfriend.commands.Clear;
 import ru.l1ttleO.boyfriend.commands.Help;
 import ru.l1ttleO.boyfriend.commands.Kick;
 import ru.l1ttleO.boyfriend.commands.Mute;
 import ru.l1ttleO.boyfriend.commands.Ping;
-import ru.l1ttleO.boyfriend.commands.UnMute;
 import ru.l1ttleO.boyfriend.commands.Unban;
+import ru.l1ttleO.boyfriend.commands.Unmute;
 
 public class EventListener extends ListenerAdapter {
 
@@ -42,8 +41,6 @@ public class EventListener extends ListenerAdapter {
         Objects.requireNonNull(guild.getSystemChannel()).sendMessage(event.getMember().getAsMention() + ", добро пожаловать на сервер " + guild.getName()).queue();
     }
 
-    public static final String[] commands = {"!ban", "!clear", "!help", "!kick", "!mute", "!ping", "!unban", "!unmute"};
-
     @Override
     public void onMessageReceived(final MessageReceivedEvent event) {
         final JDA jda = event.getJDA();
@@ -57,8 +54,6 @@ public class EventListener extends ListenerAdapter {
         if (message.mentionsEveryone())
             return;
         if (author.isBot()) {
-            if (str.startsWith("!"))
-                channel.sendMessage("Что тебе от меня надо?").queue();
             return;
         }
         if (message.isFromType(ChannelType.PRIVATE)) {
@@ -84,29 +79,22 @@ public class EventListener extends ListenerAdapter {
         final Mute mute = new Mute();
         final Ping ping = new Ping();
         final Unban unban = new Unban();
-        final UnMute unmute = new UnMute();
+        final Unmute unmute = new Unmute();
         try {
-            if (StringUtils.startsWithIgnoreCase(str, "!") && !Arrays.stream(commands).toList().contains(args[0])) {
-                channel.sendMessage("Неизвестная команда! Попробуй `!help`").queue();
-            }
+            final String command = argsList.get(0);
             argsList.remove(0);
             args = argsList.toArray(new String[0]);
-            if (StringUtils.startsWithIgnoreCase(str, "!ban"))
-                ban.run(event, args);
-            if (StringUtils.startsWithIgnoreCase(str, "!clear"))
-                clear.run(event, args);
-            if (StringUtils.startsWithIgnoreCase(str, "!help"))
-                help.run(event);
-            if (StringUtils.startsWithIgnoreCase(str, "!kick"))
-                kick.run(event, args);
-            if (StringUtils.startsWithIgnoreCase(str, "!mute"))
-                mute.run(event, args);
-            if (StringUtils.startsWithIgnoreCase(str, "!ping"))
-                ping.run(event);
-            if (StringUtils.startsWithIgnoreCase(str, "!unban"))
-                unban.run(event, args);
-            if (StringUtils.startsWithIgnoreCase(str, "!unMute"))
-                unmute.run(event, args);
+            switch (command.toLowerCase()) {
+                case "!ban" -> ban.run(event, args);
+                case "!clear" -> clear.run(event, args);
+                case "!help", "!" -> help.run(event);
+                case "!kick" -> kick.run(event, args);
+                case "!mute" -> mute.run(event, args);
+                case "!ping" -> ping.run(event);
+                case "!unban" -> unban.run(event, args);
+                case "!unmute" -> unmute.run(event, args);
+                default -> channel.sendMessage("Неизвестная команда! Попробуй `!help`").queue();
+            }
         } catch (final Exception e) {
             channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команд: " + e.getMessage()).queue();
             e.printStackTrace();
