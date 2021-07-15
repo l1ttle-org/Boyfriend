@@ -80,24 +80,26 @@ public class EventListener extends ListenerAdapter {
         final Ping ping = new Ping();
         final Unban unban = new Unban();
         final Unmute unmute = new Unmute();
-        try {
-            final String command = argsList.get(0);
-            argsList.remove(0);
-            args = argsList.toArray(new String[0]);
-            switch (command.toLowerCase()) {
-                case "!ban" -> ban.run(event, args);
-                case "!clear" -> clear.run(event, args);
-                case "!help", "!" -> help.run(event);
-                case "!kick" -> kick.run(event, args);
-                case "!mute" -> mute.run(event, args);
-                case "!ping" -> ping.run(event);
-                case "!unban" -> unban.run(event, args);
-                case "!unmute" -> unmute.run(event, args);
-                default -> channel.sendMessage("Неизвестная команда! Попробуй `!help`").queue();
+        final String command = argsList.get(0);
+        argsList.remove(0);
+        args = argsList.toArray(new String[0]);
+        if (str.startsWith("!")) {
+            try {
+                switch (command.toLowerCase()) {
+                    case "!ban" -> ban.run(event, args);
+                    case "!clear" -> clear.run(event, args);
+                    case "!help", "!" -> help.run(event);
+                    case "!kick" -> kick.run(event, args);
+                    case "!mute" -> mute.run(event, args);
+                    case "!ping" -> ping.run(event);
+                    case "!unban" -> unban.run(event, args);
+                    case "!unmute" -> unmute.run(event, args);
+                    default -> channel.sendMessage("Неизвестная команда! Попробуй `!help`").queue();
+                }
+            } catch (final Exception e) {
+                channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команд: " + e.getMessage()).queue();
+                e.printStackTrace();
             }
-        } catch (final Exception e) {
-            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команд: " + e.getMessage()).queue();
-            e.printStackTrace();
         }
     }
 }
