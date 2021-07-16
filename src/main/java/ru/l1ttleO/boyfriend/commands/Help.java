@@ -1,20 +1,27 @@
 package ru.l1ttleO.boyfriend.commands;
 
+import java.util.ArrayList;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ru.l1ttleO.boyfriend.CommandHandler;
 
-public class Help {
-    public void run(final MessageReceivedEvent event) {
-        event.getChannel().sendMessage("""
-                            Справка по командам:
-                            `!ban` - Банит пользователя. Использование: %s;
-                            `!clear` - Удаляет указанное количество сообщений в канале. Использование: %s;
-                            `!help` - Показывает эту справку;
-                            `!kick` - Выгоняет участника. Использование: %s;
-                            `!mute` - Глушит участника. Использование: %s;
-                            `!ping` - Измеряет время обработки REST-запроса;
-                            `!unban` - Возвращает пользователя из бана. Использование: %s
-                            `!unmute` - Возвращает участника из карцера. Использование: %s"""
-                           .formatted(Ban.usage, Clear.usage, Kick.usage, Mute.usage, Unban.usage, Unmute.usage)).queue();
+public class Help extends Command {
+	
+    public Help() {
+		super("help", "Показывает эту справку");
+	}
+
+	public void run(final MessageReceivedEvent event, String[] args) {
+		String text = "Справка по командам:";
+		final ArrayList<Command> commands = new ArrayList<>(CommandHandler.COMMAND_LIST.values());
+		commands.sort((c1, c2) -> {return c1.NAME.compareTo(c2.NAME);});
+		for (Command command : commands) {
+			text += "\n`%s%s` - %s".formatted(CommandHandler.prefix, command.NAME, command.DESCRIPTION);
+			if (command.USAGES.length > 0)
+				text += ". "+command.getUsages();
+			text += ";";
+		}
+		text = text.substring(0, text.length()-1);
+        event.getChannel().sendMessage(text).queue();
     }
 }
 

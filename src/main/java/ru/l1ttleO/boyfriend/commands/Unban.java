@@ -9,10 +9,14 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
-import ru.l1ttleO.boyfriend.Boyfriend;
 
-public class Unban {
-    public static final String usage = "`!unban <@упоминание или ID> <причина>`";
+import ru.l1ttleO.boyfriend.Actions;
+
+public class Unban extends Command {
+	
+    public Unban() {
+		super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> <причина>");
+	}
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final Guild guild = event.getGuild();
@@ -25,32 +29,18 @@ public class Unban {
             channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
             return;
         }
-        if (args.length == 0) {
-            channel.sendMessage("Нету аргументов! " + usage).queue();
+        if (args.length < 3) {
+            channel.sendMessage("Требуется указать причину!").queue();
             return;
         }
-        try {
-            final String id = args[0].replaceAll("[^0-9]", "").replace("!", "").replace(">", "");
-            unbanned = jda.retrieveUserById(id).complete();
-        } catch (final NumberFormatException e) {
-            channel.sendMessage("Неправильно указан пользователь! " + usage).queue();
-            return;
-        }
-        if (unbanned == null) {
-            channel.sendMessage("Указан недействительный пользователь!").queue();
-            return;
-        }
+        if ((unbanned = getUser(args[1], jda, channel)) == null) return;
         try {
             guild.retrieveBan(unbanned).complete();
         } catch (final ErrorResponseException e) {
             channel.sendMessage("Пользователь не забанен!").queue();
             return;
         }
-        final String reason = StringUtils.join(args, ' ', 1, args.length);
-        if (reason == null || reason.equals("")) {
-            channel.sendMessage("Требуется указать причину!").queue();
-            return;
-        }
-        Boyfriend.memberActions.unbanMember(channel, author, unbanned, reason);
+        final String reason = StringUtils.join(args, ' ', 2, args.length);
+        Actions.unbanMember(channel, author, unbanned, reason);
     }
 }

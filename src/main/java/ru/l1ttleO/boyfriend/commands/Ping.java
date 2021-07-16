@@ -1,19 +1,18 @@
 package ru.l1ttleO.boyfriend.commands;
 
-import java.util.Random;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ru.l1ttleO.boyfriend.Utils;
 
-public class Ping {
-    public void run(final MessageReceivedEvent event) {
+public class Ping extends Command {
+	
+    public Ping() {
+		super("ping", "Измеряет время обработки REST-запроса");
+	}
+    public void run(final MessageReceivedEvent event, String[] args) {
         final MessageChannel channel = event.getChannel();
-        final JDA jda = channel.getJDA();
-        final Random random = new Random();
-        final String[] letters = {"а", "о", "и"};
-        final int number = random.nextInt(letters.length);
-        jda.getRestPing().queue(time ->
-            channel.sendMessage("Б%sп! %sмс".formatted(letters[number], time)).queue()
+        channel.getJDA().getRestPing().queue(time ->
+            channel.sendMessage("%s %sмс".formatted(Utils.getBeep(), time)).queue()
         );
     }
 }

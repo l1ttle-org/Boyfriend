@@ -8,10 +8,14 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
-import ru.l1ttleO.boyfriend.Boyfriend;
 
-public class Unmute {
-    public static final String usage = "`!unmute <@упоминание или ID> <причина>`";
+import ru.l1ttleO.boyfriend.Actions;
+
+public class Unmute extends Command {
+	
+    public Unmute() {
+		super("unmute", "Возвращает участника из мута", "unmute <@упоминание или ID> <причина>");
+	}
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final Guild guild = event.getGuild();
@@ -23,24 +27,16 @@ public class Unmute {
             channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
             return;
         }
-        if (args.length == 0) {
-            channel.sendMessage("Нету аргументов! " + usage).queue();
+        if (args.length < 3) {
+            channel.sendMessage("Требуется указать причину!").queue();
             return;
         }
-        try {
-            final String id = args[0].replaceAll("[^0-9]", "").replace("!", "").replace(">", "");
-            unmuted = guild.retrieveMemberById(id).complete();
-        } catch (final NumberFormatException e) {
-            channel.sendMessage("Неправильно указан пользователь! " + usage).queue();
-            return;
+        if ((unmuted = getMember(args[1], event.getGuild(), channel)) == null) return;
+        List<Role> roleList = null;
+        for (String name : Mute.ROLE_NAMES) {
+        	roleList = guild.getRolesByName(name, true);
+        	if (!roleList.isEmpty()) break;
         }
-        if (unmuted == null) {
-            channel.sendMessage("Указан недействительный пользователь!").queue();
-            return;
-        }
-        List<Role> roleList = guild.getRolesByName("заключённый", true);
-        if (roleList.isEmpty())
-            roleList = guild.getRolesByName("muted", true);
         if (roleList.isEmpty()) {
             channel.sendMessage("Не найдена роль мута!").queue();
             return;
@@ -50,11 +46,7 @@ public class Unmute {
             channel.sendMessage("Участник не заглушен!").queue();
             return;
         }
-        final String reason = StringUtils.join(args, ' ', 1, args.length);
-        if (reason == null || reason.equals("")) {
-            channel.sendMessage("Требуется указать причину!").queue();
-            return;
-        }
-        Boyfriend.memberActions.unmuteMember(channel, role, author, unmuted, reason);
+        final String reason = StringUtils.join(args, ' ', 2, args.length);
+        Actions.unmuteMember(channel, role, author, unmuted, reason);
     }
 }

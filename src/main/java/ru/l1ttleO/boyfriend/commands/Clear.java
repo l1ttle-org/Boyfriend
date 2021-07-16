@@ -1,13 +1,19 @@
 package ru.l1ttleO.boyfriend.commands;
 
+import java.util.List;
 import java.util.Objects;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ru.l1ttleO.boyfriend.Utils;
 
-public class Clear {
-    public static final String usage = "`!clear <количество, не менее 1 и не больше 99>`";
+public class Clear extends Command {
+	
+	public Clear() {
+		super("clear", "Удаляет указанное количество сообщений в канале", "clear <количество, не менее 1 и не больше 99>");
+	}
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final MessageChannel channel = event.getChannel();
@@ -16,24 +22,22 @@ public class Clear {
             channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
             return;
         }
-        if (args.length == 0) {
-            channel.sendMessage("Нету аргументов! " + usage).queue();
-            return;
-        }
         try {
-            requested = Integer.parseInt(args[0]) + 1;
+            requested = Integer.parseInt(args[1]) + 1;
         } catch (final NumberFormatException e) {
-            channel.sendMessage("Неправильно указано количество! " + usage).queue();
+        	usageError(channel, "Неправильно указано количество!");
             return;
         }
         if (requested < 2) {
-            channel.sendMessage("Количество меньше 1! " + usage).queue();
+        	usageError(channel, "Количество меньше 1!");
             return;
         } else if (requested > 100) {
-            channel.sendMessage("Количество больше 99! " + usage).queue();
+        	usageError(channel, "Количество больше 99!");
             return;
         }
-        channel.purgeMessages(channel.getHistory().retrievePast(requested).complete());
-        channel.sendMessage("Успешно удалено %s сообщений".formatted(requested)).queue();
+        final List<Message> messages = channel.getHistory().retrievePast(requested).complete();
+        final int amount = messages.size();
+        channel.purgeMessages(messages);
+        channel.sendMessage("Успешно удалено %s %s".formatted(amount,Utils.plural(amount, "сообщение", "сообщения", "сообщений"))).queue();
     }
 }
