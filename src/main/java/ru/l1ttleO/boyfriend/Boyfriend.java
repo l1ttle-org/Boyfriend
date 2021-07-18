@@ -27,8 +27,6 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class Boyfriend {
-    public static final MemberActions memberActions = new MemberActions();
-
     public static void main(final String[] args) throws LoginException, InterruptedException, IOException {
         final JDABuilder builder = JDABuilder.createDefault(Files.readString(Paths.get("token.txt")).trim());
 
