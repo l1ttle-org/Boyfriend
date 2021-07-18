@@ -23,14 +23,13 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
-
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Kick extends Command {
-	
+    
     public Kick() {
-		super("kick", "Выгоняет участника", "kick <@упоминание или ID> <причина>");
-	}
+        super("kick", "Выгоняет участника", "kick <@упоминание или ID> <причина>");
+    }
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final Member author = event.getMember();

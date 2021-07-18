@@ -26,16 +26,15 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-
 import org.apache.commons.lang3.StringUtils;
-import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.Utils;
 
 public class Ban extends Command {
-	
+    
     public Ban() {
-		super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] <причина>");
-	}
+        super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] <причина>");
+    }
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final Guild guild = event.getGuild();
@@ -49,16 +48,16 @@ public class Ban extends Command {
             return;
         }
         if ((banned = getUser(args[1], event.getJDA(), channel)) == null) // assign and check in 1 line
-        	return;
+            return;
         try {
-	        if (!author.canInteract(guild.retrieveMember(banned).complete())) {
-	            channel.sendMessage("У тебя недостаточно прав для бана этого пользователя!").queue();
-	            return;
-	        }
-	        if (!guild.retrieveMember(channel.getJDA().getSelfUser()).complete().canInteract(guild.retrieveMember(banned).complete())) {
-	            channel.sendMessage("У меня недостаточно прав для бана этого пользователя!").queue();
-	            return;
-	        }
+            if (!author.canInteract(guild.retrieveMember(banned).complete())) {
+                channel.sendMessage("У тебя недостаточно прав для бана этого пользователя!").queue();
+                return;
+            }
+            if (!guild.retrieveMember(channel.getJDA().getSelfUser()).complete().canInteract(guild.retrieveMember(banned).complete())) {
+                channel.sendMessage("У меня недостаточно прав для бана этого пользователя!").queue();
+                return;
+            }
         } catch (final ErrorResponseException e) { /* not on the server */ }
         int duration = Utils.getDurationMultiplied(args[2]);
         int startIndex = 2;
@@ -68,7 +67,7 @@ public class Ban extends Command {
             startIndex++;
         } else duration = 0; // extra check
         if (startIndex >= args.length) {
-        	usageError(channel, "Требуется указать причину!");
+            usageError(channel, "Требуется указать причину!");
             return;
         }
         final String reason = StringUtils.join(args, ' ', startIndex, args.length);
