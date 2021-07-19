@@ -21,7 +21,7 @@ public class CommandHandler {
     static {
         register(
             new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Unban(), new Unmute()
-            );
+        );
     }
 
     public static void register(final Command... commands) {
