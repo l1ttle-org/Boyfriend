@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 public class Actions {
 
     public static final HashMap<Long, HashMap<Long, Thread>> BANS = new HashMap<>();
+
     public static void banMember(final MessageChannel channel, final Member author, final User banned, final String reason, final int duration, final String durationString) {
         final Guild guild = author.getGuild();
         final TextChannel logChannel = guild.getSystemChannel();
@@ -33,12 +34,12 @@ public class Actions {
         if (existingBan != null)
             existingBan.interrupt();
         if (duration > 0) {
-            List<Invite> invites = guild.retrieveInvites().complete();
+            final List<Invite> invites = guild.retrieveInvites().complete();
             if (invites.size() > 0)
                 DMtext += """
-                        \n
-                        По окончании бана ты сможешь перезайти по этой ссылке:
-                        https://discord.gg/%s""".formatted(invites.get(0).getCode());
+                    \n
+                    По окончании бана ты сможешь перезайти по этой ссылке:
+                    https://discord.gg/%s""".formatted(invites.get(0).getCode());
             final Thread thread = new Thread(() -> {
                 try {
                     Thread.sleep(duration * 1000L);
@@ -48,9 +49,9 @@ public class Actions {
                 } catch (final InterruptedException e) {
                     logChannel.sendMessage("[!] Прерван таймер разбана для %s".formatted(banned.getAsMention())).queue();
                 }
-            }, "Ban timer "+banned.getId());
+            }, "Ban timer " + banned.getId());
             guildBans.put(banned.getIdLong(), thread);
-            BANS.put(guild.getIdLong(),guildBans);
+            BANS.put(guild.getIdLong(), guildBans);
             thread.start();
         }
         try {
@@ -73,13 +74,14 @@ public class Actions {
 
     public static void kickMember(final MessageChannel channel, final Member author, final Member kicked, final String reason) {
         String DMtext = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
-        List<Invite> invites = author.getGuild().retrieveInvites().complete();
+        final List<Invite> invites = author.getGuild().retrieveInvites().complete();
         if (invites.size() > 0)
             DMtext += """
-                    \n
-                    Ты можешь перезайти по этой ссылке:
-                    https://discord.gg/%s""".formatted(invites.get(0).getCode());
-        try { kicked.getUser().openPrivateChannel().complete().sendMessage(DMtext).complete();
+                \n
+                Ты можешь перезайти по этой ссылке:
+                https://discord.gg/%s""".formatted(invites.get(0).getCode());
+        try {
+            kicked.getUser().openPrivateChannel().complete().sendMessage(DMtext).complete();
         } catch (final ErrorResponseException e) { /* can't DM to this user */ }
         author.getGuild().kick(kicked).queue();
         channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();
@@ -87,18 +89,18 @@ public class Actions {
     }
 
     public static final HashMap<Long, HashMap<Long, Thread>> MUTES = new HashMap<>();
+
     public static void muteMember(final MessageChannel channel, final Role role, final Member author, final Member muted, final String reason, final int duration, final String durationString) {
         final Guild guild = author.getGuild();
         final TextChannel logChannel = guild.getSystemChannel();
-        final String replyText = muted.getRoles().contains(role)?
-                "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason):
+        final String replyText = muted.getRoles().contains(role) ?
+            "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :
                 "Теперь %s заглушен на%s за `%s`".formatted(muted.getAsMention(), durationString, reason);
         guild.addRoleToMember(muted, role).queue();
         final HashMap<Long, Thread> guildMutes = MUTES.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingMute = guildMutes.get(muted.getIdLong());
-        if (existingMute != null) {
+        if (existingMute != null)
             existingMute.interrupt();
-        }
         if (duration > 0) {
             final Thread thread = new Thread(() -> {
                 try {
@@ -109,9 +111,9 @@ public class Actions {
                 } catch (final InterruptedException e) {
                     logChannel.sendMessage("[!] Прерван таймер размута для %s".formatted(muted.getAsMention())).queue();
                 } catch (final ErrorResponseException e) { /* Unknown member */ }
-            }, "Mute timer "+muted.getId());
+            }, "Mute timer " + muted.getId());
             guildMutes.put(muted.getIdLong(), thread);
-            MUTES.put(guild.getIdLong(),guildMutes);
+            MUTES.put(guild.getIdLong(), guildMutes);
             thread.start();
         }
         channel.sendMessage(replyText).queue();

@@ -53,13 +53,12 @@ public class EventListener extends ListenerAdapter {
         final User author = event.getAuthor();
         if (message.mentionsEveryone())
             return;
-        if (author.isBot()) {
+        if (author.isBot())
             return;
-        }
         if (message.isFromType(ChannelType.PRIVATE)) {
             assert logChannel != null;
-            logChannel.sendMessage(("Я получил следующее сообщение от %s:" +
-                                    "```%s ```").formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "`​`​`"))).queue();
+            logChannel.sendMessage("Я получил следующее сообщение от %s:```%s ```"
+                .formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "`​`​`"))).queue();
             return;
         }
         final Guild guild = event.getGuild();

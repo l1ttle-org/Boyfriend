@@ -17,18 +17,18 @@ import ru.l1ttleO.boyfriend.commands.Unmute;
 public class CommandHandler {
     public static String prefix = "!";
     public static final HashMap<String, Command> COMMAND_LIST = new HashMap<>();
-    
+
     static {
         register(
             new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Unban(), new Unmute()
-        );
+            );
     }
-    
+
     public static void register(final Command... commands) {
         for (final Command command : commands)
             COMMAND_LIST.put(command.NAME, command);
     }
-    
+
     public static void onMessageReceived(final MessageReceivedEvent event) {
         final Message message = event.getMessage();
         final MessageChannel channel = event.getChannel();

@@ -31,7 +31,8 @@ public class Help extends Command {
     public void run(final MessageReceivedEvent event, final String[] args) {
         String text = "Справка по командам:";
         final ArrayList<Command> commands = new ArrayList<>(CommandHandler.COMMAND_LIST.values());
-        commands.sort((c1, c2) -> { return c1.NAME.compareTo(c2.NAME); });
+        commands.sort((c1, c2) -> {
+            return c1.NAME.compareTo(c2.NAME); });
         for (final Command command : commands) {
             text += "\n`%s%s` - %s".formatted(CommandHandler.prefix, command.NAME, command.DESCRIPTION);
             if (command.USAGES.length > 0)
