@@ -26,7 +26,7 @@ public abstract class Command {
     
     public String getUsages() {
         return "Использование: `%s`"
-                .formatted(CommandHandler.prefix + StringUtils.join(USAGES, "` или `" + CommandHandler.prefix));
+                .formatted(CommandHandler.prefix + StringUtils.join(this.USAGES, "` или `" + CommandHandler.prefix));
     }
     
     public void usageError(final MessageChannel channel, final String text) {

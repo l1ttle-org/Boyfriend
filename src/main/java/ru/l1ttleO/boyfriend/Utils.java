@@ -43,6 +43,7 @@ public class Utils {
                         break;
                     default:
                         out = ", " + out;
+                        break;
                 }
                 concat_length++;
                 out = amount + " " + plural(amount, DURATION_TEXTS[i][vin ? 2 : 1], DURATION_TEXTS[i][3], DURATION_TEXTS[i][4]) + out;
