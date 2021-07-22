@@ -29,7 +29,7 @@ public class Utils {
         {"w", "неделя", "неделю", "недели", "недель"}};
 
     public static String getDurationText(int seconds, final boolean vin) {
-        StringBuilder out = new StringBuilder();
+        final StringBuilder out = new StringBuilder();
         int concat_length = 0;
         int amount;
         for (int i = 0; i < DURATION_TEXTS.length; i++) {

@@ -30,7 +30,7 @@ public class Help extends Command {
     }
 
     public void run(final MessageReceivedEvent event, final String[] args) {
-        StringBuilder text = new StringBuilder("Справка по командам:");
+        final StringBuilder text = new StringBuilder("Справка по командам:");
         final ArrayList<Command> commands = new ArrayList<>(CommandHandler.COMMAND_LIST.values());
         commands.sort(Comparator.comparing(c -> c.NAME));
         for (final Command command : commands) {

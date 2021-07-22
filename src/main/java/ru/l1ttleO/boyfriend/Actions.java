@@ -78,8 +78,7 @@ public class Actions {
         final List<Invite> invites = author.getGuild().retrieveInvites().complete();
         if (invites.size() > 0)
             DMtext += """
-                
-                
+                \n
                 Ты можешь перезайти по этой ссылке:
                 https://discord.gg/%s""".formatted(invites.get(0).getCode());
         try {
