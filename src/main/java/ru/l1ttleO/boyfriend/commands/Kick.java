@@ -37,7 +37,7 @@ public class Kick extends Command {
         final MessageChannel channel = event.getChannel();
         assert author != null;
         if (!author.hasPermission(Permission.KICK_MEMBERS)) {
-            channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
+            sendNoPermissionsMessage(channel);
             return;
         }
         if (args.length < 3) {

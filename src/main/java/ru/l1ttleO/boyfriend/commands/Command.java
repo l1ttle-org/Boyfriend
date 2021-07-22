@@ -29,11 +29,11 @@ public abstract class Command {
                 .formatted(CommandHandler.prefix + StringUtils.join(this.USAGES, "` или `" + CommandHandler.prefix));
     }
     
-    public void usageError(final MessageChannel channel, final String text) {
+    public void sendInvalidUsageMessage(final MessageChannel channel, final String text) {
         channel.sendMessage(text + " " + this.getUsages()).queue();
     }
     
-    public void noPermissions(final MessageChannel channel) {
+    public void sendNoPermissionsMessage(final MessageChannel channel) {
         channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
     }
     

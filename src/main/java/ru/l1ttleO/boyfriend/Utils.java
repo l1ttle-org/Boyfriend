@@ -29,7 +29,7 @@ public class Utils {
         {"w", "неделя", "неделю", "недели", "недель"}};
 
     public static String getDurationText(int seconds, final boolean vin) {
-        String out = "";
+        StringBuilder out = new StringBuilder();
         int concat_length = 0;
         int amount;
         for (int i = 0; i < DURATION_TEXTS.length; i++) {
@@ -39,19 +39,19 @@ public class Utils {
                     case 0:
                         break;
                     case 1:
-                        out = " и " + out;
+                        out.insert(0, " и ");
                         break;
                     default:
-                        out = ", " + out;
+                        out.insert(0, ", ");
                         break;
                 }
                 concat_length++;
-                out = amount + " " + plural(amount, DURATION_TEXTS[i][vin ? 2 : 1], DURATION_TEXTS[i][3], DURATION_TEXTS[i][4]) + out;
+                out.insert(0, amount + " " + plural(amount, DURATION_TEXTS[i][vin ? 2 : 1], DURATION_TEXTS[i][3], DURATION_TEXTS[i][4]));
                 seconds -= amount;
             }
             seconds /= DURATION_MULTIPLIERS[i];
         }
-        return out;
+        return out.toString();
     }
 
     public static int getDurationMultiplied(final String toParse) {

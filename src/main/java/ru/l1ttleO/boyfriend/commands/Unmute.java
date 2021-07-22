@@ -18,6 +18,7 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -41,7 +42,7 @@ public class Unmute extends Command {
         final Member unmuted;
         assert author != null;
         if (!author.hasPermission(Permission.MESSAGE_MANAGE)) {
-            channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
+            sendNoPermissionsMessage(channel);
             return;
         }
         if (args.length < 3) {
@@ -49,7 +50,7 @@ public class Unmute extends Command {
             return;
         }
         if ((unmuted = getMember(args[1], event.getGuild(), channel)) == null) return;
-        List<Role> roleList = null;
+        List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);
             if (!roleList.isEmpty()) break;

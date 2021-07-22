@@ -43,13 +43,13 @@ public class CommandHandler {
         }
         final Command command = COMMAND_LIST.get(name);
         if (command.USAGES.length > 0 && args.length == 1) {
-            command.usageError(channel, "Нету аргументов!");
+            command.sendInvalidUsageMessage(channel, "Нету аргументов!");
             return;
         }
         try {
             command.run(event, args);
         } catch (final Exception e) {
-            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команды: " + e.getMessage()).queue();
+            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команды: `%s`".formatted(e.getMessage())).queue();
             e.printStackTrace();
         }
     }

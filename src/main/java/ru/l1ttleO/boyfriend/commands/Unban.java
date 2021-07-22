@@ -43,7 +43,7 @@ public class Unban extends Command {
         final User unbanned;
         assert author != null;
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
-            channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
+            sendNoPermissionsMessage(channel);
             return;
         }
         if (args.length < 3) {

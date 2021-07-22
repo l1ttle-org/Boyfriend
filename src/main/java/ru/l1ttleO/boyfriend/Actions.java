@@ -47,6 +47,7 @@ public class Actions {
                         return;
                     unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
                 } catch (final InterruptedException e) {
+                    assert logChannel != null;
                     logChannel.sendMessage("[!] Прерван таймер разбана для %s".formatted(banned.getAsMention())).queue();
                 }
             }, "Ban timer " + banned.getId());
@@ -77,7 +78,8 @@ public class Actions {
         final List<Invite> invites = author.getGuild().retrieveInvites().complete();
         if (invites.size() > 0)
             DMtext += """
-                \n
+                
+                
                 Ты можешь перезайти по этой ссылке:
                 https://discord.gg/%s""".formatted(invites.get(0).getCode());
         try {
@@ -95,7 +97,7 @@ public class Actions {
         final TextChannel logChannel = guild.getSystemChannel();
         final String replyText = muted.getRoles().contains(role) ?
             "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :
-                "Теперь %s заглушен на%s за `%s`".formatted(muted.getAsMention(), durationString, reason);
+            "Теперь %s заглушен на%s за `%s`".formatted(muted.getAsMention(), durationString, reason);
         guild.addRoleToMember(muted, role).queue();
         final HashMap<Long, Thread> guildMutes = MUTES.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingMute = guildMutes.get(muted.getIdLong());
@@ -109,6 +111,7 @@ public class Actions {
                     if (unmuted != null)
                         unmuteMember(null, role, guild.getSelfMember(), unmuted, "Время наказания истекло");
                 } catch (final InterruptedException e) {
+                    assert logChannel != null;
                     logChannel.sendMessage("[!] Прерван таймер размута для %s".formatted(muted.getAsMention())).queue();
                 } catch (final ErrorResponseException e) { /* Unknown member */ }
             }, "Mute timer " + muted.getId());

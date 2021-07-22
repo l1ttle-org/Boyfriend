@@ -44,7 +44,7 @@ public class Ban extends Command {
         final User banned;
         assert author != null;
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
-            noPermissions(channel);
+            sendNoPermissionsMessage(channel);
             return;
         }
         if ((banned = getUser(args[1], event.getJDA(), channel)) == null) // assign and check in 1 line
@@ -67,7 +67,7 @@ public class Ban extends Command {
             startIndex++;
         } else duration = 0; // extra check
         if (startIndex >= args.length) {
-            usageError(channel, "Требуется указать причину!");
+            sendInvalidUsageMessage(channel, "Требуется указать причину!");
             return;
         }
         final String reason = StringUtils.join(args, ' ', startIndex, args.length);
