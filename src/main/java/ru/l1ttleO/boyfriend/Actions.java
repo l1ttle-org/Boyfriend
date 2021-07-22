@@ -43,6 +43,7 @@ public class Actions {
             final Thread thread = new Thread(() -> {
                 try {
                     Thread.sleep(duration * 1000L);
+                    assert banEntryReason != null;
                     if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                         return;
                     unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
