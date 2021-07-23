@@ -27,14 +27,13 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
-
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Unban extends Command {
-	
+    
     public Unban() {
-		super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> <причина>");
-	}
+        super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> <причина>");
+    }
 
     public void run(final MessageReceivedEvent event, final String[] args) {
         final Guild guild = event.getGuild();
@@ -44,7 +43,7 @@ public class Unban extends Command {
         final User unbanned;
         assert author != null;
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
-            channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
+            sendNoPermissionsMessage(channel);
             return;
         }
         if (args.length < 3) {
