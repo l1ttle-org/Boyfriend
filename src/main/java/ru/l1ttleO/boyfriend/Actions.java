@@ -48,9 +48,7 @@ public class Actions {
                     if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                         return;
                     unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
-                } catch (final InterruptedException e) {
-                    if (logChannel != null)
-                        logChannel.sendMessage("[!] Прерван таймер разбана для %s".formatted(banned.getAsMention())).queue();
+                } catch (final InterruptedException ignored) {
                 }
             }, "Ban timer " + banned.getId());
             guildBans.put(banned.getIdLong(), thread);
@@ -111,10 +109,8 @@ public class Actions {
                     final Member unmuted = muted.getGuild().retrieveMemberById(muted.getIdLong()).complete();
                     if (unmuted != null)
                         unmuteMember(null, role, guild.getSelfMember(), unmuted, "Время наказания истекло");
-                } catch (final InterruptedException e) {
-                    if (logChannel != null)
-                        logChannel.sendMessage("[!] Прерван таймер размута для %s".formatted(muted.getAsMention())).queue();
-                } catch (final ErrorResponseException e) { /* Unknown member */ }
+                } catch (final InterruptedException ignored) {
+                } catch (final ErrorResponseException ignored) { /* Unknown member */ }
             }, "Mute timer " + muted.getId());
             guildMutes.put(muted.getIdLong(), thread);
             MUTES.put(guild.getIdLong(), guildMutes);

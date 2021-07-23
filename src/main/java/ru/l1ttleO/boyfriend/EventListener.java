@@ -53,8 +53,6 @@ public class EventListener extends ListenerAdapter {
         final User author = event.getAuthor();
         if (message.mentionsEveryone())
             return;
-        if (author.isBot())
-            return;
         if (message.isFromType(ChannelType.PRIVATE)) {
             if (logChannel == null)
                 throw new IllegalStateException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
@@ -63,7 +61,7 @@ public class EventListener extends ListenerAdapter {
             return;
         }
         final Guild guild = event.getGuild();
-        if (message.getMentionedMembers().size() > 3) {
+        if (message.getMentionedMembers().size() > 3 && !author.isBot()) {
             try {
                 Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда");
             } catch (final Exception e) {

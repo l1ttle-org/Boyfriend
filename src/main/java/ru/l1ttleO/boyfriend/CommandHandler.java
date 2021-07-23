@@ -1,6 +1,7 @@
 package ru.l1ttleO.boyfriend;
 
 import java.util.HashMap;
+import java.util.List;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -46,6 +47,11 @@ public class CommandHandler {
             command.sendInvalidUsageMessage(channel, "Нету аргументов!");
             return;
         }
+        final List<Message> history = channel.getHistory().retrievePast(3).complete();
+        final String echoMessage = history.get(1).getContentRaw();
+        final String echoMessageFailsafe = history.get(2).getContentRaw();
+        if (event.getAuthor().isBot() && (echoMessage.startsWith(".echo") || echoMessageFailsafe.startsWith(".echo")))
+            return;
         try {
             command.run(event, args);
         } catch (final Exception e) {

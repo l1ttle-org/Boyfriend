@@ -118,7 +118,11 @@ run/
 !gradle-wrapper.jar
 
 # Visual Studio Code
+bin/
 .classpath
 .project
 .settings
-bin/
+.vscode
+
+# Other
+token.txt
