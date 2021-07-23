@@ -10,7 +10,7 @@ checkstyle {
 }
 
 group 'ru.l1ttleO'
-version '0.1'
+version 'dev'
 
 repositories {
     mavenCentral()
