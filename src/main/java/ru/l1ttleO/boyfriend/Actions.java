@@ -43,13 +43,14 @@ public class Actions {
             final Thread thread = new Thread(() -> {
                 try {
                     Thread.sleep(duration * 1000L);
-                    assert banEntryReason != null;
+                    if (banEntryReason == null)
+                        throw new IllegalStateException("Причина бана является null");
                     if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                         return;
                     unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
                 } catch (final InterruptedException e) {
-                    assert logChannel != null;
-                    logChannel.sendMessage("[!] Прерван таймер разбана для %s".formatted(banned.getAsMention())).queue();
+                    if (logChannel != null)
+                        logChannel.sendMessage("[!] Прерван таймер разбана для %s".formatted(banned.getAsMention())).queue();
                 }
             }, "Ban timer " + banned.getId());
             guildBans.put(banned.getIdLong(), thread);
@@ -60,8 +61,8 @@ public class Actions {
             banned.openPrivateChannel().complete().sendMessage(DMtext).complete();
         } catch (final ErrorResponseException e) { /* can't DM to this user */ }
         channel.sendMessage(replyText).queue();
-        assert logChannel != null;
-        logChannel.sendMessage("%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason)).queue();
+        if (logChannel != null)
+            logChannel.sendMessage("%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason)).queue();
     }
 
     public static void unbanMember(final MessageChannel channel, final Member author, final User unbanned, final String reason) {
@@ -111,8 +112,8 @@ public class Actions {
                     if (unmuted != null)
                         unmuteMember(null, role, guild.getSelfMember(), unmuted, "Время наказания истекло");
                 } catch (final InterruptedException e) {
-                    assert logChannel != null;
-                    logChannel.sendMessage("[!] Прерван таймер размута для %s".formatted(muted.getAsMention())).queue();
+                    if (logChannel != null)
+                        logChannel.sendMessage("[!] Прерван таймер размута для %s".formatted(muted.getAsMention())).queue();
                 } catch (final ErrorResponseException e) { /* Unknown member */ }
             }, "Mute timer " + muted.getId());
             guildMutes.put(muted.getIdLong(), thread);
@@ -120,8 +121,8 @@ public class Actions {
             thread.start();
         }
         channel.sendMessage(replyText).queue();
-        assert logChannel != null;
-        logChannel.sendMessage("%s глушит %s на%s за `%s`".formatted(author.getAsMention(), muted.getAsMention(), durationString, reason)).queue();
+        if (logChannel != null)
+            logChannel.sendMessage("%s глушит %s на%s за `%s`".formatted(author.getAsMention(), muted.getAsMention(), durationString, reason)).queue();
     }
 
     public static void unmuteMember(final MessageChannel channel, final Role role, final Member author, final Member unmuted, final String reason) {

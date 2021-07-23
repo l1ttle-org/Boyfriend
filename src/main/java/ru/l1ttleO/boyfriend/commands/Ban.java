@@ -42,7 +42,8 @@ public class Ban extends Command {
         final MessageChannel channel = event.getChannel();
         final Random random = new Random();
         final User banned;
-        assert author != null;
+        if (author == null)
+            throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
             sendNoPermissionsMessage(channel);
             return;

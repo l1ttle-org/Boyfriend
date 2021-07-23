@@ -35,7 +35,8 @@ public class Kick extends Command {
         final Member author = event.getMember();
         final Member kicked;
         final MessageChannel channel = event.getChannel();
-        assert author != null;
+        if (author == null)
+            throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.KICK_MEMBERS)) {
             sendNoPermissionsMessage(channel);
             return;

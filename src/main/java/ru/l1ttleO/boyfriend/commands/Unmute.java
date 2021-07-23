@@ -40,7 +40,8 @@ public class Unmute extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member unmuted;
-        assert author != null;
+        if (author == null)
+            throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.MESSAGE_MANAGE)) {
             sendNoPermissionsMessage(channel);
             return;

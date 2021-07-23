@@ -56,7 +56,8 @@ public class EventListener extends ListenerAdapter {
         if (author.isBot())
             return;
         if (message.isFromType(ChannelType.PRIVATE)) {
-            assert logChannel != null;
+            if (logChannel == null)
+                throw new IllegalStateException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
             logChannel.sendMessage("Я получил следующее сообщение от %s:```%s ```"
                 .formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "`​`​`"))).queue();
             return;

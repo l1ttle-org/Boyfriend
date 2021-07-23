@@ -41,7 +41,8 @@ public class Unban extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final User unbanned;
-        assert author != null;
+        if (author == null)
+            throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
             sendNoPermissionsMessage(channel);
             return;
