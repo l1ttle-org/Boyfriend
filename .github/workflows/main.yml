@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build and upload
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -33,9 +33,4 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x gradlew
-        ./gradlew shadowJar
-    - name: Upload artifacts
-      uses: actions/upload-artifact@master
-      with:
-        name: Boyfriend jar
-        path: build/libs/
+        ./gradlew build --stacktrace
