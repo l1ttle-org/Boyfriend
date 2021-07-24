@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'checkstyle'
-    id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
 checkstyle {
@@ -10,7 +9,7 @@ checkstyle {
 }
 
 group 'ru.l1ttleO'
-version '0.1'
+version 'dev'
 
 repositories {
     mavenCentral()
