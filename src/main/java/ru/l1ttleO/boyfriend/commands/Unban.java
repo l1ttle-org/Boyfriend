@@ -41,14 +41,14 @@ public class Unban extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final User unbanned;
+        if (args.length < 3) {
+            sendInvalidUsageMessage(channel, "Требуется указать причину!");
+            return;
+        }
         if (author == null)
             throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
             sendNoPermissionsMessage(channel);
-            return;
-        }
-        if (args.length < 3) {
-            channel.sendMessage("Требуется указать причину!").queue();
             return;
         }
         if ((unbanned = getUser(args[1], jda, channel)) == null) return;

@@ -43,6 +43,10 @@ public class Mute extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member muted;
+        if (args.length < 3) {
+            sendInvalidUsageMessage(channel, "Требуется указать причину!");
+            return;
+        }
         if (author == null)
             throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.MESSAGE_MANAGE)) {
@@ -68,13 +72,13 @@ public class Mute extends Command {
         int startIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
+            if (args.length < 4) {
+                sendInvalidUsageMessage(channel, "Требуется указать причину!");
+                return;
+            }
             durationString = " " + Utils.getDurationText(duration, true);
             startIndex++;
         } else duration = 0; // extra check
-        if (startIndex >= args.length) {
-            sendInvalidUsageMessage(channel, "Требуется указать причину!");
-            return;
-        }
         final String reason = StringUtils.join(args, ' ', startIndex, args.length);
         Actions.muteMember(channel, role, author, muted, reason, duration, durationString);
     }

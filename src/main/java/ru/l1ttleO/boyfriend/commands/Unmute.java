@@ -40,14 +40,14 @@ public class Unmute extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member unmuted;
+        if (args.length < 3) {
+            sendInvalidUsageMessage(channel, "Требуется указать причину!");
+            return;
+        }
         if (author == null)
             throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.MESSAGE_MANAGE)) {
             sendNoPermissionsMessage(channel);
-            return;
-        }
-        if (args.length < 3) {
-            channel.sendMessage("Требуется указать причину!").queue();
             return;
         }
         if ((unmuted = getMember(args[1], event.getGuild(), channel)) == null) return;

@@ -42,6 +42,10 @@ public class Ban extends Command {
         final MessageChannel channel = event.getChannel();
         final Random random = new Random();
         final User banned;
+        if (args.length < 3) {
+            sendInvalidUsageMessage(channel, "Требуется указать причину!");
+            return;
+        }
         if (author == null)
             throw new IllegalStateException("Автор является null");
         if (!author.hasPermission(Permission.BAN_MEMBERS)) {
@@ -64,13 +68,13 @@ public class Ban extends Command {
         int startIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
+            if (args.length < 4) {
+                sendInvalidUsageMessage(channel, "Требуется указать причину!");
+                return;
+            }
             durationString = " " + Utils.getDurationText(duration, true);
             startIndex++;
         } else duration = 0; // extra check
-        if (startIndex >= args.length) {
-            sendInvalidUsageMessage(channel, "Требуется указать причину!");
-            return;
-        }
         final String reason = StringUtils.join(args, ' ', startIndex, args.length);
         if (random.nextInt(101) == 100)
             channel.sendMessage("Я кастую бан!").queue();
