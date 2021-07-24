@@ -1,5 +1,25 @@
 # User-specific stuff
-.idea/
+.idea/artifacts
+.idea/dataSources/
+.idea/modules
+.idea/shelf/
+.idea/aws.xml
+.idea/compiler.xml
+.idea/contentModel.xml
+.idea/dataSources.ids
+.idea/dataSources.local.xml
+.idea/dbnavigator.xml
+.idea/dictionaries
+.idea/dynamic.xml
+.idea/gradle.xml
+.idea/jarRepositories.xml
+.idea/libraries
+.idea/modules.xml
+.idea/sqlDataSources.xml
+.idea/tasks.xml
+.idea/uiDesigner.xml
+.idea/usage.statistics.xml
+.idea/workspace.xml
 
 *.iml
 *.ipr
@@ -117,12 +137,4 @@ run/
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
-# Visual Studio Code
-bin/
-.classpath
-.project
-.settings
-.vscode
-
-# Other
 token.txt
