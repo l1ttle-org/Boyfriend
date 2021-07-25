@@ -3,7 +3,7 @@
   <component name="CheckStyle-IDEA">
     <option name="configuration">
       <map>
-        <entry key="active-configuration" value="PROJECT_RELATIVE:$PROJECT_DIR$/.checkstyle/checkstyle.xml:Adventure checks" />
+        <entry key="active-configuration" value="PROJECT_RELATIVE:$PROJECT_DIR$/.checkstyle/checkstyle.xml:Adventure" />
         <entry key="checkstyle-version" value="8.42" />
         <entry key="copy-libs" value="false" />
         <entry key="location-0" value="BUNDLED:(bundled):Sun Checks" />
