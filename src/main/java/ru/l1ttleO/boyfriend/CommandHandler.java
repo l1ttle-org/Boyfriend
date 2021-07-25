@@ -53,6 +53,7 @@ public class CommandHandler {
         if (event.getAuthor().isBot() && (echoMessage.startsWith(".echo") || echoMessageFailsafe.startsWith(".echo") || echoMessage.equals(content)))
             return;
         try {
+            channel.sendTyping().complete();
             command.run(event, args);
         } catch (final Exception e) {
             channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команды: `%s`".formatted(e.getMessage())).queue();

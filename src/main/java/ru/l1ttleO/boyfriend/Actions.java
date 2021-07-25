@@ -2,7 +2,6 @@ package ru.l1ttleO.boyfriend;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.Member;
@@ -64,18 +63,22 @@ public class Actions {
     }
 
     public static void unbanMember(final MessageChannel channel, final Member author, final User unbanned, final String reason) {
-        author.getGuild().unban(unbanned).queue();
-        final Thread existingBan = BANS.getOrDefault(author.getGuild().getIdLong(), new HashMap<>()).remove(unbanned.getIdLong());
+        final Guild guild = author.getGuild();
+        guild.unban(unbanned).queue();
+        final Thread existingBan = BANS.getOrDefault(guild.getIdLong(), new HashMap<>()).remove(unbanned.getIdLong());
         if (channel != null) {
             if (existingBan != null) existingBan.interrupt();
             channel.sendMessage("Возвращён из бана %s за `%s`".formatted(unbanned.getAsMention(), reason)).queue();
         }
-        Objects.requireNonNull(author.getGuild().getSystemChannel()).sendMessage("%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason)).queue();
+        final TextChannel systemChannel = guild.getSystemChannel();
+        if (systemChannel != null && !systemChannel.equals(channel))
+            systemChannel.sendMessage("%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason)).queue();
     }
 
     public static void kickMember(final MessageChannel channel, final Member author, final Member kicked, final String reason) {
+        final Guild guild = author.getGuild();
         String DMtext = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
-        final List<Invite> invites = author.getGuild().retrieveInvites().complete();
+        final List<Invite> invites = guild.retrieveInvites().complete();
         if (invites.size() > 0)
             DMtext += """
                 \n
@@ -84,9 +87,11 @@ public class Actions {
         try {
             kicked.getUser().openPrivateChannel().complete().sendMessage(DMtext).complete();
         } catch (final ErrorResponseException e) { /* can't DM to this user */ }
-        author.getGuild().kick(kicked).queue();
+        guild.kick(kicked).queue();
         channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();
-        Objects.requireNonNull(author.getGuild().getSystemChannel()).sendMessage("%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason)).queue();
+        final TextChannel systemChannel = guild.getSystemChannel();
+        if (systemChannel != null && !systemChannel.equals(channel))
+            systemChannel.sendMessage("%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason)).queue();
     }
 
     public static final HashMap<Long, HashMap<Long, Thread>> MUTES = new HashMap<>();
@@ -122,14 +127,17 @@ public class Actions {
     }
 
     public static void unmuteMember(final MessageChannel channel, final Role role, final Member author, final Member unmuted, final String reason) {
+        final Guild guild = author.getGuild();
         if (!unmuted.getRoles().contains(role)) return;
-        author.getGuild().removeRoleFromMember(unmuted, role).queue();
+        guild.removeRoleFromMember(unmuted, role).queue();
         final Thread existingMute = MUTES.getOrDefault(unmuted.getGuild().getIdLong(), new HashMap<>()).remove(unmuted.getIdLong());
         if (channel != null) {
             if (existingMute != null)
                 existingMute.interrupt();
             channel.sendMessage("Возвращён из карцера %s за `%s`".formatted(unmuted.getAsMention(), reason)).queue();
         }
-        Objects.requireNonNull(author.getGuild().getSystemChannel()).sendMessage("%s возвращает из карцера %s: `%s`".formatted(author.getAsMention(), unmuted.getAsMention(), reason)).queue();
+        final TextChannel systemChannel = guild.getSystemChannel();
+        if (systemChannel != null && !systemChannel.equals(channel))
+            systemChannel.sendMessage("%s возвращает из карцера %s: `%s`".formatted(author.getAsMention(), unmuted.getAsMention(), reason)).queue();
     }
 }

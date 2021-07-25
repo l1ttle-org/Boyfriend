@@ -19,7 +19,6 @@
 package ru.l1ttleO.boyfriend.commands;
 
 import java.util.List;
-import java.util.Objects;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
@@ -36,7 +35,9 @@ public class Clear extends Command {
     public void run(final MessageReceivedEvent event, final String[] args) {
         final MessageChannel channel = event.getChannel();
         final int requested;
-        if (!Objects.requireNonNull(event.getMember()).hasPermission((GuildChannel) event.getChannel(), Permission.MESSAGE_MANAGE)) {
+        if (event.getMember() == null)
+            throw new IllegalStateException("event.getMember() вернул null. Возможно, команда была отправлена вебхуком");
+        if (!event.getMember().hasPermission((GuildChannel) event.getChannel(), Permission.MESSAGE_MANAGE)) {
             sendNoPermissionsMessage(channel);
             return;
         }

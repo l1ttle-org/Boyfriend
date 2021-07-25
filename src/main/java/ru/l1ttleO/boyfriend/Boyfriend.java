@@ -32,7 +32,7 @@ public class Boyfriend {
 
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
         builder.disableIntents(GatewayIntent.GUILD_PRESENCES);
-        builder.setActivity(Activity.listening("VS Tabi - Genocide"));
+        builder.setActivity(Activity.listening("VS Tricky - Expurgation"));
         builder.addEventListeners(new EventListener());
 
         builder.build().awaitReady();

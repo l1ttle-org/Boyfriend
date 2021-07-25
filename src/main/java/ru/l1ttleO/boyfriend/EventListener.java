@@ -18,7 +18,6 @@
 
 package ru.l1ttleO.boyfriend;
 
-import java.util.Objects;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
@@ -35,13 +34,18 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final ReadyEvent event) {
-        Objects.requireNonNull(event.getJDA().getTextChannelById("618044439939645444")).sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
+        final TextChannel botLogChannel = event.getJDA().getTextChannelById("618044439939645444");
+        if (botLogChannel == null)
+            throw new IllegalStateException("Канал #bot-log является null. Возможно, в коде указан неверный ID канала");
+        botLogChannel.sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
     }
 
     @Override
     public void onGuildMemberJoin(final GuildMemberJoinEvent event) {
         final Guild guild = event.getGuild();
-        Objects.requireNonNull(guild.getSystemChannel()).sendMessage(event.getMember().getAsMention() + ", добро пожаловать на сервер " + guild.getName()).queue();
+        final TextChannel systemChannel = guild.getSystemChannel();
+        if (systemChannel != null)
+            systemChannel.sendMessage(event.getMember().getAsMention() + ", добро пожаловать на сервер " + guild.getName()).queue();
     }
 
     @Override
@@ -55,7 +59,7 @@ public class EventListener extends ListenerAdapter {
             return;
         if (message.isFromType(ChannelType.PRIVATE)) {
             if (logChannel == null)
-                throw new IllegalStateException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
+                throw new IllegalStateException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
             logChannel.sendMessage("Я получил следующее сообщение от %s:```%s ```"
                 .formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "`​`​`"))).queue();
             return;
@@ -63,6 +67,7 @@ public class EventListener extends ListenerAdapter {
         final Guild guild = event.getGuild();
         if (message.getMentionedMembers().size() > 3 && !author.isBot()) {
             try {
+                channel.sendTyping().complete();
                 Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда");
             } catch (final Exception e) {
                 channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: " + e.getMessage()).queue();
