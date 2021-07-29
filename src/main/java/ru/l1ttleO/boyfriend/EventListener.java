@@ -36,7 +36,7 @@ public class EventListener extends ListenerAdapter {
     public void onReady(final ReadyEvent event) {
         final TextChannel botLogChannel = event.getJDA().getTextChannelById("618044439939645444");
         if (botLogChannel == null)
-            throw new IllegalStateException("Канал #bot-log является null. Возможно, в коде указан неверный ID канала");
+            throw new IllegalStateException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
         botLogChannel.sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
     }
 
@@ -57,7 +57,7 @@ public class EventListener extends ListenerAdapter {
         final User author = event.getAuthor();
         if (message.mentionsEveryone())
             return;
-        if (message.isFromType(ChannelType.PRIVATE)) {
+        if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) {
             if (logChannel == null)
                 throw new IllegalStateException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
             logChannel.sendMessage("Я получил следующее сообщение от %s:```%s ```"

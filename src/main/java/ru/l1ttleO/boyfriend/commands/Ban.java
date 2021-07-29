@@ -59,7 +59,7 @@ public class Ban extends Command {
                 channel.sendMessage("У тебя недостаточно прав для бана этого пользователя!").queue();
                 return;
             }
-            if (!guild.retrieveMember(channel.getJDA().getSelfUser()).complete().canInteract(guild.retrieveMember(banned).complete())) {
+            if (!guild.getSelfMember().canInteract(guild.retrieveMember(banned).complete())) {
                 channel.sendMessage("У меня недостаточно прав для бана этого пользователя!").queue();
                 return;
             }

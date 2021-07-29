@@ -50,7 +50,8 @@ public class CommandHandler {
         final List<Message> history = channel.getHistory().retrievePast(3).complete();
         final String echoMessage = history.get(1).getContentRaw();
         final String echoMessageFailsafe = history.get(2).getContentRaw();
-        if (event.getAuthor().isBot() && (echoMessage.startsWith(".echo") || echoMessageFailsafe.startsWith(".echo") || echoMessage.equals(content)))
+        if (event.getAuthor().isBot() && (echoMessage.startsWith(".echo") || echoMessageFailsafe.startsWith(".echo")
+                                          || echoMessage.equals(content) || echoMessageFailsafe.equals(content)))
             return;
         try {
             channel.sendTyping().complete();
