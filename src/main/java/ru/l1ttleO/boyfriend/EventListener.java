@@ -34,10 +34,7 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final ReadyEvent event) {
-        final TextChannel botLogChannel = event.getJDA().getTextChannelById("618044439939645444");
-        if (botLogChannel == null)
-            throw new IllegalStateException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
-        botLogChannel.sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
+        Actions.getBotLogChannel(event.getJDA()).sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
     }
 
     @Override

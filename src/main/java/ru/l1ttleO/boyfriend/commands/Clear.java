@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
 
 public class Clear extends Command {
@@ -33,6 +34,7 @@ public class Clear extends Command {
     }
 
     public void run(final MessageReceivedEvent event, final String[] args) {
+        final MessageChannel botLogChannel = Actions.getBotLogChannel(event.getJDA());
         final MessageChannel channel = event.getChannel();
         final int requested;
         if (event.getMember() == null)
@@ -56,7 +58,9 @@ public class Clear extends Command {
         }
         final List<Message> messages = channel.getHistory().retrievePast(requested).complete();
         final int amount = messages.size();
+        final String plural = Utils.plural(amount, "сообщение", "сообщения", "сообщений");
         channel.purgeMessages(messages);
-        channel.sendMessage("Успешно удалено %s %s".formatted(amount, Utils.plural(amount, "сообщение", "сообщения", "сообщений"))).queue();
+        channel.sendMessage("Успешно удалено %s %s".formatted(amount, plural)).queue();
+        botLogChannel.sendMessage("%s удаляет %s %s в канале #%s".formatted(event.getAuthor().getAsMention(), amount, plural, channel.getName())).queue();
     }
 }

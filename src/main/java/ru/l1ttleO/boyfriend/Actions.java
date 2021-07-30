@@ -2,6 +2,7 @@ package ru.l1ttleO.boyfriend;
 
 import java.util.HashMap;
 import java.util.List;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.Member;
@@ -26,7 +27,7 @@ public class Actions {
         } catch (final ErrorResponseException e) { /* wasn't banned */
             replyText = "Забанен %s на%s за `%s`".formatted(banned.getAsMention(), durationString, reason);
         }
-        guild.ban(banned, 0, "(%s: на%s) %s".formatted(author.getUser().getName() + "#" + author.getUser().getDiscriminator(), durationString, reason)).complete();
+        guild.ban(banned, 0, "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason)).complete();
         final String banEntryReason = guild.retrieveBan(banned).complete().getReason();
         final HashMap<Long, Thread> guildBans = BANS.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingBan = guildBans.get(banned.getIdLong());
@@ -111,11 +112,9 @@ public class Actions {
             final Thread thread = new Thread(() -> {
                 try {
                     Thread.sleep(duration * 1000L);
-                    final Member unmuted = muted.getGuild().retrieveMemberById(muted.getIdLong()).complete();
-                    if (unmuted != null)
-                        unmuteMember(null, role, guild.getSelfMember(), unmuted, "Время наказания истекло");
-                } catch (final InterruptedException ignored) {
-                } catch (final ErrorResponseException ignored) { /* Unknown member */ }
+                    unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло");
+                } catch (final Exception ignored) {
+                }
             }, "Mute timer " + muted.getId());
             guildMutes.put(muted.getIdLong(), thread);
             MUTES.put(guild.getIdLong(), guildMutes);
@@ -139,5 +138,12 @@ public class Actions {
         final TextChannel systemChannel = guild.getSystemChannel();
         if (systemChannel != null && !systemChannel.equals(channel))
             systemChannel.sendMessage("%s возвращает из карцера %s: `%s`".formatted(author.getAsMention(), unmuted.getAsMention(), reason)).queue();
+    }
+
+    public static MessageChannel getBotLogChannel(final JDA jda) {
+        final MessageChannel botLogChannel = jda.getTextChannelById("618044439939645444");
+        if (botLogChannel == null)
+            throw new IllegalStateException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
+        return botLogChannel;
     }
 }
