@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
 
@@ -36,7 +37,7 @@ public class Ban extends Command {
         super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] <причина>");
     }
 
-    public void run(final MessageReceivedEvent event, final String[] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
@@ -63,7 +64,7 @@ public class Ban extends Command {
                 channel.sendMessage("У меня недостаточно прав для бана этого пользователя!").queue();
                 return;
             }
-        } catch (final ErrorResponseException e) { /* not on the server */ }
+        } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
         int duration = Utils.getDurationMultiplied(args[2]);
         int startIndex = 2;
         String durationString = "всегда";

@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.CommandHandler;
 
 public abstract class Command {
@@ -29,15 +31,15 @@ public abstract class Command {
                 .formatted(CommandHandler.prefix + StringUtils.join(this.USAGES, "` или `" + CommandHandler.prefix));
     }
     
-    public void sendInvalidUsageMessage(final MessageChannel channel, final String text) {
+    public void sendInvalidUsageMessage(final @NotNull MessageChannel channel, final String text) {
         channel.sendMessage(text + " " + this.getUsages()).queue();
     }
     
-    public void sendNoPermissionsMessage(final MessageChannel channel) {
+    public void sendNoPermissionsMessage(final @NotNull MessageChannel channel) {
         channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
     }
     
-    public Pair<User, Member> getUserAndMember(final String from, final JDA jda, final Guild guild, final MessageChannel channel) {
+    public @NotNull Pair<User, Member> getUserAndMember(final @NotNull String from, final @Nullable JDA jda, final @Nullable Guild guild, final @NotNull MessageChannel channel) {
         User user = null;
         Member member = null;
         try {
@@ -46,19 +48,19 @@ public abstract class Command {
                 user = jda.retrieveUserById(id).complete();
             if (guild != null)
                 member = guild.retrieveMemberById(id).complete();
-        } catch (final IllegalArgumentException e) {
+        } catch (final @NotNull IllegalArgumentException e) {
             channel.sendMessage("Неправильно указан пользователь!").queue();
-        } catch (final ErrorResponseException e) {
+        } catch (final @NotNull ErrorResponseException e) {
             channel.sendMessage("Указан недействительный пользователь!").queue();
         }
         return Pair.of(user, member);
     }
     
-    public User getUser(final String from, final JDA jda, final MessageChannel channel) {
+    public User getUser(final @NotNull String from, final JDA jda, final @NotNull MessageChannel channel) {
         return this.getUserAndMember(from, jda, null, channel).getLeft();
     }
     
-    public Member getMember(final String from, final Guild guild, final MessageChannel channel) {
+    public Member getMember(final @NotNull String from, final Guild guild, final @NotNull MessageChannel channel) {
         return this.getUserAndMember(from, null, guild, channel).getRight();
     }
 }

@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Unban extends Command {
@@ -35,7 +36,7 @@ public class Unban extends Command {
         super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> <причина>");
     }
 
-    public void run(final MessageReceivedEvent event, final String[] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
         final Guild guild = event.getGuild();
         final JDA jda = guild.getJDA();
         final Member author = event.getMember();
@@ -54,7 +55,7 @@ public class Unban extends Command {
         if ((unbanned = getUser(args[1], jda, channel)) == null) return;
         try {
             guild.retrieveBan(unbanned).complete();
-        } catch (final ErrorResponseException e) {
+        } catch (final @NotNull ErrorResponseException e) {
             channel.sendMessage("Пользователь не забанен!").queue();
             return;
         }

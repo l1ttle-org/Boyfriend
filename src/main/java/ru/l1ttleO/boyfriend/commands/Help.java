@@ -21,6 +21,7 @@ package ru.l1ttleO.boyfriend.commands;
 import java.util.ArrayList;
 import java.util.Comparator;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.CommandHandler;
 
 public class Help extends Command {
@@ -29,7 +30,7 @@ public class Help extends Command {
         super("help", "Показывает эту справку");
     }
 
-    public void run(final MessageReceivedEvent event, final String[] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String[] args) {
         final StringBuilder text = new StringBuilder("Справка по командам:");
         final ArrayList<Command> commands = new ArrayList<>(CommandHandler.COMMAND_LIST.values());
         commands.sort(Comparator.comparing(c -> c.NAME));

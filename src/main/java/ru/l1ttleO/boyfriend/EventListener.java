@@ -29,16 +29,17 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 
 public class EventListener extends ListenerAdapter {
 
     @Override
-    public void onReady(final ReadyEvent event) {
+    public void onReady(final @NotNull ReadyEvent event) {
         Actions.getBotLogChannel(event.getJDA()).sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
     }
 
     @Override
-    public void onGuildMemberJoin(final GuildMemberJoinEvent event) {
+    public void onGuildMemberJoin(final @NotNull GuildMemberJoinEvent event) {
         final Guild guild = event.getGuild();
         final TextChannel systemChannel = guild.getSystemChannel();
         if (systemChannel != null)
@@ -46,7 +47,7 @@ public class EventListener extends ListenerAdapter {
     }
 
     @Override
-    public void onMessageReceived(final MessageReceivedEvent event) {
+    public void onMessageReceived(final @NotNull MessageReceivedEvent event) {
         final JDA jda = event.getJDA();
         final Message message = event.getMessage();
         final MessageChannel channel = event.getChannel();
@@ -66,7 +67,7 @@ public class EventListener extends ListenerAdapter {
             try {
                 channel.sendTyping().complete();
                 Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда");
-            } catch (final Exception e) {
+            } catch (final @NotNull Exception e) {
                 channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: " + e.getMessage()).queue();
                 e.printStackTrace();
             }

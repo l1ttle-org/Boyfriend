@@ -1,11 +1,12 @@
 package ru.l1ttleO.boyfriend;
 
 import java.util.Random;
+import org.jetbrains.annotations.NotNull;
 
 public class Utils {
     public static final Random RANDOM = new Random();
 
-    public static <T> T randomElement(final T[] array) {
+    public static <T> T randomElement(final T @NotNull [] array) {
         return array[RANDOM.nextInt(array.length)];
     }
 
@@ -28,7 +29,7 @@ public class Utils {
         {"h", "час", "час", "часа", "часов"}, {"d", "день", "день", "дня", "дней"},
         {"w", "неделя", "неделю", "недели", "недель"}};
 
-    public static String getDurationText(int seconds, final boolean vin) {
+    public static @NotNull String getDurationText(int seconds, final boolean vin) {
         final StringBuilder out = new StringBuilder();
         int concat_length = 0;
         int amount;
@@ -54,7 +55,7 @@ public class Utils {
         return out.toString();
     }
 
-    public static int getDurationMultiplied(final String toParse) {
+    public static int getDurationMultiplied(final @NotNull String toParse) {
         try {
             int multiplier = 1;
             for (int i = 0; i < DURATION_TEXTS.length; i++) {
@@ -62,7 +63,7 @@ public class Utils {
                 multiplier *= DURATION_MULTIPLIERS[i];
             }
             return Integer.parseInt(toParse);
-        } catch (final NumberFormatException ignored) {
+        } catch (final @NotNull NumberFormatException ignored) {
             return 0;
         }
     }

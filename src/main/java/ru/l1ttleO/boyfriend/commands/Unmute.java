@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Unmute extends Command {
@@ -35,7 +36,7 @@ public class Unmute extends Command {
         super("unmute", "Возвращает участника из мута", "unmute <@упоминание или ID> <причина>");
     }
 
-    public void run(final MessageReceivedEvent event, final String[] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();

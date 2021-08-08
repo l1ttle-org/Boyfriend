@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Kick extends Command {
@@ -31,7 +32,7 @@ public class Kick extends Command {
         super("kick", "Выгоняет участника", "kick <@упоминание или ID> <причина>");
     }
 
-    public void run(final MessageReceivedEvent event, final String[] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
         final Member author = event.getMember();
         final Member kicked;
         final MessageChannel channel = event.getChannel();
