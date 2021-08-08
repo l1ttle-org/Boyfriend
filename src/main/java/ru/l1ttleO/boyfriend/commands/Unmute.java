@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Unmute extends Command {
-    
+
     public Unmute() {
         super("unmute", "Возвращает участника из мута", "unmute <@упоминание или ID> <причина>");
     }
@@ -51,7 +51,8 @@ public class Unmute extends Command {
             sendNoPermissionsMessage(channel);
             return;
         }
-        if ((unmuted = getMember(args[1], event.getGuild(), channel)) == null) return;
+        unmuted = getMember(args[1], event.getGuild(), channel);
+        if (unmuted == null) return;
         List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);

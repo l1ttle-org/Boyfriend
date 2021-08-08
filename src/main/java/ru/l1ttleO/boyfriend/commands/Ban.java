@@ -32,7 +32,7 @@ import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
 
 public class Ban extends Command {
-    
+
     public Ban() {
         super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] <причина>");
     }
@@ -53,7 +53,8 @@ public class Ban extends Command {
             sendNoPermissionsMessage(channel);
             return;
         }
-        if ((banned = getUser(args[1], event.getJDA(), channel)) == null) // assign and check in 1 line
+        banned = getUser(args[1], event.getJDA(), channel);
+        if (banned == null)
             return;
         try {
             if (!author.canInteract(guild.retrieveMember(banned).complete())) {

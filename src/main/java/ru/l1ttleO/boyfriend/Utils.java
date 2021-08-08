@@ -15,12 +15,12 @@ public class Utils {
         return "Б%sп!".formatted(randomElement(letters));
     }
 
-    public static <T> T plural(final long amount, final T one, final T two, final T five) {
+    public static <T> T plural(final long amount, final T first, final T second, final T five) {
         if (amount % 10 == 0 || amount % 10 > 4 || amount % 100 / 10 == 1)
             return five;
         if (amount % 10 == 1)
-            return one;
-        return two;
+            return first;
+        return second;
     }
 
     public static final int[] DURATION_MULTIPLIERS = {60, 60, 24, 7, 1};
@@ -31,12 +31,12 @@ public class Utils {
 
     public static @NotNull String getDurationText(int seconds, final boolean vin) {
         final StringBuilder out = new StringBuilder();
-        int concat_length = 0;
+        int concatLength = 0;
         int amount;
         for (int i = 0; i < DURATION_TEXTS.length; i++) {
             amount = i < DURATION_TEXTS.length - 1 ? seconds % DURATION_MULTIPLIERS[i] : seconds;
             if (amount != 0) {
-                switch (concat_length) {
+                switch (concatLength) {
                     case 0:
                         break;
                     case 1:
@@ -46,7 +46,7 @@ public class Utils {
                         out.insert(0, ", ");
                         break;
                 }
-                concat_length++;
+                concatLength++;
                 out.insert(0, amount + " " + plural(amount, DURATION_TEXTS[i][vin ? 2 : 1], DURATION_TEXTS[i][3], DURATION_TEXTS[i][4]));
                 seconds -= amount;
             }

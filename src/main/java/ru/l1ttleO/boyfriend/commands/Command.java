@@ -14,31 +14,31 @@ import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.CommandHandler;
 
 public abstract class Command {
-    public final String NAME;
-    public final String[] USAGES;
-    public final String DESCRIPTION;
-    
+    public final String name;
+    public final String[] usages;
+    public final String description;
+
     public Command(final String name, final String description, final String... usages) {
-        this.NAME = name;
-        this.USAGES = usages;
-        this.DESCRIPTION = description;
+        this.name = name;
+        this.usages = usages;
+        this.description = description;
     }
-    
+
     public abstract void run(final MessageReceivedEvent event, final String[] args);
-    
+
     public String getUsages() {
         return "Использование: `%s`"
-                .formatted(CommandHandler.prefix + StringUtils.join(this.USAGES, "` или `" + CommandHandler.prefix));
+                .formatted(CommandHandler.prefix + StringUtils.join(this.usages, "` или `" + CommandHandler.prefix));
     }
-    
+
     public void sendInvalidUsageMessage(final @NotNull MessageChannel channel, final String text) {
         channel.sendMessage(text + " " + this.getUsages()).queue();
     }
-    
+
     public void sendNoPermissionsMessage(final @NotNull MessageChannel channel) {
         channel.sendMessage("У тебя недостаточно прав для выполнения данной команды!").queue();
     }
-    
+
     public @NotNull Pair<User, Member> getUserAndMember(final @NotNull String from, final @Nullable JDA jda, final @Nullable Guild guild, final @NotNull MessageChannel channel) {
         User user = null;
         Member member = null;
@@ -55,11 +55,11 @@ public abstract class Command {
         }
         return Pair.of(user, member);
     }
-    
+
     public User getUser(final @NotNull String from, final JDA jda, final @NotNull MessageChannel channel) {
         return this.getUserAndMember(from, jda, null, channel).getLeft();
     }
-    
+
     public Member getMember(final @NotNull String from, final Guild guild, final @NotNull MessageChannel channel) {
         return this.getUserAndMember(from, null, guild, channel).getRight();
     }

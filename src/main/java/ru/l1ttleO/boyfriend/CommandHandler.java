@@ -27,7 +27,7 @@ public class CommandHandler {
 
     public static void register(final Command @NotNull ... commands) {
         for (final Command command : commands)
-            COMMAND_LIST.put(command.NAME, command);
+            COMMAND_LIST.put(command.name, command);
     }
 
     public static void onMessageReceived(final @NotNull MessageReceivedEvent event) {
@@ -43,7 +43,7 @@ public class CommandHandler {
             return;
         }
         final Command command = COMMAND_LIST.get(name);
-        if (command.USAGES.length > 0 && args.length == 1) {
+        if (command.usages.length > 0 && args.length == 1) {
             command.sendInvalidUsageMessage(channel, "Нету аргументов!");
             return;
         }

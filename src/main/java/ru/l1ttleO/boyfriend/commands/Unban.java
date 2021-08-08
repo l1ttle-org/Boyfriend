@@ -31,7 +31,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Unban extends Command {
-    
+
     public Unban() {
         super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> <причина>");
     }
@@ -52,7 +52,8 @@ public class Unban extends Command {
             sendNoPermissionsMessage(channel);
             return;
         }
-        if ((unbanned = getUser(args[1], jda, channel)) == null) return;
+        unbanned = getUser(args[1], jda, channel);
+        if (unbanned == null) return;
         try {
             guild.retrieveBan(unbanned).complete();
         } catch (final @NotNull ErrorResponseException e) {

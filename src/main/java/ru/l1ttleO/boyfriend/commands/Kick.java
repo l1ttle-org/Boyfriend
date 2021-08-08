@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 
 public class Kick extends Command {
-    
+
     public Kick() {
         super("kick", "Выгоняет участника", "kick <@упоминание или ID> <причина>");
     }
@@ -46,7 +46,8 @@ public class Kick extends Command {
             sendNoPermissionsMessage(channel);
             return;
         }
-        if ((kicked = getMember(args[1], event.getGuild(), channel)) == null) return;
+        kicked = getMember(args[1], event.getGuild(), channel);
+        if (kicked == null) return;
         if (!author.canInteract(kicked)) {
             channel.sendMessage("У тебя недостаточно прав для кика этого пользователя!").queue();
             return;

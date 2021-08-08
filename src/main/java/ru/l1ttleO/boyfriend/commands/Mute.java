@@ -32,13 +32,13 @@ import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
 
 public class Mute extends Command {
-    
+
     public Mute() {
         super("mute", "Глушит участника", "mute <@упоминание или ID> [<продолжительность>] <причина>");
     }
 
     public static final String[] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
-    
+
     public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
@@ -54,7 +54,8 @@ public class Mute extends Command {
             sendNoPermissionsMessage(channel);
             return;
         }
-        if ((muted = getMember(args[1], event.getGuild(), channel)) == null) return;
+        muted = getMember(args[1], event.getGuild(), channel);
+        if (muted == null) return;
         if (!author.canInteract(muted)) {
             channel.sendMessage("У тебя недостаточно прав для мута этого пользователя!").queue();
             return;

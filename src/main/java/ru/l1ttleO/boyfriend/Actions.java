@@ -20,7 +20,7 @@ public class Actions {
 
     public static void banMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull User banned, final String reason, final int duration, final String durationString) {
         final Guild guild = author.getGuild();
-        String DMtext = "Тебя забанил %s на%s за `%s`.".formatted(author.getAsMention(), durationString, reason);
+        String privateText = "Тебя забанил %s на%s за `%s`.".formatted(author.getAsMention(), durationString, reason);
         String replyText;
         try {
             guild.retrieveBan(banned).complete();
@@ -36,8 +36,8 @@ public class Actions {
             existingBan.interrupt();
         if (duration > 0) {
             final List<Invite> invites = guild.retrieveInvites().complete();
-            if (invites.size() > 0)
-                DMtext += """
+            if (!invites.isEmpty())
+                privateText += """
                     \n
                     По окончании бана ты сможешь перезайти по этой ссылке:
                     https://discord.gg/%s""".formatted(invites.get(0).getCode());
@@ -57,7 +57,7 @@ public class Actions {
             thread.start();
         }
         try {
-            banned.openPrivateChannel().complete().sendMessage(DMtext).complete();
+            banned.openPrivateChannel().complete().sendMessage(privateText).complete();
         } catch (final @NotNull ErrorResponseException e) { /* can't DM to this user */ }
         channel.sendMessage(replyText).queue();
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), true);
@@ -76,15 +76,15 @@ public class Actions {
 
     public static void kickMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull Member kicked, final String reason) {
         final Guild guild = author.getGuild();
-        String DMtext = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
+        String privateText = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
         final List<Invite> invites = guild.retrieveInvites().complete();
-        if (invites.size() > 0)
-            DMtext += """
+        if (!invites.isEmpty())
+            privateText += """
                 \n
                 Ты можешь перезайти по этой ссылке:
                 https://discord.gg/%s""".formatted(invites.get(0).getCode());
         try {
-            kicked.getUser().openPrivateChannel().complete().sendMessage(DMtext).complete();
+            kicked.getUser().openPrivateChannel().complete().sendMessage(privateText).complete();
         } catch (final @NotNull ErrorResponseException e) { /* can't DM to this user */ }
         guild.kick(kicked).queue();
         channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();

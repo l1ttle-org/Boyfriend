@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.CommandHandler;
 
 public class Help extends Command {
-    
+
     public Help() {
         super("help", "Показывает эту справку");
     }
@@ -33,10 +33,10 @@ public class Help extends Command {
     public void run(final @NotNull MessageReceivedEvent event, final String[] args) {
         final StringBuilder text = new StringBuilder("Справка по командам:");
         final ArrayList<Command> commands = new ArrayList<>(CommandHandler.COMMAND_LIST.values());
-        commands.sort(Comparator.comparing(c -> c.NAME));
+        commands.sort(Comparator.comparing(command -> command.name));
         for (final Command command : commands) {
-            text.append("\n`%s%s` - %s".formatted(CommandHandler.prefix, command.NAME, command.DESCRIPTION));
-            if (command.USAGES.length > 0)
+            text.append("\n`%s%s` - %s".formatted(CommandHandler.prefix, command.name, command.description));
+            if (command.usages.length > 0)
                 text.append(". ").append(command.getUsages());
             text.append(";");
         }
