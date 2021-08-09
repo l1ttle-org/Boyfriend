@@ -28,37 +28,35 @@ public class Actions {
         } catch (final @NotNull ErrorResponseException e) { /* wasn't banned */
             replyText = "Забанен %s на%s за `%s`".formatted(banned.getAsMention(), durationString, reason);
         }
+        if (duration > 0) {
+            final List<Invite> invites = guild.retrieveInvites().complete();
+            if (!invites.isEmpty())
+                privateText += """
+                               \n
+                               По окончании бана ты сможешь перезайти по этой ссылке:
+                               https://discord.gg/%s""".formatted(invites.get(0).getCode());
+        }
+        sendDirectMessage(banned, privateText);
         guild.ban(banned, 0, "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason)).complete();
         final String banEntryReason = guild.retrieveBan(banned).complete().getReason();
         final HashMap<Long, Thread> guildBans = BANS.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingBan = guildBans.get(banned.getIdLong());
         if (existingBan != null)
             existingBan.interrupt();
-        if (duration > 0) {
-            final List<Invite> invites = guild.retrieveInvites().complete();
-            if (!invites.isEmpty())
-                privateText += """
-                    \n
-                    По окончании бана ты сможешь перезайти по этой ссылке:
-                    https://discord.gg/%s""".formatted(invites.get(0).getCode());
-            final Thread thread = new Thread(() -> {
-                try {
-                    Thread.sleep(duration * 1000L);
-                    if (banEntryReason == null)
-                        throw new IllegalStateException("Причина бана является null");
-                    if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
-                        return;
-                    unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
-                } catch (final @NotNull InterruptedException ignored) {
-                }
-            }, "Ban timer " + banned.getId());
-            guildBans.put(banned.getIdLong(), thread);
-            BANS.put(guild.getIdLong(), guildBans);
-            thread.start();
-        }
-        try {
-            banned.openPrivateChannel().complete().sendMessage(privateText).complete();
-        } catch (final @NotNull ErrorResponseException e) { /* can't DM to this user */ }
+        final Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(duration * 1000L);
+                if (banEntryReason == null)
+                    throw new IllegalStateException("Причина бана является null");
+                if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
+                    return;
+                unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
+            } catch (final @NotNull InterruptedException ignored) {
+            }
+        }, "Ban timer " + banned.getId());
+        guildBans.put(banned.getIdLong(), thread);
+        BANS.put(guild.getIdLong(), guildBans);
+        thread.start();
         channel.sendMessage(replyText).queue();
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), true);
     }
@@ -68,7 +66,8 @@ public class Actions {
         guild.unban(unbanned).queue();
         final Thread existingBan = BANS.getOrDefault(guild.getIdLong(), new HashMap<>()).remove(unbanned.getIdLong());
         if (channel != null) {
-            if (existingBan != null) existingBan.interrupt();
+            if (existingBan != null)
+                existingBan.interrupt();
             channel.sendMessage("Возвращён из бана %s за `%s`".formatted(unbanned.getAsMention(), reason)).queue();
         }
         sendNotification(guild, "%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason), true);
@@ -83,9 +82,7 @@ public class Actions {
                 \n
                 Ты можешь перезайти по этой ссылке:
                 https://discord.gg/%s""".formatted(invites.get(0).getCode());
-        try {
-            kicked.getUser().openPrivateChannel().complete().sendMessage(privateText).complete();
-        } catch (final @NotNull ErrorResponseException e) { /* can't DM to this user */ }
+        sendDirectMessage(kicked.getUser(), privateText);
         guild.kick(kicked).queue();
         channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();
         sendNotification(guild, "%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason), true);
@@ -108,7 +105,7 @@ public class Actions {
                 try {
                     Thread.sleep(duration * 1000L);
                     unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло");
-                } catch (final @NotNull Exception ignored) {
+                } catch (final @NotNull InterruptedException ignored) {
                 }
             }, "Mute timer " + muted.getId());
             guildMutes.put(muted.getIdLong(), thread);
@@ -145,5 +142,11 @@ public class Actions {
             channel.sendMessage(text).queue();
         if (notifyPublic && guild.getSystemChannel() != null)
             guild.getSystemChannel().sendMessage(text).queue();
+    }
+
+    public static void sendDirectMessage(final @NotNull User user, final @NotNull String message) {
+        try {
+            user.openPrivateChannel().complete().sendMessage(message).complete();
+        } catch (final @NotNull ErrorResponseException e) { /* can't DM to this user */ }
     }
 }

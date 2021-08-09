@@ -34,25 +34,25 @@ public class Kick extends Command {
 
     public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
         final Member author = event.getMember();
-        final Member kicked;
         final MessageChannel channel = event.getChannel();
+        final Member kicked = getMember(args[1], event.getGuild(), channel);
         if (args.length < 3) {
             sendInvalidUsageMessage(channel, "Требуется указать причину!");
             return;
         }
         if (author == null)
             throw new IllegalStateException("Автор является null");
+        final String reason = StringUtils.join(args, ' ', 2, args.length);
         if (!author.hasPermission(Permission.KICK_MEMBERS)) {
             sendNoPermissionsMessage(channel);
             return;
         }
-        kicked = getMember(args[1], event.getGuild(), channel);
-        if (kicked == null) return;
+        if (kicked == null)
+            return;
         if (!author.canInteract(kicked)) {
-            channel.sendMessage("У тебя недостаточно прав для кика этого пользователя!").queue();
+            channel.sendMessage("У тебя недостаточно прав для кика этого участника!").queue();
             return;
         }
-        final String reason = StringUtils.join(args, ' ', 2, args.length);
         Actions.kickMember(channel, author, kicked, reason);
     }
 }

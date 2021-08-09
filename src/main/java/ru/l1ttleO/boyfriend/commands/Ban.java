@@ -42,7 +42,8 @@ public class Ban extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Random random = new Random();
-        final User banned;
+        final String reason;
+        final User banned = getUser(args[1], event.getJDA(), channel);
         if (args.length < 3) {
             sendInvalidUsageMessage(channel, "Требуется указать причину!");
             return;
@@ -53,7 +54,6 @@ public class Ban extends Command {
             sendNoPermissionsMessage(channel);
             return;
         }
-        banned = getUser(args[1], event.getJDA(), channel);
         if (banned == null)
             return;
         try {
@@ -77,7 +77,7 @@ public class Ban extends Command {
             durationString = " " + Utils.getDurationText(duration, true);
             startIndex++;
         } else duration = 0; // extra check
-        final String reason = StringUtils.join(args, ' ', startIndex, args.length);
+        reason = StringUtils.join(args, ' ', startIndex, args.length);
         if (random.nextInt(101) == 100)
             channel.sendMessage("Я кастую бан!").queue();
         Actions.banMember(channel, author, banned, reason, duration, durationString);

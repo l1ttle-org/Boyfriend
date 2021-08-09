@@ -13,6 +13,7 @@ import ru.l1ttleO.boyfriend.commands.Help;
 import ru.l1ttleO.boyfriend.commands.Kick;
 import ru.l1ttleO.boyfriend.commands.Mute;
 import ru.l1ttleO.boyfriend.commands.Ping;
+import ru.l1ttleO.boyfriend.commands.Remind;
 import ru.l1ttleO.boyfriend.commands.Unban;
 import ru.l1ttleO.boyfriend.commands.Unmute;
 
@@ -22,7 +23,7 @@ public class CommandHandler {
 
     static {
         register(
-                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Unban(), new Unmute());
+                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Remind(), new Unban(), new Unmute());
     }
 
     public static void register(final Command @NotNull ... commands) {
@@ -57,7 +58,7 @@ public class CommandHandler {
             channel.sendTyping().complete();
             command.run(event, args);
         } catch (final @NotNull Exception e) {
-            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команды: `%s`".formatted(e.getMessage())).queue();
+            channel.sendMessage(e.toString()).queue();
             e.printStackTrace();
         }
     }

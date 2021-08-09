@@ -29,7 +29,7 @@ import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
 
 public class Clear extends Command {
-    
+
     public Clear() {
         super("clear", "Удаляет указанное количество сообщений в канале", "clear <количество, не менее 1 и не больше 99>");
     }
@@ -60,6 +60,6 @@ public class Clear extends Command {
         final int amount = messages.size();
         final String plural = Utils.plural(amount, "сообщение", "сообщения", "сообщений");
         channel.purgeMessages(messages);
-        Actions.sendNotification(event.getGuild(), "%s удаляет %s %s в канале #%s".formatted(event.getAuthor().getAsMention(), amount, plural, channel.getName()), false);
+        Actions.sendNotification(event.getGuild(), "%s удаляет %s %s в канале <#%s>".formatted(event.getAuthor().getAsMention(), amount, plural, channel.getId()), false);
     }
 }

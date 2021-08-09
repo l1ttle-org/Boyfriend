@@ -63,4 +63,5 @@ public abstract class Command {
     public Member getMember(final @NotNull String from, final Guild guild, final @NotNull MessageChannel channel) {
         return this.getUserAndMember(from, null, guild, channel).getRight();
     }
+
 }

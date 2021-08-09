@@ -43,7 +43,7 @@ public class Mute extends Command {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
-        final Member muted;
+        final Member muted = getMember(args[1], event.getGuild(), channel);
         if (args.length < 3) {
             sendInvalidUsageMessage(channel, "Требуется указать причину!");
             return;
@@ -54,10 +54,10 @@ public class Mute extends Command {
             sendNoPermissionsMessage(channel);
             return;
         }
-        muted = getMember(args[1], event.getGuild(), channel);
-        if (muted == null) return;
+        if (muted == null)
+            return;
         if (!author.canInteract(muted)) {
-            channel.sendMessage("У тебя недостаточно прав для мута этого пользователя!").queue();
+            channel.sendMessage("У тебя недостаточно прав для мута этого участника!").queue();
             return;
         }
         List<Role> roleList = new ArrayList<>();
