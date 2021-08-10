@@ -35,7 +35,7 @@ public class Remind extends Command {
                 Thread.sleep(duration * 1000L);
                 channel.sendTyping().complete();
                 channel.sendMessage(author.getAsMention() + text).queue();
-            } catch (final @NotNull InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false);
             }
         }, "Remind timer " + author.getId());
