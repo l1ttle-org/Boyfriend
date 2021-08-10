@@ -14,6 +14,7 @@ import ru.l1ttleO.boyfriend.commands.Kick;
 import ru.l1ttleO.boyfriend.commands.Mute;
 import ru.l1ttleO.boyfriend.commands.Ping;
 import ru.l1ttleO.boyfriend.commands.Remind;
+import ru.l1ttleO.boyfriend.commands.Truth;
 import ru.l1ttleO.boyfriend.commands.Unban;
 import ru.l1ttleO.boyfriend.commands.Unmute;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -24,7 +25,7 @@ public class CommandHandler {
 
     static {
         register(
-                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Remind(), new Unban(), new Unmute());
+                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Remind(), new Truth(), new Unban(), new Unmute());
     }
 
     public static void register(final Command @NotNull ... commands) {
@@ -57,7 +58,7 @@ public class CommandHandler {
             channel.sendTyping().complete();
             command.run(event, args);
         } catch (final @NotNull Exception e) {
-            channel.sendMessage("`" + e + "`").queue();
+            channel.sendMessage("Идентификатор ошибки: `" + e + "`").queue();
             e.printStackTrace();
         }
     }

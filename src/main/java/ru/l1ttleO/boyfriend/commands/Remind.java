@@ -22,12 +22,12 @@ public class Remind extends Command {
         final String text;
         final int duration;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать текст напоминания", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать текст напоминания!", channel, this.getUsages());
         if (author == null)
             throw new InvalidAuthorException();
         duration = Utils.getDurationMultiplied(args[1]);
         if (duration < 1)
-            throw new WrongUsageException("Требуется указать продолжительность", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать продолжительность!", channel, this.getUsages());
         text = "```" + StringUtils.join(args, ' ', 2, args.length).replaceAll("```", "​`​") + "```";
         channel.sendMessage("Напоминание успешно установлено").queue();
         final Thread thread = new Thread(() -> {
