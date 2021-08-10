@@ -25,6 +25,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Kick extends Command {
 
@@ -32,27 +35,23 @@ public class Kick extends Command {
         super("kick", "Выгоняет участника", "kick <@упоминание или ID> <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member kicked = getMember(args[1], event.getGuild(), channel);
-        if (args.length < 3) {
-            sendInvalidUsageMessage(channel, "Требуется указать причину!");
-            return;
-        }
+        if (args.length < 3)
+            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
-            throw new IllegalStateException("Автор является null");
+            throw new InvalidAuthorException();
         final String reason = StringUtils.join(args, ' ', 2, args.length);
-        if (!author.hasPermission(Permission.KICK_MEMBERS)) {
-            sendNoPermissionsMessage(channel);
-            return;
-        }
+        if (!author.hasPermission(Permission.KICK_MEMBERS))
+            throw new NoPermissionException(channel, false, false);
         if (kicked == null)
             return;
-        if (!author.canInteract(kicked)) {
-            channel.sendMessage("У тебя недостаточно прав для кика этого участника!").queue();
-            return;
-        }
+        if (!author.canInteract(kicked))
+            throw new NoPermissionException(channel, false, true);
+        if (!event.getGuild().getSelfMember().canInteract(kicked))
+            throw new NoPermissionException(channel, true, true);
         Actions.kickMember(channel, author, kicked, reason);
     }
 }

@@ -30,6 +30,8 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class EventListener extends ListenerAdapter {
 
@@ -57,7 +59,7 @@ public class EventListener extends ListenerAdapter {
             return;
         if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) {
             if (logChannel == null)
-                throw new IllegalStateException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
+                throw new ImprobableException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
             logChannel.sendMessage("Я получил следующее сообщение от %s:```%s ```"
                 .formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "`​`​`"))).queue();
             return;
@@ -73,6 +75,9 @@ public class EventListener extends ListenerAdapter {
             }
             return;
         }
-        CommandHandler.onMessageReceived(event);
+        try {
+            CommandHandler.onMessageReceived(event);
+        } catch (final @NotNull WrongUsageException ignored) {
+        }
     }
 }

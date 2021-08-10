@@ -29,6 +29,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Unmute extends Command {
 
@@ -36,21 +39,17 @@ public class Unmute extends Command {
         super("unmute", "Возвращает участника из мута", "unmute <@упоминание или ID> <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member unmuted;
-        if (args.length < 3) {
-            sendInvalidUsageMessage(channel, "Требуется указать причину!");
-            return;
-        }
+        if (args.length < 3)
+            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
-            throw new IllegalStateException("Автор является null");
-        if (!author.hasPermission(Permission.MESSAGE_MANAGE)) {
-            sendNoPermissionsMessage(channel);
-            return;
-        }
+            throw new InvalidAuthorException();
+        if (!author.hasPermission(Permission.MESSAGE_MANAGE))
+            throw new NoPermissionException(channel, false, false);
         unmuted = getMember(args[1], event.getGuild(), channel);
         if (unmuted == null) return;
         List<Role> roleList = new ArrayList<>();

@@ -4,7 +4,7 @@ import java.util.Random;
 import org.jetbrains.annotations.NotNull;
 
 public class Utils {
-    public static final Random RANDOM = new Random();
+    public static final @NotNull Random RANDOM = new Random();
 
     public static <T> T randomElement(final T @NotNull [] array) {
         return array[RANDOM.nextInt(array.length)];
@@ -23,8 +23,8 @@ public class Utils {
         return second;
     }
 
-    public static final int[] DURATION_MULTIPLIERS = {60, 60, 24, 7, 1};
-    public static final String[][] DURATION_TEXTS =
+    public static final int @NotNull [] DURATION_MULTIPLIERS = {60, 60, 24, 7, 1};
+    public static final String @NotNull [] @NotNull [] DURATION_TEXTS =
         {{"s", "секунда", "секунду", "секунды", "секунд"}, {"m", "минута", "минуту", "минуты", "минут"},
         {"h", "час", "час", "часа", "часов"}, {"d", "день", "день", "дня", "дней"},
         {"w", "неделя", "неделю", "недели", "недель"}};

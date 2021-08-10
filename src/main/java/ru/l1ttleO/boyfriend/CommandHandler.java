@@ -16,10 +16,11 @@ import ru.l1ttleO.boyfriend.commands.Ping;
 import ru.l1ttleO.boyfriend.commands.Remind;
 import ru.l1ttleO.boyfriend.commands.Unban;
 import ru.l1ttleO.boyfriend.commands.Unmute;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class CommandHandler {
-    public static final String prefix = "!";
-    public static final HashMap<String, Command> COMMAND_LIST = new HashMap<>();
+    public static final @NotNull String prefix = "!";
+    public static final @NotNull HashMap<String, Command> COMMAND_LIST = new HashMap<>();
 
     static {
         register(
@@ -31,7 +32,7 @@ public class CommandHandler {
             COMMAND_LIST.put(command.name, command);
     }
 
-    public static void onMessageReceived(final @NotNull MessageReceivedEvent event) {
+    public static void onMessageReceived(final @NotNull MessageReceivedEvent event) throws WrongUsageException {
         final Message message = event.getMessage();
         final MessageChannel channel = event.getChannel();
         final String content = message.getContentRaw();
@@ -44,10 +45,8 @@ public class CommandHandler {
             return;
         }
         final Command command = COMMAND_LIST.get(name);
-        if (command.usages.length > 0 && args.length == 1) {
-            command.sendInvalidUsageMessage(channel, "Нету аргументов!");
-            return;
-        }
+        if (command.usages.length > 0 && args.length == 1)
+            throw new WrongUsageException("Нету аргументов!", channel, command.getUsages());
         final List<Message> history = channel.getHistory().retrievePast(3).complete();
         final String echoMessage = history.get(1).getContentRaw();
         final String echoMessageFailsafe = history.get(2).getContentRaw();
@@ -58,7 +57,7 @@ public class CommandHandler {
             channel.sendTyping().complete();
             command.run(event, args);
         } catch (final @NotNull Exception e) {
-            channel.sendMessage(e.toString()).queue();
+            channel.sendMessage("`" + e + "`").queue();
             e.printStackTrace();
         }
     }

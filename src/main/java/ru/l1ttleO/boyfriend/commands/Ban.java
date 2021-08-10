@@ -30,6 +30,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
+import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Ban extends Command {
 
@@ -37,42 +40,34 @@ public class Ban extends Command {
         super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Random random = new Random();
         final String reason;
-        final User banned = getUser(args[1], event.getJDA(), channel);
-        if (args.length < 3) {
-            sendInvalidUsageMessage(channel, "Требуется указать причину!");
-            return;
-        }
+        final User banned;
+        if (args.length < 3)
+            throw new WrongUsageException("Требуется указать причину", channel, this.getUsages());
         if (author == null)
-            throw new IllegalStateException("Автор является null");
-        if (!author.hasPermission(Permission.BAN_MEMBERS)) {
-            sendNoPermissionsMessage(channel);
-            return;
-        }
+            throw new InvalidAuthorException();
+        if (!author.hasPermission(Permission.BAN_MEMBERS))
+            throw new NoPermissionException(channel, false, false);
+        banned = getUser(args[1], event.getJDA(), channel);
         if (banned == null)
             return;
         try {
-            if (!author.canInteract(guild.retrieveMember(banned).complete())) {
-                channel.sendMessage("У тебя недостаточно прав для бана этого пользователя!").queue();
-                return;
-            }
-            if (!guild.getSelfMember().canInteract(guild.retrieveMember(banned).complete())) {
-                channel.sendMessage("У меня недостаточно прав для бана этого пользователя!").queue();
-                return;
-            }
+            if (!author.canInteract(guild.retrieveMember(banned).complete()))
+                throw new NoPermissionException(channel, false, true);
+            if (!guild.getSelfMember().canInteract(guild.retrieveMember(banned).complete()))
+                throw new NoPermissionException(channel, true, true);
         } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
         int duration = Utils.getDurationMultiplied(args[2]);
         int startIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4) {
-                sendInvalidUsageMessage(channel, "Требуется указать причину!");
-                return;
+                throw new WrongUsageException("Требуется указать причину", channel, this.getUsages());
             }
             durationString = " " + Utils.getDurationText(duration, true);
             startIndex++;

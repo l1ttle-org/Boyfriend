@@ -13,10 +13,39 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 
 public class Actions {
 
-    public static final HashMap<Long, HashMap<Long, Thread>> BANS = new HashMap<>();
+    public static final @NotNull HashMap<Long, HashMap<Long, Thread>> BANS = new HashMap<>();
+    public static final @NotNull HashMap<Long, HashMap<Long, Thread>> MUTES = new HashMap<>();
+
+    public static void unbanMember(final @Nullable MessageChannel channel, final @NotNull Member author, final @NotNull User unbanned, final String reason) {
+        final Guild guild = author.getGuild();
+        guild.unban(unbanned).queue();
+        final Thread existingBan = BANS.getOrDefault(guild.getIdLong(), new HashMap<>()).remove(unbanned.getIdLong());
+        if (channel != null) {
+            if (existingBan != null)
+                existingBan.interrupt();
+            channel.sendMessage("Возвращён из бана %s за `%s`".formatted(unbanned.getAsMention(), reason)).queue();
+        }
+        sendNotification(guild, "%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason), true);
+    }
+
+    public static void kickMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull Member kicked, final String reason) {
+        final Guild guild = author.getGuild();
+        String privateText = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
+        final List<Invite> invites = guild.retrieveInvites().complete();
+        if (!invites.isEmpty())
+            privateText += """
+                \n
+                Ты можешь перезайти по этой ссылке:
+                https://discord.gg/%s""".formatted(invites.get(0).getCode());
+        sendDirectMessage(kicked.getUser(), privateText);
+        guild.kick(kicked).queue();
+        channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();
+        sendNotification(guild, "%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason), true);
+    }
 
     public static void banMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull User banned, final String reason, final int duration, final String durationString) {
         final Guild guild = author.getGuild();
@@ -47,7 +76,7 @@ public class Actions {
             try {
                 Thread.sleep(duration * 1000L);
                 if (banEntryReason == null)
-                    throw new IllegalStateException("Причина бана является null");
+                    throw new ImprobableException("Причина бана является null");
                 if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                     return;
                 unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
@@ -60,35 +89,6 @@ public class Actions {
         channel.sendMessage(replyText).queue();
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), true);
     }
-
-    public static void unbanMember(final @Nullable MessageChannel channel, final @NotNull Member author, final @NotNull User unbanned, final String reason) {
-        final Guild guild = author.getGuild();
-        guild.unban(unbanned).queue();
-        final Thread existingBan = BANS.getOrDefault(guild.getIdLong(), new HashMap<>()).remove(unbanned.getIdLong());
-        if (channel != null) {
-            if (existingBan != null)
-                existingBan.interrupt();
-            channel.sendMessage("Возвращён из бана %s за `%s`".formatted(unbanned.getAsMention(), reason)).queue();
-        }
-        sendNotification(guild, "%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason), true);
-    }
-
-    public static void kickMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull Member kicked, final String reason) {
-        final Guild guild = author.getGuild();
-        String privateText = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
-        final List<Invite> invites = guild.retrieveInvites().complete();
-        if (!invites.isEmpty())
-            privateText += """
-                \n
-                Ты можешь перезайти по этой ссылке:
-                https://discord.gg/%s""".formatted(invites.get(0).getCode());
-        sendDirectMessage(kicked.getUser(), privateText);
-        guild.kick(kicked).queue();
-        channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();
-        sendNotification(guild, "%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason), true);
-    }
-
-    public static final HashMap<Long, HashMap<Long, Thread>> MUTES = new HashMap<>();
 
     public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final int duration, final String durationString) {
         final Guild guild = author.getGuild();
@@ -132,7 +132,7 @@ public class Actions {
     public static @NotNull MessageChannel getBotLogChannel(final @NotNull JDA jda) {
         final MessageChannel botLogChannel = jda.getTextChannelById("618044439939645444");
         if (botLogChannel == null)
-            throw new IllegalStateException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
+            throw new ImprobableException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
         return botLogChannel;
     }
 

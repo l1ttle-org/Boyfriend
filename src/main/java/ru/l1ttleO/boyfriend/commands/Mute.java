@@ -30,6 +30,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
+import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Mute extends Command {
 
@@ -37,29 +40,25 @@ public class Mute extends Command {
         super("mute", "Глушит участника", "mute <@упоминание или ID> [<продолжительность>] <причина>");
     }
 
-    public static final String[] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
+    public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
 
-    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member muted = getMember(args[1], event.getGuild(), channel);
-        if (args.length < 3) {
-            sendInvalidUsageMessage(channel, "Требуется указать причину!");
-            return;
-        }
+        if (args.length < 3)
+            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
-            throw new IllegalStateException("Автор является null");
-        if (!author.hasPermission(Permission.MESSAGE_MANAGE)) {
-            sendNoPermissionsMessage(channel);
-            return;
-        }
+            throw new InvalidAuthorException();
+        if (!author.hasPermission(Permission.MESSAGE_MANAGE))
+            throw new NoPermissionException(channel, false, false);
         if (muted == null)
             return;
-        if (!author.canInteract(muted)) {
-            channel.sendMessage("У тебя недостаточно прав для мута этого участника!").queue();
-            return;
-        }
+        if (!author.canInteract(muted))
+            throw new NoPermissionException(channel, false, true);
+        if (!guild.getSelfMember().canInteract(muted))
+            throw new NoPermissionException(channel, true, true);
         List<Role> roleList = new ArrayList<>();
         for (final String name : ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);
@@ -74,10 +73,8 @@ public class Mute extends Command {
         int startIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
-            if (args.length < 4) {
-                sendInvalidUsageMessage(channel, "Требуется указать причину!");
-                return;
-            }
+            if (args.length < 4)
+                throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
             durationString = " " + Utils.getDurationText(duration, true);
             startIndex++;
         } else duration = 0; // extra check

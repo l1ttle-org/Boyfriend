@@ -27,6 +27,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
+import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Clear extends Command {
 
@@ -34,28 +37,22 @@ public class Clear extends Command {
         super("clear", "Удаляет указанное количество сообщений в канале", "clear <количество, не менее 1 и не больше 99>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final String[] args) {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String[] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final MessageChannel channel = event.getChannel();
         final int requested;
         if (event.getMember() == null)
-            throw new IllegalStateException("event.getMember() вернул null. Возможно, команда была отправлена вебхуком");
-        if (!event.getMember().hasPermission((GuildChannel) event.getChannel(), Permission.MESSAGE_MANAGE)) {
-            sendNoPermissionsMessage(channel);
-            return;
-        }
+            throw new InvalidAuthorException();
+        if (!event.getMember().hasPermission((GuildChannel) event.getChannel(), Permission.MESSAGE_MANAGE))
+            throw new NoPermissionException(channel, false, false);
         try {
             requested = Integer.parseInt(args[1]) + 1;
         } catch (final @NotNull NumberFormatException e) {
-            sendInvalidUsageMessage(channel, "Неправильно указано количество!");
-            return;
+            throw new WrongUsageException("Неправильно указано количество", channel, this.getUsages());
         }
-        if (requested < 2) {
-            sendInvalidUsageMessage(channel, "Количество меньше 1!");
-            return;
-        } else if (requested > 100) {
-            sendInvalidUsageMessage(channel, "Количество больше 99!");
-            return;
-        }
+        if (requested < 2)
+            throw new WrongUsageException("Количество меньше 1", channel, this.getUsages());
+        else if (requested > 100)
+            throw new WrongUsageException("Количество больше 99", channel, this.getUsages());
         final List<Message> messages = channel.getHistory().retrievePast(requested).complete();
         final int amount = messages.size();
         final String plural = Utils.plural(amount, "сообщение", "сообщения", "сообщений");
