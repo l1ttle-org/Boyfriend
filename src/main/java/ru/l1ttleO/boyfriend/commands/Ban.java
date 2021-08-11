@@ -48,7 +48,7 @@ public class Ban extends Command {
         final String reason;
         final User banned;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
@@ -67,7 +67,7 @@ public class Ban extends Command {
         String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4) {
-                throw new WrongUsageException("Требуется указать причину", channel, this.getUsages());
+                throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
             }
             durationString = " " + Utils.getDurationText(duration, true);
             startIndex++;

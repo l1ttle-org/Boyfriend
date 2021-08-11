@@ -47,12 +47,12 @@ public class Clear extends Command {
         try {
             requested = Integer.parseInt(args[1]) + 1;
         } catch (final @NotNull NumberFormatException e) {
-            throw new WrongUsageException("Неправильно указано количество", channel, this.getUsages());
+            throw new WrongUsageException("Неправильно указано количество!", channel, this.getUsages());
         }
         if (requested < 2)
-            throw new WrongUsageException("Количество меньше 1", channel, this.getUsages());
+            throw new WrongUsageException("Количество меньше 1!", channel, this.getUsages());
         else if (requested > 100)
-            throw new WrongUsageException("Количество больше 99", channel, this.getUsages());
+            throw new WrongUsageException("Количество больше 99!", channel, this.getUsages());
         final List<Message> messages = channel.getHistory().retrievePast(requested).complete();
         final int amount = messages.size();
         final String plural = Utils.plural(amount, "сообщение", "сообщения", "сообщений");

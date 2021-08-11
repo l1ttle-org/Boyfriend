@@ -1,5 +1,9 @@
 # User-specific stuff
 .idea/
+.settings/
+.vscode/
+.classpath
+.project
 
 # Checkstyle-IDEA config
 !.idea/checkstyle-idea.xml
@@ -10,6 +14,7 @@
 
 # IntelliJ
 out/
+
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 
@@ -105,6 +110,7 @@ $RECYCLE.BIN/
 
 .gradle
 build/
+bin/
 
 # Ignore Gradle GUI config
 gradle-app.setting

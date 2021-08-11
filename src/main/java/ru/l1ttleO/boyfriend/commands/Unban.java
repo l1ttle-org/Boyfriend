@@ -46,7 +46,7 @@ public class Unban extends Command {
         final MessageChannel channel = event.getChannel();
         final User unbanned;
         if (args.length < 3)
-            throw new WrongUsageException("", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))

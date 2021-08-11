@@ -28,8 +28,8 @@ public class Remind extends Command {
         duration = Utils.getDurationMultiplied(args[1]);
         if (duration < 1)
             throw new WrongUsageException("Требуется указать продолжительность!", channel, this.getUsages());
-        text = "```" + StringUtils.join(args, ' ', 2, args.length).replaceAll("```", "`​`​`") + "```";
-        channel.sendMessage("Напоминание успешно установлено").queue();
+        text = " ```" + StringUtils.join(args, ' ', 2, args.length).replaceAll("```", "`​`​`") + "```";
+        channel.sendMessage("Напоминание успешно установлено. Через %s будет отправлено данное сообщение:%s".formatted(Utils.getDurationText(duration, true), text)).queue();
         final Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(duration * 1000L);
