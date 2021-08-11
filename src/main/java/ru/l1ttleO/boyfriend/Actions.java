@@ -80,7 +80,7 @@ public class Actions {
                 if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                     return;
                 unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло");
-            } catch (final @NotNull InterruptedException ignored) {
+            } catch (final InterruptedException ignored) {
             }
         }, "Ban timer " + banned.getId());
         guildBans.put(banned.getIdLong(), thread);
