@@ -105,7 +105,7 @@ public class Actions {
                 try {
                     Thread.sleep(duration * 1000L);
                     unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло");
-                } catch (final @NotNull InterruptedException ignored) {
+                } catch (final InterruptedException ignored) {
                 }
             }, "Mute timer " + muted.getId());
             guildMutes.put(muted.getIdLong(), thread);
