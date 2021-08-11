@@ -27,7 +27,7 @@ public abstract class Command {
         this.description = description;
     }
 
-    public abstract void run(final MessageReceivedEvent event, final String[] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException;
+    public abstract void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException;
 
     public String getUsages() {
         return "Использование: `%s`"

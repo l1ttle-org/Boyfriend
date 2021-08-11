@@ -35,7 +35,7 @@ public class Kick extends Command {
         super("kick", "Выгоняет участника", "kick <@упоминание или ID> <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member kicked = getMember(args[1], event.getGuild(), channel);

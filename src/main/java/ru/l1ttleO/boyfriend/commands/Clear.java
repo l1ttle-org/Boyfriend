@@ -37,7 +37,7 @@ public class Clear extends Command {
         super("clear", "Удаляет указанное количество сообщений в канале", "clear <количество, не менее 1 и не больше 99>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String[] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final MessageChannel channel = event.getChannel();
         final int requested;
         if (event.getMember() == null)

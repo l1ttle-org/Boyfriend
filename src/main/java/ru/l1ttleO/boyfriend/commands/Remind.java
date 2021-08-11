@@ -28,14 +28,14 @@ public class Remind extends Command {
         duration = Utils.getDurationMultiplied(args[1]);
         if (duration < 1)
             throw new WrongUsageException("Требуется указать продолжительность!", channel, this.getUsages());
-        text = "```" + StringUtils.join(args, ' ', 2, args.length).replaceAll("```", "​`​") + "```";
+        text = "```" + StringUtils.join(args, ' ', 2, args.length).replaceAll("```", "`​`​`") + "```";
         channel.sendMessage("Напоминание успешно установлено").queue();
         final Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(duration * 1000L);
                 channel.sendTyping().complete();
                 channel.sendMessage(author.getAsMention() + text).queue();
-            } catch (final InterruptedException e) {
+            } catch (final @NotNull InterruptedException e) {
                 Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false);
             }
         }, "Remind timer " + author.getId());

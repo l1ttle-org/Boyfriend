@@ -24,12 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Utils;
 
 public class Ping extends Command {
-    
+
     public Ping() {
         super("ping", "Измеряет время обработки REST-запроса");
     }
-    
-    public void run(final @NotNull MessageReceivedEvent event, final String[] args) {
+
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) {
         final MessageChannel channel = event.getChannel();
         channel.getJDA().getRestPing().queue(time ->
             channel.sendMessage("%s %sмс".formatted(Utils.getBeep(), time)).queue()

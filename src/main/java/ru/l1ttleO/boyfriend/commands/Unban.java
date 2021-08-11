@@ -39,7 +39,7 @@ public class Unban extends Command {
         super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Guild guild = event.getGuild();
         final JDA jda = guild.getJDA();
         final Member author = event.getMember();

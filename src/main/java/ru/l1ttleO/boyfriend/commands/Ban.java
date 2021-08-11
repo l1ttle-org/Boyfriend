@@ -40,7 +40,7 @@ public class Ban extends Command {
         super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
