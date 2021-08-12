@@ -36,14 +36,16 @@ import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 public class Unmute extends Command {
 
     public Unmute() {
-        super("unmute", "Возвращает участника из мута", "unmute <@упоминание или ID> <причина>");
+        super("unmute", "Возвращает участника из мута", "unmute <@упоминание или ID> [-s] <причина>");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+        boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
-        final MessageChannel channel = event.getChannel();
         final Member unmuted;
+        final MessageChannel channel = event.getChannel();
+        int reasonIndex = 2;
         if (args.length < 3)
             throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
@@ -51,7 +53,10 @@ public class Unmute extends Command {
         if (!author.hasPermission(Permission.MESSAGE_MANAGE))
             throw new NoPermissionException(channel, false, false);
         unmuted = getMember(args[1], event.getGuild(), channel);
-        if (unmuted == null) return;
+        if (unmuted == null) 
+            return;
+        if (author == unmuted)
+            throw new WrongUsageException("Ты не можешь выпустить самого себя из карцера!", channel, this.getUsages());    
         List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);
@@ -66,7 +71,13 @@ public class Unmute extends Command {
             channel.sendMessage("Участник не заглушен!").queue();
             return;
         }
-        final String reason = StringUtils.join(args, ' ', 2, args.length);
-        Actions.unmuteMember(channel, role, author, unmuted, reason);
+        if (args[reasonIndex].equals("-s")) {
+            silent = true;
+            reasonIndex++;
+        }
+        if (silent)
+            event.getMessage().delete().queue(); 
+        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
+        Actions.unmuteMember(channel, role, author, unmuted, reason, silent);
     }
 }

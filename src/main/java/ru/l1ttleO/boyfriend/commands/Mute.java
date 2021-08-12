@@ -37,12 +37,13 @@ import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 public class Mute extends Command {
 
     public Mute() {
-        super("mute", "Глушит участника", "mute <@упоминание или ID> [<продолжительность>] <причина>");
+        super("mute", "Глушит участника", "mute <@упоминание или ID> [<продолжительность>] [-s] <причина>");
     }
 
     public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+        boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
@@ -70,15 +71,21 @@ public class Mute extends Command {
         }
         final Role role = roleList.get(0);
         int duration = Utils.getDurationMultiplied(args[2]);
-        int startIndex = 2;
+        int reasonIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4)
                 throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
             durationString = " " + Utils.getDurationText(duration, true);
-            startIndex++;
+            reasonIndex++;
         } else duration = 0; // extra check
-        final String reason = StringUtils.join(args, ' ', startIndex, args.length);
-        Actions.muteMember(channel, role, author, muted, reason, duration, durationString);
+        if (args[reasonIndex].equals("-s")) {
+            silent = true;
+            reasonIndex++;
+        }
+        if (silent)
+            event.getMessage().delete().queue();  
+        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
+        Actions.muteMember(channel, role, author, muted, reason, duration, durationString, silent);
     }
 }

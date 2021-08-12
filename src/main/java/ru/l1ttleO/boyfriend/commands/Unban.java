@@ -36,15 +36,17 @@ import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 public class Unban extends Command {
 
     public Unban() {
-        super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> <причина>");
+        super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> [-s] <причина>");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+        boolean silent = false;
         final Guild guild = event.getGuild();
         final JDA jda = guild.getJDA();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final User unbanned;
+        int reasonIndex = 2;
         if (args.length < 3)
             throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
@@ -59,7 +61,13 @@ public class Unban extends Command {
             channel.sendMessage("Пользователь не забанен!").queue();
             return;
         }
-        final String reason = StringUtils.join(args, ' ', 2, args.length);
-        Actions.unbanMember(channel, author, unbanned, reason);
+        if (args[reasonIndex].equals("-s")) {
+            silent = true;
+            reasonIndex++;
+        }
+        if (silent)
+            event.getMessage().delete().queue(); 
+        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
+        Actions.unbanMember(channel, author, unbanned, reason, silent);
     }
 }

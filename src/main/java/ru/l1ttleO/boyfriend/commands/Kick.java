@@ -32,18 +32,24 @@ import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 public class Kick extends Command {
 
     public Kick() {
-        super("kick", "Выгоняет участника", "kick <@упоминание или ID> <причина>");
+        super("kick", "Выгоняет участника", "kick <@упоминание или ID> [-s] <причина>");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+        boolean silent = false;
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member kicked = getMember(args[1], event.getGuild(), channel);
+        int reasonIndex = 2;
         if (args.length < 3)
             throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
         if (author == null)
             throw new InvalidAuthorException();
-        final String reason = StringUtils.join(args, ' ', 2, args.length);
+        if (args[reasonIndex].equals("-s")) {
+            silent = true;
+            reasonIndex++;
+        }
+        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         if (!author.hasPermission(Permission.KICK_MEMBERS))
             throw new NoPermissionException(channel, false, false);
         if (kicked == null)
@@ -52,6 +58,8 @@ public class Kick extends Command {
             throw new NoPermissionException(channel, false, true);
         if (!event.getGuild().getSelfMember().canInteract(kicked))
             throw new NoPermissionException(channel, true, true);
-        Actions.kickMember(channel, author, kicked, reason);
+        if (silent)
+            event.getMessage().delete().queue(); 
+        Actions.kickMember(channel, author, kicked, reason, silent);
     }
 }

@@ -17,10 +17,10 @@ public class Remind extends Command {
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, WrongUsageException {
+        final int duration;
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final String text;
-        final int duration;
         if (args.length < 3)
             throw new WrongUsageException("Требуется указать текст напоминания!", channel, this.getUsages());
         if (author == null)
@@ -28,12 +28,11 @@ public class Remind extends Command {
         duration = Utils.getDurationMultiplied(args[1]);
         if (duration < 1)
             throw new WrongUsageException("Требуется указать продолжительность!", channel, this.getUsages());
-        text = " ```" + StringUtils.join(args, ' ', 2, args.length).replaceAll("```", "`​`​`") + "```";
+        text = " ```" + StringUtils.join(args, ' ', 2, args.length).replaceAll("```", "​`​`​`​") + " ```";
         channel.sendMessage("Напоминание успешно установлено. Через %s будет отправлено данное сообщение:%s".formatted(Utils.getDurationText(duration, true), text)).queue();
         final Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(duration * 1000L);
-                channel.sendTyping().complete();
                 channel.sendMessage(author.getAsMention() + text).queue();
             } catch (final InterruptedException e) {
                 Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false);

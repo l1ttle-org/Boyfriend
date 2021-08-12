@@ -55,7 +55,6 @@ public class CommandHandler {
                                           || echoMessage.equals(content) || echoMessageFailsafe.equals(content)))
             return;
         try {
-            channel.sendTyping().complete();
             command.run(event, args);
         } catch (final @NotNull Exception e) {
             channel.sendMessage("Идентификатор ошибки: `" + e + "`").queue();

@@ -61,14 +61,13 @@ public class EventListener extends ListenerAdapter {
             if (logChannel == null)
                 throw new ImprobableException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
             logChannel.sendMessage("Я получил следующее сообщение от %s:```%s ```"
-                .formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "`​`​`"))).queue();
+                .formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "​`​`​`​"))).queue();
             return;
         }
         final Guild guild = event.getGuild();
         if (message.getMentionedMembers().size() > 3 && !author.isBot()) {
             try {
-                channel.sendTyping().complete();
-                Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда");
+                Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда", false);
             } catch (final @NotNull Exception e) {
                 channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: " + e.getMessage()).queue();
                 e.printStackTrace();

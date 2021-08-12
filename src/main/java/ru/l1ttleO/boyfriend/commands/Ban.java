@@ -37,10 +37,11 @@ import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 public class Ban extends Command {
 
     public Ban() {
-        super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] <причина>");
+        super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] [-s] <причина>");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+        boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
@@ -63,18 +64,24 @@ public class Ban extends Command {
                 throw new NoPermissionException(channel, true, true);
         } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
         int duration = Utils.getDurationMultiplied(args[2]);
-        int startIndex = 2;
+        int reasonIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4) {
                 throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
             }
             durationString = " " + Utils.getDurationText(duration, true);
-            startIndex++;
+            reasonIndex++;
         } else duration = 0; // extra check
-        reason = StringUtils.join(args, ' ', startIndex, args.length);
+        if (args[reasonIndex].equals("-s")) {
+            silent = true;
+            reasonIndex++;
+        }
+        reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         if (random.nextInt(101) == 100)
             channel.sendMessage("Я кастую бан!").queue();
-        Actions.banMember(channel, author, banned, reason, duration, durationString);
+        if (silent)
+            event.getMessage().delete().queue(); 
+        Actions.banMember(channel, author, banned, reason, duration, durationString, silent);
     }
 }
