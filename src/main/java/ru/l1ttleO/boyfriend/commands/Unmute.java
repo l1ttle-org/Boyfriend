@@ -56,7 +56,7 @@ public class Unmute extends Command {
         if (unmuted == null) 
             return;
         if (author == unmuted)
-            throw new NoPermissionException("Ты не можешь выпустить самого себя из карцера!");    
+            throw new NoPermissionException("Ты не можешь выпустить самого себя из карцера!");
         List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);

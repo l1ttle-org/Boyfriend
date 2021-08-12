@@ -27,7 +27,7 @@ public class Actions {
         if (channel != null) {
             if (existingBan != null)
                 existingBan.interrupt();
-            if (!silent)    
+            if (!silent)
                 channel.sendMessage("Возвращён из бана %s за `%s`".formatted(unbanned.getAsMention(), reason)).queue();
         }
         sendNotification(guild, "%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason), silent);
@@ -88,7 +88,7 @@ public class Actions {
             BANS.put(guild.getIdLong(), guildBans);
             thread.start();
         }
-        if (!silent)    
+        if (!silent)
             channel.sendMessage(replyText).queue();
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
     }

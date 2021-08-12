@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 public class DelayedRunnable {
-    
+
     final public Thread thread;
     final public long duration;
     final public long startedAt;
@@ -28,6 +28,6 @@ public class DelayedRunnable {
         startedAt = System.currentTimeMillis();
         thread.start();
     }
-    
+
     // TODO for Apceniy: DelayedWorker
 }

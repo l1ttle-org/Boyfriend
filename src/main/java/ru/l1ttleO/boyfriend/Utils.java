@@ -62,7 +62,7 @@ public class Utils {
             return Integer.parseInt(toParse);
         } catch (final @NotNull NumberFormatException ignored) {
         }
-        
+
         int result = 0;
         Set<String> used = Collections.emptySet();
         String[] buffer;
@@ -72,8 +72,8 @@ public class Utils {
             if (buffer.length < 2 || used.contains(buffer[1]))
                 throw new NumberFormatException();
             used.add(buffer[1]);
-            input.setLength(input.length()-buffer[1].length());
-            
+            input.setLength(input.length() - buffer[1].length());
+
             int multiplier = 1;
             int i = 0;
             for (; i < DURATION_TEXTS.length; i++) {
@@ -85,12 +85,12 @@ public class Utils {
                 throw new NumberFormatException();
 
             buffer = input.toString().split("\\D+$");
-            input.setLength(input.length()-buffer[1].length());
+            input.setLength(input.length() - buffer[1].length());
             result += Integer.parseInt(buffer[1])*multiplier;
         }
         return result;
     }
-    
+
     public static String wrap(final @NotNull String text) {
         return "```" + text.replaceAll("```", "​`​`​`​") + " ```";
     }

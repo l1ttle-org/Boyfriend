@@ -18,7 +18,7 @@ public class Remind extends Command {
     public Remind() {
         super("remind", "Создаёт напоминание", "remind", "remind <время напоминания> <текст напоминания>");
     }
-    
+
     public static final @NotNull ThreadGroup REMINDERS_THREAD_GROUP = new ThreadGroup("Reminders");
     public static final @NotNull HashMap<Long, HashMap<DelayedRunnable, String>> REMINDERS = new HashMap<>();
 
@@ -36,8 +36,8 @@ public class Remind extends Command {
                 String append;
                 for (Entry<DelayedRunnable, String> reminder : userReminders.entrySet()) {
                     append = """
-                        
-                        
+
+
                         <t:%s:R>
                         %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, reminder.getValue());
                     if (listText.isEmpty())
