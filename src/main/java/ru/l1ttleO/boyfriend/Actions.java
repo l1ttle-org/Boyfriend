@@ -68,8 +68,8 @@ public class Actions {
                                https://discord.gg/%s""".formatted(invites.get(0).getCode());
         }
         sendDirectMessage(banned, privateText);
-        guild.ban(banned, 0, "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason)).complete();
-        final String banEntryReason = guild.retrieveBan(banned).complete().getReason();
+        final String banEntryReason = "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason);
+        guild.ban(banned, 0, banEntryReason).complete();
         final HashMap<Long, Thread> guildBans = BANS.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingBan = guildBans.get(banned.getIdLong());
         if (existingBan != null)
@@ -78,8 +78,6 @@ public class Actions {
             final Thread thread = new Thread(() -> {
                 try {
                     Thread.sleep(duration * 1000L);
-                    if (banEntryReason == null)
-                        throw new ImprobableException("Причина бана является null");
                     if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                         return;
                     unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);

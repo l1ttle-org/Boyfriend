@@ -48,11 +48,11 @@ public class Unban extends Command {
         final User unbanned;
         int reasonIndex = 2;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
-            throw new NoPermissionException(channel, false, false);
+            throw new NoPermissionException(false, false);
         unbanned = getUser(args[1], jda, channel);
         if (unbanned == null) return;
         try {

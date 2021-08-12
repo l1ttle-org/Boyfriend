@@ -49,17 +49,17 @@ public class Mute extends Command {
         final MessageChannel channel = event.getChannel();
         final Member muted = getMember(args[1], event.getGuild(), channel);
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.MESSAGE_MANAGE))
-            throw new NoPermissionException(channel, false, false);
+            throw new NoPermissionException(false, false);
         if (muted == null)
             return;
-        if (!author.canInteract(muted))
-            throw new NoPermissionException(channel, false, true);
-        if (!guild.getSelfMember().canInteract(muted))
-            throw new NoPermissionException(channel, true, true);
+        final boolean selfInteract = guild.getSelfMember().canInteract(muted);
+        final boolean authorInteract = author.canInteract(muted);
+        if (!selfInteract || !authorInteract)
+            throw new NoPermissionException(!selfInteract, !authorInteract);
         List<Role> roleList = new ArrayList<>();
         for (final String name : ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);
@@ -70,12 +70,16 @@ public class Mute extends Command {
             return;
         }
         final Role role = roleList.get(0);
-        int duration = Utils.getDurationMultiplied(args[2]);
+        int duration = 0;
+        try {
+            duration = Utils.getDurationMultiplied(args[2]);
+        } catch (final @NotNull NumberFormatException ignored) {
+        }
         int reasonIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4)
-                throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
+                throw new WrongUsageException("Требуется указать причину!");
             durationString = " " + Utils.getDurationText(duration, true);
             reasonIndex++;
         } else duration = 0; // extra check

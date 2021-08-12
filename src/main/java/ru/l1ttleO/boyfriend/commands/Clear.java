@@ -43,16 +43,16 @@ public class Clear extends Command {
         if (event.getMember() == null)
             throw new InvalidAuthorException();
         if (!event.getMember().hasPermission((GuildChannel) event.getChannel(), Permission.MESSAGE_MANAGE))
-            throw new NoPermissionException(channel, false, false);
+            throw new NoPermissionException(false, false);
         try {
             requested = Integer.parseInt(args[1]) + 1;
         } catch (final @NotNull NumberFormatException e) {
-            throw new WrongUsageException("Неправильно указано количество!", channel, this.getUsages());
+            throw new WrongUsageException("Неправильно указано количество!");
         }
         if (requested < 2)
-            throw new WrongUsageException("Количество меньше 1!", channel, this.getUsages());
+            throw new WrongUsageException("Количество не должно быть меньше 1!");
         else if (requested > 100)
-            throw new WrongUsageException("Количество больше 99!", channel, this.getUsages());
+            throw new WrongUsageException("Количество не должно быть больше 99!");
         final List<Message> messages = channel.getHistory().retrievePast(requested).complete();
         final int amount = messages.size();
         final String plural = Utils.plural(amount, "сообщение", "сообщения", "сообщений");

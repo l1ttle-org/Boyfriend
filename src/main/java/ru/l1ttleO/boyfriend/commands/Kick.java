@@ -42,7 +42,7 @@ public class Kick extends Command {
         final Member kicked = getMember(args[1], event.getGuild(), channel);
         int reasonIndex = 2;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
             throw new InvalidAuthorException();
         if (args[reasonIndex].equals("-s")) {
@@ -51,13 +51,13 @@ public class Kick extends Command {
         }
         final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         if (!author.hasPermission(Permission.KICK_MEMBERS))
-            throw new NoPermissionException(channel, false, false);
+            throw new NoPermissionException(false, false);
         if (kicked == null)
             return;
-        if (!author.canInteract(kicked))
-            throw new NoPermissionException(channel, false, true);
-        if (!event.getGuild().getSelfMember().canInteract(kicked))
-            throw new NoPermissionException(channel, true, true);
+        final boolean selfInteract = event.getGuild().getSelfMember().canInteract(kicked);
+        final boolean authorInteract = author.canInteract(kicked);
+        if (!selfInteract || !authorInteract)
+            throw new NoPermissionException(!selfInteract, !authorInteract);
         if (silent)
             event.getMessage().delete().queue(); 
         Actions.kickMember(channel, author, kicked, reason, silent);

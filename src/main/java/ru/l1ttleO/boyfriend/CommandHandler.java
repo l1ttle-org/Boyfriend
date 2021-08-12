@@ -1,5 +1,6 @@
 package ru.l1ttleO.boyfriend;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import net.dv8tion.jda.api.entities.Message;
@@ -17,6 +18,7 @@ import ru.l1ttleO.boyfriend.commands.Remind;
 import ru.l1ttleO.boyfriend.commands.Truth;
 import ru.l1ttleO.boyfriend.commands.Unban;
 import ru.l1ttleO.boyfriend.commands.Unmute;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class CommandHandler {
@@ -46,16 +48,20 @@ public class CommandHandler {
             return;
         }
         final Command command = COMMAND_LIST.get(name);
-        if (command.usages.length > 0 && args.length == 1)
-            throw new WrongUsageException("Нету аргументов!", channel, command.getUsages());
+        if (command.usages.length > 0 && args.length == 1 && Arrays.stream(command.usages).noneMatch(name::equals))
+            throw new WrongUsageException("Нету аргументов!");
         final List<Message> history = channel.getHistory().retrievePast(3).complete();
         final String echoMessage = history.get(1).getContentRaw();
         final String echoMessageFailsafe = history.get(2).getContentRaw();
         if (event.getAuthor().isBot() && (echoMessage.startsWith(".echo") || echoMessageFailsafe.startsWith(".echo")
-                                          || echoMessage.equals(content) || echoMessageFailsafe.equals(content)))
+                                          || echoMessage.endsWith(content) || echoMessageFailsafe.endsWith(content)))
             return;
         try {
             command.run(event, args);
+        } catch (final @NotNull WrongUsageException e) {
+            channel.sendMessage(e.getMessage() + " " + command.getUsages()).queue();
+        } catch (final @NotNull NoPermissionException e) {
+            channel.sendMessage(e.getMessage()).queue();
         } catch (final @NotNull Exception e) {
             channel.sendMessage("Идентификатор ошибки: `" + e + "`").queue();
             e.printStackTrace();
