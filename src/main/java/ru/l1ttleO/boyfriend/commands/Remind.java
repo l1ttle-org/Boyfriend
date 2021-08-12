@@ -1,10 +1,10 @@
 package ru.l1ttleO.boyfriend.commands;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import java.util.HashMap;
-import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
@@ -32,12 +32,11 @@ public class Remind extends Command {
             if (userReminders.isEmpty())
                 channel.sendMessage("Нет активных напоминаний").queue();
             else {
-                StringBuilder listText = new StringBuilder("Активные напоминания:");
+                final StringBuilder listText = new StringBuilder("Активные напоминания:");
                 String append;
-                for (Entry<DelayedRunnable, String> reminder : userReminders.entrySet()) {
+                for (final Entry<DelayedRunnable, String> reminder : userReminders.entrySet()) {
                     append = """
-
-
+                        \n
                         <t:%s:R>
                         %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, reminder.getValue());
                     if (listText.isEmpty())

@@ -10,11 +10,11 @@ public class DelayedRunnable {
     final public long duration;
     final public long startedAt;
 
-    public DelayedRunnable(@Nullable ThreadGroup threadGroup, @NotNull Consumer<DelayedRunnable> runnable, @Nullable String name, @NotNull long millis, @Nullable Consumer<DelayedRunnable> ifInterrupted) {
-        duration = millis;
+    public DelayedRunnable(final @Nullable ThreadGroup threadGroup, final @NotNull Consumer<DelayedRunnable> runnable, final @Nullable String name, final @NotNull long millis, final @Nullable Consumer<DelayedRunnable> ifInterrupted) {
+        this.duration = millis;
         final Runnable internalRunnable = () -> {
             try {
-                Thread.sleep(duration);
+                Thread.sleep(this.duration);
                 runnable.accept(this);
             } catch (final InterruptedException e) {
                 if (ifInterrupted != null)
@@ -22,11 +22,11 @@ public class DelayedRunnable {
             }
         };
         if (name != null)
-            thread = new Thread(threadGroup, internalRunnable, name);
+            this.thread = new Thread(threadGroup, internalRunnable, name);
         else
-            thread = new Thread(threadGroup, internalRunnable);
-        startedAt = System.currentTimeMillis();
-        thread.start();
+            this.thread = new Thread(threadGroup, internalRunnable);
+        this.startedAt = System.currentTimeMillis();
+        this.thread.start();
     }
 
     // TODO for Apceniy: DelayedWorker

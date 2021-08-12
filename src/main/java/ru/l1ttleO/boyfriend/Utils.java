@@ -57,16 +57,16 @@ public class Utils {
         return out.toString();
     }
 
-    public static int getDurationMultiplied(@NotNull String toParse) throws NumberFormatException {
+    public static int getDurationMultiplied(final @NotNull String toParse) throws NumberFormatException {
         try {
             return Integer.parseInt(toParse);
         } catch (final @NotNull NumberFormatException ignored) {
         }
 
         int result = 0;
-        Set<String> used = Collections.emptySet();
+        final Set<String> used = Collections.emptySet();
         String[] buffer;
-        StringBuilder input = new StringBuilder(toParse);
+        final StringBuilder input = new StringBuilder(toParse);
         while (!input.isEmpty()) {
             buffer = input.toString().split("\\d+$");
             if (buffer.length < 2 || used.contains(buffer[1]))
@@ -86,7 +86,7 @@ public class Utils {
 
             buffer = input.toString().split("\\D+$");
             input.setLength(input.length() - buffer[1].length());
-            result += Integer.parseInt(buffer[1])*multiplier;
+            result += Integer.parseInt(buffer[1]) * multiplier;
         }
         return result;
     }

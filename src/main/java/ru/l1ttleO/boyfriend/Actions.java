@@ -77,12 +77,11 @@ public class Actions {
         if (existingBan != null)
             existingBan.interrupt();
         if (duration > 0) {
-            DelayedRunnable runnable = new DelayedRunnable(BANS_THREAD_GROUP, (DelayedRunnable dr) -> {
+            final DelayedRunnable runnable = new DelayedRunnable(BANS_THREAD_GROUP, (DelayedRunnable dr) -> {
                 if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                     return;
                 unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);
             }, "Ban timer " + banned.getId(), duration * 1000L, null);
-
             guildBans.put(banned.getIdLong(), runnable.thread);
             BANS.put(guild.getIdLong(), guildBans);
         }
@@ -102,7 +101,7 @@ public class Actions {
         if (existingMute != null)
             existingMute.interrupt();
         if (duration > 0) {
-            DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> {
+            final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> {
                 unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent);
             }, "Mute timer " + muted.getId(), duration * 1000L, null);
             guildMutes.put(muted.getIdLong(), runnable.thread);
