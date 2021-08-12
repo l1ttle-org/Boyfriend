@@ -76,20 +76,20 @@ public class Actions {
             existingBan.interrupt();
         if (duration > 0) {
             final Thread thread = new Thread(() -> {
-            try {
-                Thread.sleep(duration * 1000L);
-                if (banEntryReason == null)
-                    throw new ImprobableException("Причина бана является null");
-                if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
-                    return;
-                unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);
-            } catch (final InterruptedException ignored) {
-            }
-        }, "Ban timer " + banned.getId());
-        guildBans.put(banned.getIdLong(), thread);
-        BANS.put(guild.getIdLong(), guildBans);
-        thread.start();
-    }
+                try {
+                    Thread.sleep(duration * 1000L);
+                    if (banEntryReason == null)
+                        throw new ImprobableException("Причина бана является null");
+                    if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
+                        return;
+                    unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);
+                } catch (final InterruptedException ignored) {
+                }
+            }, "Ban timer " + banned.getId());
+            guildBans.put(banned.getIdLong(), thread);
+            BANS.put(guild.getIdLong(), guildBans);
+            thread.start();
+        }
         if (!silent)    
             channel.sendMessage(replyText).queue();
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
