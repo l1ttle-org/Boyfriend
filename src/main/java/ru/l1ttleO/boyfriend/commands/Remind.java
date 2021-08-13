@@ -67,10 +67,10 @@ public class Remind extends Command {
         text = Utils.wrap(StringUtils.join(args, ' ', 2, args.length));
         channel.sendMessage("Напоминание успешно установлено. Через %s будет отправлено данное сообщение: %s".formatted(Utils.getDurationText(duration, true), text)).queue();
 
-        final DelayedRunnable runnable = new DelayedRunnable(REMINDERS_THREAD_GROUP, (final DelayedRunnable dr) -> {
+        final DelayedRunnable runnable = new DelayedRunnable(REMINDERS_THREAD_GROUP, (final @NotNull DelayedRunnable dr) -> {
             channel.sendMessage(author.getAsMention() + " " + text).queue();
             REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>()).remove(dr);
-        }, "Remind timer " + author.getId(), duration * 1000L, (final DelayedRunnable dr) ->
+        }, "Remind timer " + author.getId(), duration * 1000L, (final @NotNull DelayedRunnable dr) ->
                 Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false));
         final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
         userReminders.put(runnable, Pair.of(text, channel.getIdLong()));

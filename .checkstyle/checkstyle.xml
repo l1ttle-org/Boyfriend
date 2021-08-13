@@ -84,7 +84,7 @@
 
         <!-- https://checkstyle.org/config_imports.html#IllegalImport -->
         <module name="IllegalImport">
-            <property name="illegalPkgs" value="sun, jdk, com.sun"/>
+            <property name="illegalPkgs" value="sun, jdk, com.sun, javax.annotation"/>
         </module>
 
         <!-- https://checkstyle.org/config_coding.html#IllegalTokenText -->

@@ -90,7 +90,7 @@ public class Utils {
         return result;
     }
 
-    public static String wrap(final @NotNull String text) {
+    public static @NotNull String wrap(final @NotNull String text) {
         return "```" + text.replaceAll("```", "​`​`​`​") + " ```";
     }
 }

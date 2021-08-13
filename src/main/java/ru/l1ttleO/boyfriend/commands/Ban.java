@@ -77,7 +77,7 @@ public class Ban extends Command {
             durationString = " " + Utils.getDurationText(duration, true);
             reasonIndex++;
         } else duration = 0; // extra check
-        if (args[reasonIndex].equals("-s")) {
+        if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;
         }
@@ -85,7 +85,7 @@ public class Ban extends Command {
         if (random.nextInt(101) == 100)
             channel.sendMessage("Я кастую бан!").queue();
         if (silent)
-            event.getMessage().delete().queue(); 
+            event.getMessage().delete().queue();
         Actions.banMember(channel, author, banned, reason, duration, durationString, silent);
     }
 }

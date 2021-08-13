@@ -53,7 +53,7 @@ public class Unmute extends Command {
         if (!author.hasPermission(Permission.MESSAGE_MANAGE))
             throw new NoPermissionException(false, false);
         unmuted = getMember(args[1], event.getGuild(), channel);
-        if (unmuted == null) 
+        if (unmuted == null)
             return;
         if (author == unmuted)
             throw new NoPermissionException("Ты не можешь выпустить самого себя из карцера!");
@@ -71,12 +71,12 @@ public class Unmute extends Command {
             channel.sendMessage("Участник не заглушен!").queue();
             return;
         }
-        if (args[reasonIndex].equals("-s")) {
+        if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;
         }
         if (silent)
-            event.getMessage().delete().queue(); 
+            event.getMessage().delete().queue();
         final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         Actions.unmuteMember(channel, role, author, unmuted, reason, silent);
     }

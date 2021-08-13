@@ -1,12 +1,12 @@
 package ru.l1ttleO.boyfriend;
 
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DelayedRunnable {
 
-    public final Thread thread;
+    public final @NotNull Thread thread;
     public final long duration;
     public final long startedAt;
 

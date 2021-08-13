@@ -83,12 +83,12 @@ public class Mute extends Command {
             durationString = " " + Utils.getDurationText(duration, true);
             reasonIndex++;
         } else duration = 0; // extra check
-        if (args[reasonIndex].equals("-s")) {
+        if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;
         }
         if (silent)
-            event.getMessage().delete().queue();  
+            event.getMessage().delete().queue();
         final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         Actions.muteMember(channel, role, author, muted, reason, duration, durationString, silent);
     }

@@ -61,12 +61,12 @@ public class Unban extends Command {
             channel.sendMessage("Пользователь не забанен!").queue();
             return;
         }
-        if (args[reasonIndex].equals("-s")) {
+        if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;
         }
         if (silent)
-            event.getMessage().delete().queue(); 
+            event.getMessage().delete().queue();
         final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         Actions.unbanMember(channel, author, unbanned, reason, silent);
     }

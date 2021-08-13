@@ -45,7 +45,7 @@ public class Kick extends Command {
             throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
             throw new InvalidAuthorException();
-        if (args[reasonIndex].equals("-s")) {
+        if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;
         }
@@ -59,7 +59,7 @@ public class Kick extends Command {
         if (!selfInteract || !authorInteract)
             throw new NoPermissionException(!selfInteract, !authorInteract);
         if (silent)
-            event.getMessage().delete().queue(); 
+            event.getMessage().delete().queue();
         Actions.kickMember(channel, author, kicked, reason, silent);
     }
 }
