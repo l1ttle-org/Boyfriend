@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.DelayedRunnable;
@@ -20,7 +21,7 @@ public class Remind extends Command {
     }
 
     public static final @NotNull ThreadGroup REMINDERS_THREAD_GROUP = new ThreadGroup("Reminders");
-    public static final @NotNull HashMap<Long, HashMap<DelayedRunnable, String>> REMINDERS = new HashMap<>();
+    public static final @NotNull HashMap<Long, HashMap<DelayedRunnable, Pair<String, Long>>> REMINDERS = new HashMap<>();
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, WrongUsageException {
         final int duration;
@@ -34,15 +35,15 @@ public class Remind extends Command {
             if (userReminders.isEmpty())
                 channel.sendMessage("Нет активных напоминаний").queue();
             else {
-                final StringBuilder listText = new StringBuilder("Активные напоминания:");
+                final StringBuilder listText = new StringBuilder("Активные напоминания:\n");
                 String append;
-                for (final Entry<DelayedRunnable, String> reminder : userReminders.entrySet()) {
+                for (final Entry<DelayedRunnable, Pair<String, Long>> reminder : userReminders.entrySet()) {
                     append = """
-                        \n
-                        <t:%s:R>
-                        %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, reminder.getValue());
+                        
+                        <t:%s:R> в <#%s>
+                        %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, reminder.getValue().getRight(), reminder.getValue().getLeft());
                     if (listText.isEmpty())
-                        append.strip();
+                        append = append.strip();
                     if (listText.length() + append.length() > 2000) {
                         channel.sendMessage(listText).queue();
                         listText.setLength(0); // clear
@@ -72,7 +73,7 @@ public class Remind extends Command {
         }, "Remind timer " + author.getId(), duration * 1000L, (final DelayedRunnable dr) ->
                 Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false));
         final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
-        userReminders.put(runnable, text);
+        userReminders.put(runnable, Pair.of(text,channel.getIdLong()));
         REMINDERS.put(author.getIdLong(), userReminders);
     }
 }

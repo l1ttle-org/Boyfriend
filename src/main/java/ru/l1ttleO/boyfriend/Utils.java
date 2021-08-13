@@ -1,8 +1,7 @@
 package ru.l1ttleO.boyfriend;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 
 public class Utils {
@@ -64,27 +63,27 @@ public class Utils {
         }
 
         int result = 0;
-        final Set<String> used = Collections.emptySet();
+        final HashSet<String> used = new HashSet<>();
         String[] buffer;
         final StringBuilder input = new StringBuilder(toParse);
         while (!input.isEmpty()) {
-            buffer = input.toString().split("\\d+$");
+            buffer = input.toString().split("\\d+(?=\\D+$)");
             if (buffer.length < 2 || used.contains(buffer[1]))
-                throw new NumberFormatException();
+                throw new NumberFormatException("Incorrect time format");
             used.add(buffer[1]);
             input.setLength(input.length() - buffer[1].length());
 
             int multiplier = 1;
             int i;
             for (i = 0; i < DURATION_TEXTS.length; i++) {
-                if (buffer[0].equals(DURATION_TEXTS[i][0]))
+                if (buffer[1].equals(DURATION_TEXTS[i][0]))
                     break;
                 multiplier *= DURATION_MULTIPLIERS[i];
             }
-            if (i == DURATION_TEXTS.length) // modifier not found
-                throw new NumberFormatException();
+            if (i == DURATION_TEXTS.length)
+                throw new NumberFormatException("Time multiplier \"%s not found\"".formatted(buffer[1]));
 
-            buffer = input.toString().split("\\D+$");
+            buffer = (" " + input.toString()).split("\\D+(?=\\d+$)");
             input.setLength(input.length() - buffer[1].length());
             result += Integer.parseInt(buffer[1]) * multiplier;
         }
