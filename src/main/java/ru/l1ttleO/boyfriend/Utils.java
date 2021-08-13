@@ -83,7 +83,7 @@ public class Utils {
             if (i == DURATION_TEXTS.length)
                 throw new NumberFormatException("Time multiplier \"%s not found\"".formatted(buffer[1]));
 
-            buffer = (" " + input.toString()).split("\\D+(?=\\d+$)");
+            buffer = (" " + input).split("\\D+(?=\\d+$)");
             input.setLength(input.length() - buffer[1].length());
             result += Integer.parseInt(buffer[1]) * multiplier;
         }
