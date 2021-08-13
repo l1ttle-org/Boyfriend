@@ -60,8 +60,8 @@ public class EventListener extends ListenerAdapter {
         if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) {
             if (logChannel == null)
                 throw new ImprobableException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
-            logChannel.sendMessage("Я получил следующее сообщение от %s:```%s ```"
-                .formatted(author.getAsMention(), message.getContentDisplay().replaceAll("```", "​`​`​`​"))).queue();
+            logChannel.sendMessage("Я получил следующее сообщение от %s: %s"
+                .formatted(author.getAsMention(), Utils.wrap(message.getContentDisplay()))).queue();
             return;
         }
         final Guild guild = event.getGuild();

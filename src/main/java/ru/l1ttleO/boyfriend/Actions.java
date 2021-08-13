@@ -17,6 +17,8 @@ import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 
 public class Actions {
 
+    public static final @NotNull ThreadGroup BANS_THREAD_GROUP = new ThreadGroup("Bans");
+    public static final @NotNull ThreadGroup MUTES_THREAD_GROUP = new ThreadGroup("Mutes");
     public static final @NotNull HashMap<Long, HashMap<Long, Thread>> BANS = new HashMap<>();
     public static final @NotNull HashMap<Long, HashMap<Long, Thread>> MUTES = new HashMap<>();
 
@@ -27,7 +29,7 @@ public class Actions {
         if (channel != null) {
             if (existingBan != null)
                 existingBan.interrupt();
-            if (!silent)    
+            if (!silent)
                 channel.sendMessage("Возвращён из бана %s за `%s`".formatted(unbanned.getAsMention(), reason)).queue();
         }
         sendNotification(guild, "%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason), silent);
@@ -68,29 +70,22 @@ public class Actions {
                                https://discord.gg/%s""".formatted(invites.get(0).getCode());
         }
         sendDirectMessage(banned, privateText);
-        guild.ban(banned, 0, "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason)).complete();
-        final String banEntryReason = guild.retrieveBan(banned).complete().getReason();
+        final String banEntryReason = "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason);
+        guild.ban(banned, 0, banEntryReason).complete();
         final HashMap<Long, Thread> guildBans = BANS.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingBan = guildBans.get(banned.getIdLong());
         if (existingBan != null)
             existingBan.interrupt();
         if (duration > 0) {
-            final Thread thread = new Thread(() -> {
-                try {
-                    Thread.sleep(duration * 1000L);
-                    if (banEntryReason == null)
-                        throw new ImprobableException("Причина бана является null");
-                    if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
-                        return;
-                    unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);
-                } catch (final InterruptedException ignored) {
-                }
-            }, "Ban timer " + banned.getId());
-            guildBans.put(banned.getIdLong(), thread);
+            final DelayedRunnable runnable = new DelayedRunnable(BANS_THREAD_GROUP, (DelayedRunnable dr) -> {
+                if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
+                    return;
+                unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);
+            }, "Ban timer " + banned.getId(), duration * 1000L, null);
+            guildBans.put(banned.getIdLong(), runnable.thread);
             BANS.put(guild.getIdLong(), guildBans);
-            thread.start();
         }
-        if (!silent)    
+        if (!silent)
             channel.sendMessage(replyText).queue();
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
     }
@@ -106,16 +101,10 @@ public class Actions {
         if (existingMute != null)
             existingMute.interrupt();
         if (duration > 0) {
-            final Thread thread = new Thread(() -> {
-                try {
-                    Thread.sleep(duration * 1000L);
-                    unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent);
-                } catch (final InterruptedException ignored) {
-                }
-            }, "Mute timer " + muted.getId());
-            guildMutes.put(muted.getIdLong(), thread);
+            final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent),
+                                                                 "Mute timer " + muted.getId(), duration * 1000L, null);
+            guildMutes.put(muted.getIdLong(), runnable.thread);
             MUTES.put(guild.getIdLong(), guildMutes);
-            thread.start();
         }
         if (!silent)
             channel.sendMessage(replyText).queue();

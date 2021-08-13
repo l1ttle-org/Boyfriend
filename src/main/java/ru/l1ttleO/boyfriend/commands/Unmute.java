@@ -47,16 +47,16 @@ public class Unmute extends Command {
         final MessageChannel channel = event.getChannel();
         int reasonIndex = 2;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.MESSAGE_MANAGE))
-            throw new NoPermissionException(channel, false, false);
+            throw new NoPermissionException(false, false);
         unmuted = getMember(args[1], event.getGuild(), channel);
         if (unmuted == null) 
             return;
         if (author == unmuted)
-            throw new WrongUsageException("Ты не можешь выпустить самого себя из карцера!", channel, this.getUsages());    
+            throw new NoPermissionException("Ты не можешь выпустить самого себя из карцера!");
         List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);

@@ -1,5 +1,6 @@
 package ru.l1ttleO.boyfriend;
 
+import java.util.HashSet;
 import java.util.Random;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,16 +56,41 @@ public class Utils {
         return out.toString();
     }
 
-    public static int getDurationMultiplied(final @NotNull String toParse) {
+    public static int getDurationMultiplied(final @NotNull String toParse) throws NumberFormatException {
         try {
-            int multiplier = 1;
-            for (int i = 0; i < DURATION_TEXTS.length; i++) {
-                if (toParse.endsWith(DURATION_TEXTS[i][0])) return multiplier * Integer.parseInt(toParse.substring(0, toParse.length() - 1));
-                multiplier *= DURATION_MULTIPLIERS[i];
-            }
             return Integer.parseInt(toParse);
         } catch (final @NotNull NumberFormatException ignored) {
-            return 0;
         }
+
+        int result = 0;
+        final HashSet<String> used = new HashSet<>();
+        String[] buffer;
+        final StringBuilder input = new StringBuilder(toParse);
+        while (!input.isEmpty()) {
+            buffer = input.toString().split("\\d+(?=\\D+$)");
+            if (buffer.length < 2 || used.contains(buffer[1]))
+                throw new NumberFormatException("Incorrect time format");
+            used.add(buffer[1]);
+            input.setLength(input.length() - buffer[1].length());
+
+            int multiplier = 1;
+            int i;
+            for (i = 0; i < DURATION_TEXTS.length; i++) {
+                if (buffer[1].equals(DURATION_TEXTS[i][0]))
+                    break;
+                multiplier *= DURATION_MULTIPLIERS[i];
+            }
+            if (i == DURATION_TEXTS.length)
+                throw new NumberFormatException("Time multiplier \"%s not found\"".formatted(buffer[1]));
+
+            buffer = (" " + input).split("\\D+(?=\\d+$)");
+            input.setLength(input.length() - buffer[1].length());
+            result += Integer.parseInt(buffer[1]) * multiplier;
+        }
+        return result;
+    }
+
+    public static String wrap(final @NotNull String text) {
+        return "```" + text.replaceAll("```", "​`​`​`​") + " ```";
     }
 }

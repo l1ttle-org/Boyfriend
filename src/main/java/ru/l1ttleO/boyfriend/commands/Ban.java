@@ -49,26 +49,30 @@ public class Ban extends Command {
         final String reason;
         final User banned;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
+            throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
-            throw new NoPermissionException(channel, false, false);
+            throw new NoPermissionException(false, false);
         banned = getUser(args[1], event.getJDA(), channel);
         if (banned == null)
             return;
         try {
-            if (!author.canInteract(guild.retrieveMember(banned).complete()))
-                throw new NoPermissionException(channel, false, true);
-            if (!guild.getSelfMember().canInteract(guild.retrieveMember(banned).complete()))
-                throw new NoPermissionException(channel, true, true);
+            final boolean selfInteract = guild.getSelfMember().canInteract(guild.retrieveMember(banned).complete());
+            final boolean authorInteract = author.canInteract(guild.retrieveMember(banned).complete());
+            if (!selfInteract || !authorInteract)
+                throw new NoPermissionException(!selfInteract, !authorInteract);
         } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
-        int duration = Utils.getDurationMultiplied(args[2]);
+        int duration = 0;
+        try {
+            duration = Utils.getDurationMultiplied(args[2]);
+        } catch (final @NotNull NumberFormatException ignored) {
+        }
         int reasonIndex = 2;
         String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4) {
-                throw new WrongUsageException("Требуется указать причину!", channel, this.getUsages());
+                throw new WrongUsageException("Требуется указать причину!");
             }
             durationString = " " + Utils.getDurationText(duration, true);
             reasonIndex++;
