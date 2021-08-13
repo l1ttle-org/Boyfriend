@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class DelayedRunnable {
 
-    final public Thread thread;
-    final public long duration;
-    final public long startedAt;
+    public final Thread thread;
+    public final long duration;
+    public final long startedAt;
 
     public DelayedRunnable(final @Nullable ThreadGroup threadGroup, final @NotNull Consumer<DelayedRunnable> runnable, final @Nullable String name, final @NotNull long millis, final @Nullable Consumer<DelayedRunnable> ifInterrupted) {
         this.duration = millis;
