@@ -10,7 +10,7 @@ public class DelayedRunnable {
     public final long duration;
     public final long startedAt;
 
-    public DelayedRunnable(final @Nullable ThreadGroup threadGroup, final @NotNull Consumer<DelayedRunnable> runnable, final @Nullable String name, final @NotNull long millis, final @Nullable Consumer<DelayedRunnable> ifInterrupted) {
+    public DelayedRunnable(@Nullable final ThreadGroup threadGroup, final @NotNull Consumer<DelayedRunnable> runnable, @Nullable final String name, final long millis, @Nullable final Consumer<DelayedRunnable> ifInterrupted) {
         this.duration = millis;
         final Runnable internalRunnable = () -> {
             try {

@@ -75,8 +75,8 @@ public class Utils {
             input.setLength(input.length() - buffer[1].length());
 
             int multiplier = 1;
-            int i = 0;
-            for (; i < DURATION_TEXTS.length; i++) {
+            int i;
+            for (i = 0; i < DURATION_TEXTS.length; i++) {
                 if (buffer[0].equals(DURATION_TEXTS[i][0]))
                     break;
                 multiplier *= DURATION_MULTIPLIERS[i];

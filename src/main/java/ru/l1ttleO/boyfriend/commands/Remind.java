@@ -27,6 +27,8 @@ public class Remind extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final String text;
+        if (author == null)
+            throw new InvalidAuthorException();
         if (args.length < 2) {
             final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
             if (userReminders.isEmpty())
@@ -45,7 +47,7 @@ public class Remind extends Command {
                         channel.sendMessage(listText).queue();
                         listText.setLength(0); // clear
                         if (append.length() > 2000)
-                            append = append.substring(0, 1994) + "..." + append.substring(append.length() - 3, append.length());
+                            append = append.substring(0, 1994) + "..." + append.substring(append.length() - 3);
                     }
                     listText.append(append);
                 }
@@ -54,8 +56,6 @@ public class Remind extends Command {
             return;
         } else if (args.length < 3)
             throw new WrongUsageException("Требуется указать текст напоминания!");
-        if (author == null)
-            throw new InvalidAuthorException();
         try {
             duration = Utils.getDurationMultiplied(args[1]);
         } catch (final @NotNull NumberFormatException e) {
@@ -69,9 +69,8 @@ public class Remind extends Command {
         final DelayedRunnable runnable = new DelayedRunnable(REMINDERS_THREAD_GROUP, (final DelayedRunnable dr) -> {
             channel.sendMessage(author.getAsMention() + " " + text).queue();
             REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>()).remove(dr);
-        }, "Remind timer " + author.getId(), duration * 1000L, (final DelayedRunnable dr) -> {
-            Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false);
-        });
+        }, "Remind timer " + author.getId(), duration * 1000L, (final DelayedRunnable dr) ->
+         Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false));
         final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
         userReminders.put(runnable, text);
         REMINDERS.put(author.getIdLong(), userReminders);
