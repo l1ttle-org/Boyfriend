@@ -101,9 +101,8 @@ public class Actions {
         if (existingMute != null)
             existingMute.interrupt();
         if (duration > 0) {
-            final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> {
-                unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent);
-            }, "Mute timer " + muted.getId(), duration * 1000L, null);
+            final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent),
+                                                                 "Mute timer " + muted.getId(), duration * 1000L, null);
             guildMutes.put(muted.getIdLong(), runnable.thread);
             MUTES.put(guild.getIdLong(), guildMutes);
         }
