@@ -73,7 +73,7 @@ public class Remind extends Command {
         }, "Remind timer " + author.getId(), duration * 1000L, (final DelayedRunnable dr) ->
                 Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false));
         final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
-        userReminders.put(runnable, Pair.of(text,channel.getIdLong()));
+        userReminders.put(runnable, Pair.of(text, channel.getIdLong()));
         REMINDERS.put(author.getIdLong(), userReminders);
     }
 }
