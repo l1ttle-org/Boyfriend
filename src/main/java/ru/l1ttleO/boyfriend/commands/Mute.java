@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
+import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -42,7 +43,7 @@ public class Mute extends Command {
 
     public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException {
         boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
@@ -82,7 +83,8 @@ public class Mute extends Command {
                 throw new WrongUsageException("Требуется указать причину!");
             durationString = " " + Utils.getDurationText(duration, true);
             reasonIndex++;
-        } else duration = 0; // extra check
+        } else if (duration < 0)
+            throw new IntegerOverflowException();
         if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;

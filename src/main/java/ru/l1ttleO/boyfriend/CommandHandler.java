@@ -63,7 +63,7 @@ public class CommandHandler {
         } catch (final @NotNull NoPermissionException e) {
             channel.sendMessage(e.getMessage()).queue();
         } catch (final @NotNull Exception e) {
-            channel.sendMessage("Идентификатор ошибки: `" + e + "`").queue();
+            channel.sendMessage("Произошла фатальная ошибка во время выполнения команды: `" + e + "`").queue();
             e.printStackTrace();
         }
     }

@@ -11,19 +11,20 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.DelayedRunnable;
 import ru.l1ttleO.boyfriend.Utils;
+import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Remind extends Command {
 
     public Remind() {
-        super("remind", "Создаёт напоминание", "remind", "remind <время напоминания> <текст напоминания>");
+        super("remind", "Создаёт напоминание", "remind", "remind <время напоминания, не больше 2147483647> <текст напоминания>");
     }
 
     public static final @NotNull ThreadGroup REMINDERS_THREAD_GROUP = new ThreadGroup("Reminders");
     public static final @NotNull HashMap<Long, HashMap<DelayedRunnable, Pair<String, Long>>> REMINDERS = new HashMap<>();
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, WrongUsageException {
         final int duration;
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
@@ -39,7 +40,7 @@ public class Remind extends Command {
                 String append;
                 for (final Entry<DelayedRunnable, Pair<String, Long>> reminder : userReminders.entrySet()) {
                     append = """
-                        
+
                         <t:%s:R> в <#%s>
                         %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, reminder.getValue().getRight(), reminder.getValue().getLeft());
                     if (listText.isEmpty())
@@ -62,8 +63,9 @@ public class Remind extends Command {
         } catch (final @NotNull NumberFormatException e) {
             throw new WrongUsageException("Неверно указана продолжительность!");
         }
-        if (duration < 1)
-            throw new WrongUsageException("Длительность должна быть больше нуля!");
+        if (duration < 0) {
+            throw new IntegerOverflowException();
+        }
         text = Utils.wrap(StringUtils.join(args, ' ', 2, args.length));
         channel.sendMessage("Напоминание успешно установлено. Через %s будет отправлено данное сообщение: %s".formatted(Utils.getDurationText(duration, true), text)).queue();
 
