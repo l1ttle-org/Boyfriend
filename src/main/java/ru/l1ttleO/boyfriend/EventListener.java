@@ -55,8 +55,6 @@ public class EventListener extends ListenerAdapter {
         final MessageChannel channel = event.getChannel();
         final TextChannel logChannel = jda.getTextChannelById("860066351430238248");
         final User author = event.getAuthor();
-        if (message.mentionsEveryone())
-            return;
         if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) {
             if (logChannel == null)
                 throw new ImprobableException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
@@ -65,15 +63,17 @@ public class EventListener extends ListenerAdapter {
             return;
         }
         final Guild guild = event.getGuild();
-        if (message.getMentionedMembers().size() > 3 && !author.isBot()) {
+        if (message.getMentionedMembers().size() > 3 && !author.isBot() && guild.getSelfMember().canInteract(event.getMember())) {
             try {
                 Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда", false);
             } catch (final @NotNull Exception e) {
-                channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: " + e.getMessage()).queue();
+                channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: `" + e + "`").queue();
                 e.printStackTrace();
             }
             return;
         }
+        if (message.mentionsEveryone())
+            return;
         try {
             CommandHandler.onMessageReceived(event);
         } catch (final @NotNull WrongUsageException ignored) {

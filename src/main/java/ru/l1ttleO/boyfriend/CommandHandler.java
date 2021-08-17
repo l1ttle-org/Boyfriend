@@ -63,7 +63,7 @@ public class CommandHandler {
         } catch (final @NotNull NoPermissionException e) {
             channel.sendMessage(e.getMessage()).queue();
         } catch (final @NotNull Exception e) {
-            channel.sendMessage("Произошла фатальная ошибка во время выполнения команды: `" + e + "`").queue();
+            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команды: `" + e + "`").queue();
             e.printStackTrace();
         }
     }
