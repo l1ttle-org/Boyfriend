@@ -5,15 +5,15 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
-import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 
 public class Utils {
@@ -39,6 +39,7 @@ public class Utils {
     }
 
     public static final LinkedHashMap<@NotNull Integer, Pair<@NotNull String, @NotNull String[]>> DURATION_TYPES = new LinkedHashMap<>();
+    
     static {
         DURATION_TYPES.put(Calendar.YEAR, Pair.of("y", new String[]{"год", "год", "года", "лет"}));
         DURATION_TYPES.put(Calendar.MONTH, Pair.of("M", new String[]{"месяц", "месяц", "месяца", "месяцев"}));
@@ -48,6 +49,7 @@ public class Utils {
         DURATION_TYPES.put(Calendar.MINUTE, Pair.of("m", new String[]{"минута", "минуту", "минуты", "минут"}));
         DURATION_TYPES.put(Calendar.SECOND, Pair.of("s", new String[]{"секунда", "секунду", "секунды", "секунд"}));
     }
+    
     public static final int[] CHECK_ORDER = {Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_YEAR,
         Calendar.SECOND, Calendar.MINUTE, Calendar.HOUR_OF_DAY};
 
@@ -55,20 +57,21 @@ public class Utils {
         if (from == 0)
             from = System.currentTimeMillis();
         final LinkedHashMap<Integer, Integer> durations = new LinkedHashMap<>();
-        boolean negative = millis < 0;
+        final boolean negative = millis < 0;
         if (negative)
             millis *= -1;
 
         // magic
-        int millisOfTheDay = (int) (millis%(1000*60*60*24));
+        int millisOfTheDay = (int) (millis % (1000 * 60 * 60 * 24));
         millis -= millisOfTheDay;
         final GregorianCalendar dateFrom = new GregorianCalendar();
         dateFrom.setTimeInMillis(negative ? from - millis : from);
         final GregorianCalendar dateTo = new GregorianCalendar();
         dateTo.setTimeInMillis(negative ? from : from + millis);
-        millisOfTheDay = Math.round(((float)millisOfTheDay) / 1000);
+        millisOfTheDay = Math.round(((float) millisOfTheDay) / 1000);
         for (final int unit : CHECK_ORDER) {
-            int amount, max;
+            int amount;
+            final int max;
             if (unit >= Calendar.HOUR_OF_DAY) {
                 max = dateFrom.getMaximum(unit) + 1;
                 amount = millisOfTheDay % max;
@@ -84,7 +87,7 @@ public class Utils {
                         amount = dateTo.get(Calendar.MONTH) - dateFrom.get(Calendar.MONTH);
                         if (amount < 0) {
                             amount += 12;
-                            durations.put(Calendar.YEAR, durations.get(Calendar.YEAR)-1);
+                            durations.put(Calendar.YEAR, durations.get(Calendar.YEAR) - 1);
                         }
                         break;
                     default: // DAY_OF_YEAR
@@ -137,10 +140,10 @@ public class Utils {
 
     /**
      * Converts the string representation of the duration to milliseconds.
+     * 
      * @param duration string to parse. If plain number, treated as seconds. Can be in Discord time format.
      * @param from timestamp used to calculate months & etc. properly. If 0, current timestamp is used.
      * @return milliseconds
-     * @throws NumberFormatException
      */
     public static long parseDuration(final @NotNull String duration, long from) throws NumberFormatException {
         if (from == 0)
