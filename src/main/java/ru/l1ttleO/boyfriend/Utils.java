@@ -140,7 +140,7 @@ public class Utils {
 
     /**
      * Converts the string representation of the duration to milliseconds.
-     * 
+
      * @param duration string to parse. If plain number, treated as seconds. Can be in Discord time format.
      * @param from timestamp used to calculate months & etc. properly. If 0, current timestamp is used.
      * @return milliseconds
