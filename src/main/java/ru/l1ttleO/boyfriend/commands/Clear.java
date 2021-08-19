@@ -57,6 +57,6 @@ public class Clear extends Command {
         final int amount = messages.size();
         final String plural = Utils.plural(amount, "сообщение", "сообщения", "сообщений");
         channel.purgeMessages(messages);
-        Actions.sendNotification(event.getGuild(), "%s удаляет %s %s в канале <#%s>".formatted(event.getAuthor().getAsMention(), amount, plural, channel.getId()), false);
+        Actions.sendNotification(event.getGuild(), "%s удаляет %s %s в канале <#%s>".formatted(event.getAuthor().getAsMention(), amount, plural, channel.getId()), true);
     }
 }
