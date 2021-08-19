@@ -122,7 +122,7 @@ public class Utils {
         String[] names;
         for (final var entry : durations.entrySet()) {
             names = DURATION_TYPES.get(entry.getKey()).getRight();
-            out.append((negative ? "-" : "") + entry.getValue() + " " + plural(entry.getValue(), names[accusative ? 1 : 0], names[2], names[3]));
+            out.append((negative && entry.getValue() > 0 ? "-" : "") + entry.getValue() + " " + plural(entry.getValue(), names[accusative ? 1 : 0], names[2], names[3]));
             if (i < durations.size() - 2) {
                 out.append(", ");
             } else if (i == durations.size() - 2) {

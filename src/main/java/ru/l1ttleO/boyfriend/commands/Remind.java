@@ -64,7 +64,7 @@ public class Remind extends Command {
             throw new WrongUsageException("Неверно указана продолжительность!");
         }
         if (duration <= 0) {
-            throw new WrongUsageException("Продолжительность должна быть положительной!");
+            throw new WrongUsageException("Продолжительность должна быть положительной и не огромной!");
         }
         text = Utils.wrap(StringUtils.join(args, ' ', 2, args.length));
         channel.sendMessage("Напоминание успешно установлено. Через %s будет отправлено данное сообщение: %s".formatted(Utils.getDurationText(duration, 0, true), text)).queue();
