@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -52,7 +53,7 @@ public class Unmute extends Command {
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.MESSAGE_MANAGE))
             throw new NoPermissionException(false, false);
-        unmuted = getMember(args[1], event.getGuild(), channel);
+        unmuted = Utils.getMember(args[1], event.getGuild(), channel);
         if (unmuted == null)
             return;
         if (author == unmuted)

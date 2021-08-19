@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -39,7 +40,7 @@ public class Kick extends Command {
         boolean silent = false;
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
-        final Member kicked = getMember(args[1], event.getGuild(), channel);
+        final Member kicked = Utils.getMember(args[1], event.getGuild(), channel);
         int reasonIndex = 2;
         if (args.length < 3)
             throw new WrongUsageException("Требуется указать причину!");

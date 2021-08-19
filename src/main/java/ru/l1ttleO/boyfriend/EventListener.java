@@ -37,7 +37,7 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final @NotNull ReadyEvent event) {
-        Actions.getBotLogChannel(event.getJDA()).sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
+        Utils.getBotLogChannel(event.getJDA()).sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
     }
 
     @Override

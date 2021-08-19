@@ -2,7 +2,6 @@ package ru.l1ttleO.boyfriend;
 
 import java.util.HashMap;
 import java.util.List;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,7 +12,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 
 public class Actions {
 
@@ -51,7 +49,7 @@ public class Actions {
         sendNotification(guild, "%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason), silent);
     }
 
-    public static void banMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull User banned, final String reason, final int duration, final String durationString, final boolean silent) {
+    public static void banMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull User banned, final String reason, final long duration, final String durationString, final boolean silent) {
         final Guild guild = author.getGuild();
         String privateText = "Тебя забанил %s на%s за `%s`.".formatted(author.getAsMention(), durationString, reason);
         String replyText;
@@ -81,7 +79,7 @@ public class Actions {
                 if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                     return;
                 unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);
-            }, "Ban timer " + banned.getId(), duration * 1000L, null);
+            }, "Ban timer " + banned.getId(), duration, null);
             guildBans.put(banned.getIdLong(), runnable.thread);
             BANS.put(guild.getIdLong(), guildBans);
         }
@@ -90,7 +88,7 @@ public class Actions {
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
     }
 
-    public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final int duration, final String durationString, final boolean silent) {
+    public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString, final boolean silent) {
         final Guild guild = author.getGuild();
         final String replyText = muted.getRoles().contains(role) ?
             "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :
@@ -102,7 +100,7 @@ public class Actions {
             existingMute.interrupt();
         if (duration > 0) {
             final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent),
-                                                                 "Mute timer " + muted.getId(), duration * 1000L, null);
+                                                                 "Mute timer " + muted.getId(), duration, null);
             guildMutes.put(muted.getIdLong(), runnable.thread);
             MUTES.put(guild.getIdLong(), guildMutes);
         }
@@ -123,13 +121,6 @@ public class Actions {
                 channel.sendMessage("Выпущен из карцера %s за `%s`".formatted(unmuted.getAsMention(), reason)).queue();
         }
         sendNotification(guild, "%s выпускает из карцера %s: `%s`".formatted(author.getAsMention(), unmuted.getAsMention(), reason), silent);
-    }
-
-    public static @NotNull MessageChannel getBotLogChannel(final @NotNull JDA jda) {
-        final MessageChannel botLogChannel = jda.getTextChannelById("618044439939645444");
-        if (botLogChannel == null)
-            throw new ImprobableException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
-        return botLogChannel;
     }
 
     public static void sendNotification(final @NotNull Guild guild, final @NotNull String text, final boolean silent) {

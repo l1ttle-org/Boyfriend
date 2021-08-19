@@ -55,7 +55,7 @@ public class Ban extends Command {
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
             throw new NoPermissionException(false, false);
-        banned = getUser(args[1], event.getJDA(), channel);
+        banned = Utils.getUser(args[1], event.getJDA(), channel);
         if (banned == null)
             return;
         try {
@@ -64,9 +64,9 @@ public class Ban extends Command {
             if (!selfInteract || !authorInteract)
                 throw new NoPermissionException(!selfInteract, !authorInteract);
         } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
-        int duration = 0;
+        long duration = 0;
         try {
-            duration = Utils.getDurationMultiplied(args[2]);
+            duration = Utils.parseDuration(args[2], 0);
         } catch (final @NotNull NumberFormatException ignored) {
         }
         int reasonIndex = 2;
@@ -75,10 +75,9 @@ public class Ban extends Command {
             if (args.length < 4) {
                 throw new WrongUsageException("Требуется указать причину!");
             }
-            durationString = " " + Utils.getDurationText(duration, true);
+            durationString = " " + Utils.getDurationText(duration, 0, true);
             reasonIndex++;
-        } else if (duration < 0)
-            throw new IntegerOverflowException();
+        }
         if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;

@@ -48,7 +48,7 @@ public class Mute extends Command {
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
-        final Member muted = getMember(args[1], event.getGuild(), channel);
+        final Member muted = Utils.getMember(args[1], event.getGuild(), channel);
         if (args.length < 3)
             throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
@@ -71,9 +71,9 @@ public class Mute extends Command {
             return;
         }
         final Role role = roleList.get(0);
-        int duration = 0;
+        long duration = 0;
         try {
-            duration = Utils.getDurationMultiplied(args[2]);
+            duration = Utils.parseDuration(args[2], 0);
         } catch (final @NotNull NumberFormatException ignored) {
         }
         int reasonIndex = 2;
@@ -81,7 +81,7 @@ public class Mute extends Command {
         if (duration > 0) {
             if (args.length < 4)
                 throw new WrongUsageException("Требуется указать причину!");
-            durationString = " " + Utils.getDurationText(duration, true);
+            durationString = " " + Utils.getDurationText(duration, 0, true);
             reasonIndex++;
         } else if (duration < 0)
             throw new IntegerOverflowException();
