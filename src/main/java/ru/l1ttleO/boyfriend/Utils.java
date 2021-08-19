@@ -194,9 +194,9 @@ public class Utils {
                 user = jda.retrieveUserById(id).complete();
             if (guild != null)
                 member = guild.retrieveMemberById(id).complete();
-        } catch (final @NotNull IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             channel.sendMessage("Неправильно указан пользователь!").queue();
-        } catch (final @NotNull ErrorResponseException e) {
+        } catch (final ErrorResponseException e) {
             channel.sendMessage("Указан недействительный пользователь!").queue();
         }
         return Pair.of(user, member);
