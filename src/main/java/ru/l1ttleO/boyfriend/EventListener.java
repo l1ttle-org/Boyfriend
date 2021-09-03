@@ -40,10 +40,10 @@ public class EventListener extends ListenerAdapter {
     public void onReady(final @NotNull ReadyEvent event) {
         Actions.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep() + " Я запустился").queue();
         final JDA jda = event.getJDA();
-        Guild g = jda.getGuildById("562979429593120778");
+        final Guild g = jda.getGuildById("562979429593120778");
         if (g == null)
             return;
-        Member m = g.getSelfMember();
+        final Member m = g.getSelfMember();
         if (m.getNickname() != null) {
             jda.retrieveUserById("196160375593369600").complete().openPrivateChannel().complete().sendMessage("Ахуел блять?").queue();
             m.modifyNickname(null).queue();
