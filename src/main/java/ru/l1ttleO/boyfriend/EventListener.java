@@ -21,6 +21,7 @@ package ru.l1ttleO.boyfriend;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -37,7 +38,16 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final @NotNull ReadyEvent event) {
-        Actions.getBotLogChannel(event.getJDA()).sendMessage("%s Я запустился".formatted(Utils.getBeep())).queue();
+        Actions.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep() + " Я запустился").queue();
+        final JDA jda = event.getJDA();
+        Guild g = jda.getGuildById("562979429593120778");
+        if (g == null)
+            return;
+        Member m = g.getSelfMember();
+        if (m.getNickname() != null) {
+            jda.retrieveUserById("196160375593369600").complete().openPrivateChannel().complete().sendMessage("Ахуел блять?").queue();
+            m.modifyNickname(null).queue();
+        }
     }
 
     @Override
@@ -63,7 +73,7 @@ public class EventListener extends ListenerAdapter {
             return;
         }
         final Guild guild = event.getGuild();
-        if (message.getMentionedMembers().size() > 3 && !author.isBot() && guild.getSelfMember().canInteract(event.getMember())) {
+        if (message.getMentionedMembers().size() > 3 && !author.isBot() && event.getMember() != null && guild.getSelfMember().canInteract(event.getMember())) {
             try {
                 Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда", false);
             } catch (final @NotNull Exception e) {

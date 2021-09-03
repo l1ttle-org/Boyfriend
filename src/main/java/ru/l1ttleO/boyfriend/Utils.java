@@ -58,7 +58,7 @@ public class Utils {
 
     public static int getDurationMultiplied(final @NotNull String toParse) throws NumberFormatException {
         try {
-            return Integer.parseInt(toParse) < 0 ? 0 : Integer.parseInt(toParse);
+            return Math.max(Integer.parseInt(toParse), 0);
         } catch (final @NotNull NumberFormatException ignored) {
         }
 
