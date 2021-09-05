@@ -90,9 +90,11 @@ public class Actions {
 
     public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString, final boolean silent) {
         final Guild guild = author.getGuild();
-        final String replyText = muted.getRoles().contains(role) ?
-            "Теперь %s заглушен на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :
-            "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason);
+        final boolean remute = muted.getRoles().contains(role);
+        final String replyText = (remute ? "Теперь %s заглушен на%s за `%s`" :
+            "Заглушен %s на%s за `%s`").formatted(muted.getAsMention(), durationString, reason);
+        final String notificationText = (remute ? "%s меняет длительность заключения %s на%s за `%s`" :
+            "%s глушит %s на%s за `%s`").formatted(author.getAsMention(), muted.getAsMention(), durationString, reason);
         guild.addRoleToMember(muted, role).queue();
         final HashMap<Long, Thread> guildMutes = MUTES.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingMute = guildMutes.get(muted.getIdLong());
@@ -106,7 +108,7 @@ public class Actions {
         }
         if (!silent)
             channel.sendMessage(replyText).queue();
-        sendNotification(guild, "%s глушит %s на%s за `%s`".formatted(author.getAsMention(), muted.getAsMention(), durationString, reason), silent);
+        sendNotification(guild, notificationText, silent);
     }
 
     public static void unmuteMember(final @Nullable MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member unmuted, final String reason, final boolean silent) {
