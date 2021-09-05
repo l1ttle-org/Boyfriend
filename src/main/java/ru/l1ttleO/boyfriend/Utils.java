@@ -34,14 +34,14 @@ public class Utils {
         return "Б%sп!".formatted(randomElement(letters));
     }
 
-    public static <T> T plural(long amount, final T one, final T two_to_four, final T five_to_zero) {
+    public static <T> T plural(long amount, final T one, final T twoToFour, final T fiveToZero) {
         if (amount < 0)
             amount *= -1;
         if (amount % 10 == 0 || amount % 10 > 4 || amount % 100 / 10 == 1)
-            return five_to_zero;
+            return fiveToZero;
         if (amount % 10 == 1)
             return one;
-        return two_to_four;
+        return twoToFour;
     }
 
     public static final LinkedHashMap<@NotNull ChronoField, Pair<@NotNull String, @NotNull String[]>> DURATION_TYPES = new LinkedHashMap<>();
@@ -123,7 +123,7 @@ public class Utils {
         String[] names;
         for (final var entry : durations.entrySet()) {
             names = DURATION_TYPES.get(entry.getKey()).getRight();
-            out.append((negative && entry.getValue() > 0 ? "-" : "") + entry.getValue() + " " + plural(entry.getValue(), names[accusative ? 1 : 0], names[2], names[3]));
+            out.append(negative && entry.getValue() > 0 ? "-" : "").append(entry.getValue()).append(" ").append(plural(entry.getValue(), names[accusative ? 1 : 0], names[2], names[3]));
             if (i < durations.size() - 2) {
                 out.append(", ");
             } else if (i == durations.size() - 2) {
