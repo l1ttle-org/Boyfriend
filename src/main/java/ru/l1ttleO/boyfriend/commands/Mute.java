@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -43,12 +42,12 @@ public class Mute extends Command {
 
     public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
-        final Member muted = getMember(args[1], event.getGuild(), channel);
+        final Member muted = Utils.getMember(args[1], event.getGuild(), channel);
         if (args.length < 3)
             throw new WrongUsageException("Требуется указать причину!");
         if (author == null)
@@ -57,10 +56,7 @@ public class Mute extends Command {
             throw new NoPermissionException(false, false);
         if (muted == null)
             return;
-        final boolean selfInteract = guild.getSelfMember().canInteract(muted);
-        final boolean authorInteract = author.canInteract(muted);
-        if (!selfInteract || !authorInteract)
-            throw new NoPermissionException(!selfInteract, !authorInteract);
+        Utils.checkInteractions(guild, author, muted);
         List<Role> roleList = new ArrayList<>();
         for (final String name : ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);
@@ -71,20 +67,18 @@ public class Mute extends Command {
             return;
         }
         final Role role = roleList.get(0);
-        int duration = 0;
+        long duration = 0;
         try {
-            duration = Utils.getDurationMultiplied(args[2]);
-        } catch (final @NotNull NumberFormatException ignored) {
+            duration = Math.max(Utils.parseDuration(args[2], 0), 0);
+        } catch (final @NotNull NumberFormatException | ArithmeticException ignored) {
         }
         int reasonIndex = 2;
-        String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4)
                 throw new WrongUsageException("Требуется указать причину!");
-            durationString = " " + Utils.getDurationText(duration, true);
             reasonIndex++;
-        } else if (duration < 0)
-            throw new IntegerOverflowException();
+        } else duration = 3600_000;
+        final String durationString = " " + Utils.getDurationText(duration, 0, true);
         if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;

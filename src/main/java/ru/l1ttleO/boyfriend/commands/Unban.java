@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -53,7 +54,7 @@ public class Unban extends Command {
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
             throw new NoPermissionException(false, false);
-        unbanned = getUser(args[1], jda, channel);
+        unbanned = Utils.getUser(args[1], jda, channel);
         if (unbanned == null) return;
         try {
             guild.retrieveBan(unbanned).complete();

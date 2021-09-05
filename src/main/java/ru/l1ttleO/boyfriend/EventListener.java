@@ -38,7 +38,7 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final @NotNull ReadyEvent event) {
-        Actions.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep() + " Я запустился").queue();
+        Utils.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep() + " Я запустился").queue();
         final JDA jda = event.getJDA();
         final Guild g = jda.getGuildById("562979429593120778");
         if (g == null)

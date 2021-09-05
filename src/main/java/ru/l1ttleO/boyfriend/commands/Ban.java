@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -41,7 +40,7 @@ public class Ban extends Command {
         super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] [-s] <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
@@ -55,19 +54,16 @@ public class Ban extends Command {
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
             throw new NoPermissionException(false, false);
-        banned = getUser(args[1], event.getJDA(), channel);
+        banned = Utils.getUser(args[1], event.getJDA(), channel);
         if (banned == null)
             return;
         try {
-            final boolean selfInteract = guild.getSelfMember().canInteract(guild.retrieveMember(banned).complete());
-            final boolean authorInteract = author.canInteract(guild.retrieveMember(banned).complete());
-            if (!selfInteract || !authorInteract)
-                throw new NoPermissionException(!selfInteract, !authorInteract);
+            Utils.checkInteractions(guild, author, guild.retrieveMember(banned).complete());
         } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
-        int duration = 0;
+        long duration = 0;
         try {
-            duration = Utils.getDurationMultiplied(args[2]);
-        } catch (final @NotNull NumberFormatException ignored) {
+            duration = Math.max(Utils.parseDuration(args[2], 0), 0);
+        } catch (final @NotNull NumberFormatException | ArithmeticException ignored) {
         }
         int reasonIndex = 2;
         String durationString = "всегда";
@@ -75,10 +71,9 @@ public class Ban extends Command {
             if (args.length < 4) {
                 throw new WrongUsageException("Требуется указать причину!");
             }
-            durationString = " " + Utils.getDurationText(duration, true);
+            durationString = " " + Utils.getDurationText(duration, 0, true);
             reasonIndex++;
-        } else if (duration < 0)
-            throw new IntegerOverflowException();
+        }
         if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;
