@@ -32,7 +32,6 @@ import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
-import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Ban extends Command {
@@ -59,15 +58,12 @@ public class Ban extends Command {
         if (banned == null)
             return;
         try {
-            final boolean selfInteract = guild.getSelfMember().canInteract(guild.retrieveMember(banned).complete());
-            final boolean authorInteract = author.canInteract(guild.retrieveMember(banned).complete());
-            if (!selfInteract || !authorInteract)
-                throw new NoPermissionException(!selfInteract, !authorInteract);
+            Utils.checkInteractions(guild, author, guild.retrieveMember(banned).complete());
         } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
         long duration = 0;
         try {
             duration = Math.max(Utils.parseDuration(args[2], 0), 0);
-        } catch (final @NotNull NumberFormatException | NumberOverflowException ignored) {
+        } catch (final @NotNull NumberFormatException | ArithmeticException ignored) {
         }
         int reasonIndex = 2;
         String durationString = "всегда";

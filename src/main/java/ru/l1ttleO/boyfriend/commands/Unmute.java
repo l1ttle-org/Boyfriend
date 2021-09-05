@@ -58,10 +58,7 @@ public class Unmute extends Command {
             return;
         if (author.getIdLong() == unmuted.getIdLong())
             throw new NoPermissionException("Ты не можешь выпустить самого себя из карцера!");
-        final boolean selfInteract = guild.getSelfMember().canInteract(unmuted);
-        final boolean authorInteract = author.canInteract(unmuted);
-        if (!selfInteract || !authorInteract)
-            throw new NoPermissionException(!selfInteract, !authorInteract);
+        Utils.checkInteractions(guild, author, unmuted);
         List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);

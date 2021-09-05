@@ -20,7 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
-import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 
 public class Utils {
     public static final @NotNull Random RANDOM = new Random();
@@ -74,7 +74,7 @@ public class Utils {
             int amount;
             final int max;
             if (unit.ordinal() <= ChronoField.HOUR_OF_DAY.ordinal()) {
-                max = (int) unit.getBaseUnit().getDuration().toMillis();
+                max = Math.toIntExact(unit.getBaseUnit().getDuration().toMillis());
                 amount = millisOfTheDay / max;
                 millisOfTheDay -= amount * max;
             } else {
@@ -144,15 +144,15 @@ public class Utils {
      * @param from timestamp used to calculate months & etc. properly. If 0, current timestamp is used.
      * @return milliseconds
      * @throws NumberFormatException if {@code duration} doesn't match any of the used formats
-     * @throws NumberOverflowException if {@code duration} is too big to fit in {@code long}
+     * @throws ArithmeticException if {@code duration} is too big to fit in {@code long}
      */
-    public static long parseDuration(final @NotNull String duration, long from) throws NumberFormatException, NumberOverflowException {
+    public static long parseDuration(final @NotNull String duration, long from) throws NumberFormatException, ArithmeticException {
         if (from == 0)
             from = System.currentTimeMillis();
         try {
             final long result = Long.parseLong(duration);
-            if ((result >= 0) ^ (result * 1000 >= 0))
-                throw new NumberOverflowException("Введена слишком большая продолжительность, из-за чего она стала отрицательной");
+            if (result >= 0 ^ result * 1000 >= 0)
+                throw new ArithmeticException("Введена слишком большая продолжительность, из-за чего она стала отрицательной");
             return result * 1000;
         } catch (final @NotNull NumberFormatException ignored) {
             if (duration.matches("<t:(\\d+)(:.)?>"))
@@ -229,5 +229,12 @@ public class Utils {
         if (botLogChannel == null)
             throw new ImprobableException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
         return botLogChannel;
+    }
+    
+    public static void checkInteractions(final @NotNull Guild guild, final @NotNull Member author,  final @NotNull Member subject) throws NoPermissionException {
+        final boolean selfInteract = guild.getSelfMember().canInteract(subject);
+        final boolean authorInteract = author.canInteract(subject);
+        if (!selfInteract || !authorInteract)
+            throw new NoPermissionException(!selfInteract, !authorInteract);
     }
 }

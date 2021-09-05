@@ -55,10 +55,7 @@ public class Kick extends Command {
             throw new NoPermissionException(false, false);
         if (kicked == null)
             return;
-        final boolean selfInteract = event.getGuild().getSelfMember().canInteract(kicked);
-        final boolean authorInteract = author.canInteract(kicked);
-        if (!selfInteract || !authorInteract)
-            throw new NoPermissionException(!selfInteract, !authorInteract);
+        Utils.checkInteractions(event.getGuild(), author, kicked);
         if (silent)
             event.getMessage().delete().queue();
         Actions.kickMember(channel, author, kicked, reason, silent);
