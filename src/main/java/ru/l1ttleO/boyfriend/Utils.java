@@ -231,7 +231,7 @@ public class Utils {
         return botLogChannel;
     }
     
-    public static void checkInteractions(final @NotNull Guild guild, final @NotNull Member author,  final @NotNull Member subject) throws NoPermissionException {
+    public static void checkInteractions(final @NotNull Guild guild, final @NotNull Member author, final @NotNull Member subject) throws NoPermissionException {
         final boolean selfInteract = guild.getSelfMember().canInteract(subject);
         final boolean authorInteract = author.canInteract(subject);
         if (!selfInteract || !authorInteract)
