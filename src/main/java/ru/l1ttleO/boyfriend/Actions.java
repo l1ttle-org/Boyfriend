@@ -91,8 +91,8 @@ public class Actions {
     public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString, final boolean silent) {
         final Guild guild = author.getGuild();
         final String replyText = muted.getRoles().contains(role) ?
-            "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :
-            "Теперь %s заглушен на%s за `%s`".formatted(muted.getAsMention(), durationString, reason);
+            "Теперь %s заглушен на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :
+            "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason);
         guild.addRoleToMember(muted, role).queue();
         final HashMap<Long, Thread> guildMutes = MUTES.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingMute = guildMutes.get(muted.getIdLong());
@@ -100,7 +100,7 @@ public class Actions {
             existingMute.interrupt();
         if (duration > 0) {
             final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent),
-                                                                 "Mute timer " + muted.getId(), duration * 1000L, null);
+                                                                 "Mute timer " + muted.getId(), duration, null);
             guildMutes.put(muted.getIdLong(), runnable.thread);
             MUTES.put(guild.getIdLong(), guildMutes);
         }
