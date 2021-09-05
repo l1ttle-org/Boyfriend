@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
+import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -41,7 +41,7 @@ public class Ban extends Command {
         super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] [-s] <причина>");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
@@ -66,8 +66,8 @@ public class Ban extends Command {
         } catch (final @NotNull ErrorResponseException e) { /* not on the server */ }
         long duration = 0;
         try {
-            duration = Utils.parseDuration(args[2], 0);
-        } catch (final @NotNull NumberFormatException ignored) {
+            duration = Math.max(Utils.parseDuration(args[2], 0), 0);
+        } catch (final @NotNull NumberFormatException | NumberOverflowException ignored) {
         }
         int reasonIndex = 2;
         String durationString = "всегда";

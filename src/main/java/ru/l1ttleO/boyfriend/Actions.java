@@ -65,7 +65,7 @@ public class Actions {
                 privateText += """
                                \n
                                По окончании бана ты сможешь перезайти по этой ссылке:
-                               https://discord.gg/%s""".formatted(invites.get(0).getCode());
+                               https://discord.gg/""" + invites.get(0).getCode();
         }
         sendDirectMessage(banned, privateText);
         final String banEntryReason = "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason);
@@ -88,7 +88,7 @@ public class Actions {
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
     }
 
-    public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString, final boolean silent) {
+    public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, String durationString, final boolean silent) {
         final Guild guild = author.getGuild();
         final String replyText = muted.getRoles().contains(role) ?
             "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :

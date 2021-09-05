@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.DelayedRunnable;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
+import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
@@ -24,7 +24,7 @@ public class Remind extends Command {
     public static final @NotNull ThreadGroup REMINDERS_THREAD_GROUP = new ThreadGroup("Reminders");
     public static final @NotNull HashMap<Long, HashMap<DelayedRunnable, Pair<String, Long>>> REMINDERS = new HashMap<>();
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws NumberOverflowException, InvalidAuthorException, WrongUsageException {
         final long duration;
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
@@ -62,6 +62,8 @@ public class Remind extends Command {
             duration = Utils.parseDuration(args[1], 0);
         } catch (final @NotNull NumberFormatException e) {
             throw new WrongUsageException("Неверно указана продолжительность!");
+        } catch (final @NotNull NumberOverflowException e) {
+            throw new WrongUsageException("Слишком большая продолжительность!");
         }
         if (duration <= 0) {
             throw new WrongUsageException("Продолжительность должна быть положительной и не огромной!");

@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
+import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -43,7 +43,7 @@ public class Mute extends Command {
 
     public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException {
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws NumberOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException {
         boolean silent = false;
         final Guild guild = event.getGuild();
         final Member author = event.getMember();
@@ -73,18 +73,18 @@ public class Mute extends Command {
         final Role role = roleList.get(0);
         long duration = 0;
         try {
-            duration = Utils.parseDuration(args[2], 0);
+            duration = Math.max(Utils.parseDuration(args[2], 0), 0);
         } catch (final @NotNull NumberFormatException ignored) {
         }
         int reasonIndex = 2;
-        String durationString = "всегда";
         if (duration > 0) {
             if (args.length < 4)
                 throw new WrongUsageException("Требуется указать причину!");
-            durationString = " " + Utils.getDurationText(duration, 0, true);
             reasonIndex++;
         } else if (duration < 0)
-            throw new IntegerOverflowException();
+            throw new NumberOverflowException("Введена слишком большая продолжительность, из-за чего она стала отрицательной");
+        else duration = 3600_000;
+        final String durationString = " " + Utils.getDurationText(duration, 0, true);
         if ("-s".equals(args[reasonIndex])) {
             silent = true;
             reasonIndex++;

@@ -1,7 +1,12 @@
 package ru.l1ttleO.boyfriend;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
@@ -15,6 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
+import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 
 public class Utils {
     public static final @NotNull Random RANDOM = new Random();
@@ -38,81 +44,73 @@ public class Utils {
         return two_to_four;
     }
 
-    public static final LinkedHashMap<@NotNull Integer, Pair<@NotNull String, @NotNull String[]>> DURATION_TYPES = new LinkedHashMap<>();
+    public static final LinkedHashMap<@NotNull ChronoField, Pair<@NotNull String, @NotNull String[]>> DURATION_TYPES = new LinkedHashMap<>();
     
     static {
-        DURATION_TYPES.put(Calendar.YEAR, Pair.of("y", new String[]{"год", "год", "года", "лет"}));
-        DURATION_TYPES.put(Calendar.MONTH, Pair.of("M", new String[]{"месяц", "месяц", "месяца", "месяцев"}));
-        DURATION_TYPES.put(Calendar.WEEK_OF_YEAR, Pair.of("w", new String[]{"неделя", "неделю", "недели", "недель"}));
-        DURATION_TYPES.put(Calendar.DAY_OF_YEAR, Pair.of("d", new String[]{"день", "день", "дня", "дней"}));
-        DURATION_TYPES.put(Calendar.HOUR_OF_DAY, Pair.of("h", new String[]{"час", "час", "часа", "часов"}));
-        DURATION_TYPES.put(Calendar.MINUTE, Pair.of("m", new String[]{"минута", "минуту", "минуты", "минут"}));
-        DURATION_TYPES.put(Calendar.SECOND, Pair.of("s", new String[]{"секунда", "секунду", "секунды", "секунд"}));
+        DURATION_TYPES.put(ChronoField.YEAR, Pair.of("y", new String[]{"год", "год", "года", "лет"}));
+        DURATION_TYPES.put(ChronoField.MONTH_OF_YEAR, Pair.of("M", new String[]{"месяц", "месяц", "месяца", "месяцев"}));
+        DURATION_TYPES.put(ChronoField.ALIGNED_WEEK_OF_YEAR, Pair.of("w", new String[]{"неделя", "неделю", "недели", "недель"}));
+        DURATION_TYPES.put(ChronoField.DAY_OF_YEAR, Pair.of("d", new String[]{"день", "день", "дня", "дней"}));
+        DURATION_TYPES.put(ChronoField.HOUR_OF_DAY, Pair.of("h", new String[]{"час", "час", "часа", "часов"}));
+        DURATION_TYPES.put(ChronoField.MINUTE_OF_HOUR, Pair.of("m", new String[]{"минута", "минуту", "минуты", "минут"}));
+        DURATION_TYPES.put(ChronoField.SECOND_OF_MINUTE, Pair.of("s", new String[]{"секунда", "секунду", "секунды", "секунд"}));
     }
-    
-    public static final int[] CHECK_ORDER = {Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_YEAR,
-        Calendar.SECOND, Calendar.MINUTE, Calendar.HOUR_OF_DAY};
 
     public static @NotNull String getDurationText(long millis, long from, final boolean accusative) {
         if (from == 0)
             from = System.currentTimeMillis();
-        final LinkedHashMap<Integer, Integer> durations = new LinkedHashMap<>();
+        final LinkedHashMap<ChronoField, Integer> durations = new LinkedHashMap<>();
         final boolean negative = millis < 0;
         if (negative)
             millis *= -1;
 
-        // magic
-        int millisOfTheDay = (int) (millis % (1000 * 60 * 60 * 24));
+     // magic
+        int millisOfTheDay = (int) (millis%(1000*60*60*24));
         millis -= millisOfTheDay;
-        final GregorianCalendar dateFrom = new GregorianCalendar();
-        dateFrom.setTimeInMillis(negative ? from - millis : from);
-        final GregorianCalendar dateTo = new GregorianCalendar();
-        dateTo.setTimeInMillis(negative ? from : from + millis);
-        millisOfTheDay = Math.round(((float) millisOfTheDay) / 1000);
-        for (final int unit : CHECK_ORDER) {
-            int amount;
-            final int max;
-            if (unit >= Calendar.HOUR_OF_DAY) {
-                max = dateFrom.getMaximum(unit) + 1;
-                amount = millisOfTheDay % max;
-                millisOfTheDay /= max;
+        final LocalDate dateFrom = LocalDate.ofInstant(Instant.ofEpochMilli(negative ? from - millis : from), ZoneOffset.UTC);
+        LocalDate dateTo = LocalDate.ofInstant(Instant.ofEpochMilli(negative ? from : from + millis), ZoneOffset.UTC);
+        for (final ChronoField unit : DURATION_TYPES.keySet()) {
+            if (unit == ChronoField.ALIGNED_WEEK_OF_YEAR) continue;
+            int amount, max;
+            if (unit.ordinal() <= ChronoField.HOUR_OF_DAY.ordinal()) {
+                max = (int) unit.getBaseUnit().getDuration().toMillis();
+                amount = millisOfTheDay / max;
+                millisOfTheDay -= amount * max;
             } else {
                 if (dateFrom.get(unit) == dateTo.get(unit))
                     continue;
                 switch (unit) {
-                    case Calendar.YEAR:
+                    case YEAR -> amount = dateTo.get(unit) - dateFrom.get(unit);
+                    case MONTH_OF_YEAR -> {
                         amount = dateTo.get(unit) - dateFrom.get(unit);
-                        break;
-                    case Calendar.MONTH:
-                        amount = dateTo.get(Calendar.MONTH) - dateFrom.get(Calendar.MONTH);
                         if (amount < 0) {
                             amount += 12;
-                            durations.put(Calendar.YEAR, durations.get(Calendar.YEAR) - 1);
+                            durations.put(ChronoField.YEAR, durations.get(ChronoField.YEAR) - 1);
                         }
-                        break;
-                    default: // DAY_OF_YEAR
-                        amount = dateTo.get(Calendar.DAY_OF_MONTH) - dateFrom.get(Calendar.DAY_OF_MONTH);
+                    }
+                    default -> { // DAY_OF_YEAR
+                        amount = dateTo.get(ChronoField.DAY_OF_MONTH) - dateFrom.get(ChronoField.DAY_OF_MONTH);
                         if (amount < 0) {
-                            amount = durations.getOrDefault(Calendar.MONTH, 12);
-                            final int years = durations.getOrDefault(Calendar.YEAR, 0);
+                            amount = durations.getOrDefault(ChronoField.MONTH_OF_YEAR, 12);
+                            final int years = durations.getOrDefault(ChronoField.YEAR, 0);
                             if (amount == 12)
-                                durations.put(Calendar.YEAR, years - 1);
-                            durations.put(Calendar.MONTH, amount - 1);
-                            amount = dateTo.get(Calendar.DAY_OF_MONTH);
-                            dateTo.add(Calendar.MONTH, -1);
-                            max = dateTo.getActualMaximum(Calendar.DAY_OF_MONTH);
-                            amount += max - Math.min(max, dateFrom.get(Calendar.DAY_OF_MONTH));
+                                durations.put(ChronoField.YEAR, years - 1);
+                            durations.put(ChronoField.MONTH_OF_YEAR, amount - 1);
+                            amount = dateTo.get(ChronoField.DAY_OF_MONTH);
+                            dateTo = dateTo.plus(-1, ChronoField.MONTH_OF_YEAR.getBaseUnit());
+                            max = dateTo.lengthOfMonth();
+                            amount += max - Math.min(max, dateFrom.get(ChronoField.DAY_OF_MONTH));
                         }
-                        durations.put(Calendar.WEEK_OF_YEAR, amount / 7);
+                        durations.put(ChronoField.ALIGNED_WEEK_OF_YEAR, amount / 7);
                         amount %= 7;
-                        break;
+                    }
                 }
             }
             durations.put(unit, amount);
         }
 
         // filter and sort
-        for (final int unit : DURATION_TYPES.keySet()) {
+        for (final @NotNull ChronoField unit : DURATION_TYPES.keySet()) {
             final int amount = durations.getOrDefault(unit, 0);
             durations.remove(unit);
             if (amount != 0)
@@ -144,12 +142,17 @@ public class Utils {
      * @param duration string to parse. If plain number, treated as seconds. Can be in Discord time format.
      * @param from timestamp used to calculate months & etc. properly. If 0, current timestamp is used.
      * @return milliseconds
+     * @throws NumberFormatException if {@code duration} doesn't match any of the used formats
+     * @throws NumberOverflowException if {@code duration} is too big to fit in {@code long}
      */
-    public static long parseDuration(final @NotNull String duration, long from) throws NumberFormatException {
+    public static long parseDuration(final @NotNull String duration, long from) throws NumberFormatException, NumberOverflowException {
         if (from == 0)
             from = System.currentTimeMillis();
         try {
-            return Long.parseLong(duration) * 1000;
+            final long result = Long.parseLong(duration);
+            if ((result >= 0) ^ (result * 1000 >= 0))
+                throw new NumberOverflowException("Введена слишком большая продолжительность, из-за чего она стала отрицательной");
+            return result * 1000;
         } catch (final @NotNull NumberFormatException ignored) {
             if (duration.matches("<t:(\\d+)(:.)?>"))
                 return Long.parseLong(duration.split("\\D+$")[0].substring(3)) * 1000 - from;
@@ -173,15 +176,22 @@ public class Utils {
             durations.put(unit, Integer.parseInt(buffer[1]));
         }
         
-        final Calendar date = new GregorianCalendar();
-        date.setTimeInMillis(from);
+        LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneOffset.UTC);
         for (final var type : DURATION_TYPES.entrySet()) {
-            if (durations.containsKey(type.getValue().getLeft()))
-                date.add(type.getKey(), durations.remove(type.getValue().getLeft()));
+            if (durations.containsKey(type.getValue().getLeft())) {
+                final int amount = durations.remove(type.getValue().getLeft());
+                final TemporalUnit baseUnit = type.getKey().getBaseUnit();
+                date = switch(baseUnit.toString()) {
+                    case "Years" -> date.plusYears(amount);
+                    case "Months" -> date.plusMonths(amount);
+                    case "Weeks" -> date.plusWeeks(amount);
+                    default -> date.plus(Duration.of(amount, baseUnit));
+                };
+            }
         }
         if (!durations.isEmpty())
             throw new NumberFormatException("Unknown time unit \"%s\"".formatted(durations.keySet().toArray()[0]));
-        return date.getTimeInMillis() - from;
+        return date.toInstant(ZoneOffset.UTC).toEpochMilli() - from;
     }
 
     public static @NotNull String wrap(final @NotNull String text) {

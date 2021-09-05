@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.CommandHandler;
-import ru.l1ttleO.boyfriend.exceptions.IntegerOverflowException;
+import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
@@ -20,7 +20,7 @@ public abstract class Command {
         this.description = description;
     }
 
-    public abstract void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws IntegerOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException;
+    public abstract void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws NumberOverflowException, InvalidAuthorException, NoPermissionException, WrongUsageException;
 
     public String getUsages() {
         return "Использование: `%s`"
