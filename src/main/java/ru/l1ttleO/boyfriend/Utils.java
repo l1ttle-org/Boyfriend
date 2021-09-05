@@ -64,14 +64,15 @@ public class Utils {
         if (negative)
             millis *= -1;
 
-     // magic
-        int millisOfTheDay = (int) (millis%(1000*60*60*24));
+        // magic
+        int millisOfTheDay = (int) (millis % (1000 * 60 * 60 * 24));
         millis -= millisOfTheDay;
         final LocalDate dateFrom = LocalDate.ofInstant(Instant.ofEpochMilli(negative ? from - millis : from), ZoneOffset.UTC);
         LocalDate dateTo = LocalDate.ofInstant(Instant.ofEpochMilli(negative ? from : from + millis), ZoneOffset.UTC);
         for (final ChronoField unit : DURATION_TYPES.keySet()) {
             if (unit == ChronoField.ALIGNED_WEEK_OF_YEAR) continue;
-            int amount, max;
+            int amount;
+            final int max;
             if (unit.ordinal() <= ChronoField.HOUR_OF_DAY.ordinal()) {
                 max = (int) unit.getBaseUnit().getDuration().toMillis();
                 amount = millisOfTheDay / max;

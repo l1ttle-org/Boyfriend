@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.DelayedRunnable;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.exceptions.NumberOverflowException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class Remind extends Command {

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class NumberOverflowException extends Exception {
 
-    public NumberOverflowException(@NotNull String message) {
+    public NumberOverflowException(final @NotNull String message) {
         super(message);
     }
 }

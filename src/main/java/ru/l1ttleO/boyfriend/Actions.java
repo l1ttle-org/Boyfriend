@@ -88,7 +88,7 @@ public class Actions {
         sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
     }
 
-    public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, String durationString, final boolean silent) {
+    public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString, final boolean silent) {
         final Guild guild = author.getGuild();
         final String replyText = muted.getRoles().contains(role) ?
             "Заглушен %s на%s за `%s`".formatted(muted.getAsMention(), durationString, reason) :
@@ -98,10 +98,12 @@ public class Actions {
         final Thread existingMute = guildMutes.get(muted.getIdLong());
         if (existingMute != null)
             existingMute.interrupt();
-        final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent),
-                                                             "Mute timer " + muted.getId(), duration * 1000L, null);
-        guildMutes.put(muted.getIdLong(), runnable.thread);
-        MUTES.put(guild.getIdLong(), guildMutes);
+        if (duration > 0) {
+            final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP, (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted, "Время наказания истекло", silent),
+                                                                 "Mute timer " + muted.getId(), duration * 1000L, null);
+            guildMutes.put(muted.getIdLong(), runnable.thread);
+            MUTES.put(guild.getIdLong(), guildMutes);
+        }
         if (!silent)
             channel.sendMessage(replyText).queue();
         sendNotification(guild, "%s глушит %s на%s за `%s`".formatted(author.getAsMention(), muted.getAsMention(), durationString, reason), silent);
