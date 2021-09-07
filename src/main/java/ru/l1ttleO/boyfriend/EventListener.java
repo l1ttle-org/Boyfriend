@@ -32,7 +32,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
-import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 public class EventListener extends ListenerAdapter {
 
@@ -84,9 +83,6 @@ public class EventListener extends ListenerAdapter {
         }
         if (message.mentionsEveryone())
             return;
-        try {
-            CommandHandler.onMessageReceived(event);
-        } catch (final @NotNull WrongUsageException ignored) {
-        }
+        CommandHandler.onMessageReceived(event);
     }
 }
