@@ -35,11 +35,11 @@ public class CommandHandler {
             COMMAND_LIST.put(command.name, command);
     }
 
-    public static void onMessageReceived(final @NotNull MessageReceivedEvent event) {
+    public static void onMessageReceived(final @NotNull MessageReceivedEvent event) throws WrongUsageException {
         final Message message = event.getMessage();
+        final MessageChannel channel = event.getChannel();
         final String content = message.getContentRaw();
         if (!content.startsWith(prefix)) return;
-        final MessageChannel channel = event.getChannel();
         final String[] args = content.split(" ");
         String name = args[0].substring(prefix.length()).toLowerCase();
         if (name.isEmpty()) name = "help";
@@ -48,6 +48,8 @@ public class CommandHandler {
             return;
         }
         final Command command = COMMAND_LIST.get(name);
+        if (command.usages.length > 0 && args.length == 1 && Arrays.stream(command.usages).noneMatch(name::equals))
+            throw new WrongUsageException("Нету аргументов!");
         final List<Message> history = channel.getHistory().retrievePast(3).complete();
         final String echoMessage = history.get(1).getContentRaw();
         final String echoMessageFailsafe = history.get(2).getContentRaw();
@@ -55,8 +57,6 @@ public class CommandHandler {
                                           || echoMessage.endsWith(content) || echoMessageFailsafe.endsWith(content)))
             return;
         try {
-            if (command.usages.length > 0 && args.length == 1 && Arrays.stream(command.usages).noneMatch(name::equals))
-                throw new WrongUsageException("Нету аргументов!");
             command.run(event, args);
         } catch (final @NotNull WrongUsageException e) {
             channel.sendMessage(e.getMessage() + " " + command.getUsages()).queue();
