@@ -78,7 +78,7 @@ public class Unmute extends Command {
             reasonIndex++;
         }
         if (silent)
-            event.getMessage().delete().queue();
+            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
         final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         Actions.unmuteMember(channel, role, author, unmuted, reason, silent);
     }

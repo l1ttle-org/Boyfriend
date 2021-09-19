@@ -57,7 +57,7 @@ public class Kick extends Command {
             return;
         Utils.checkInteractions(event.getGuild(), author, kicked);
         if (silent)
-            event.getMessage().delete().queue();
+            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
         Actions.kickMember(channel, author, kicked, reason, silent);
     }
 }

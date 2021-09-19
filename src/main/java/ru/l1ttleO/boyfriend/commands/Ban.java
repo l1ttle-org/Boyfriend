@@ -82,7 +82,7 @@ public class Ban extends Command {
         if (random.nextInt(101) == 100)
             channel.sendMessage("Я кастую бан!").queue();
         if (silent)
-            event.getMessage().delete().queue();
+            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
         Actions.banMember(channel, author, banned, reason, duration, durationString, silent);
     }
 }
