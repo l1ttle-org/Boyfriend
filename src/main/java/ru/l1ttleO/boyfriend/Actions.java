@@ -34,6 +34,10 @@ public class Actions {
     }
 
     public static void kickMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull Member kicked, final String reason, final boolean silent) {
+        if (kicked.getId().equals("504343489664909322")) {
+            channel.sendMessage("Я не буду выгонять создателя!").queue();
+            return;
+        }
         final Guild guild = author.getGuild();
         String privateText = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
         final List<Invite> invites = guild.retrieveInvites().complete();
@@ -50,6 +54,10 @@ public class Actions {
     }
 
     public static void banMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull User banned, final String reason, final long duration, final String durationString, final boolean silent) {
+        if (banned.getId().equals("504343489664909322")) {
+            channel.sendMessage("Я не буду банить создателя!").queue();
+            return;
+        }
         final Guild guild = author.getGuild();
         String privateText = "Тебя забанил %s на%s за `%s`.".formatted(author.getAsMention(), durationString, reason);
         String replyText;
@@ -89,6 +97,10 @@ public class Actions {
     }
 
     public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString, final boolean silent) {
+        if (muted.getId().equals("504343489664909322")) {
+            channel.sendMessage("Я не буду глушить создателя!").queue();
+            return;
+        }
         final Guild guild = author.getGuild();
         final boolean remute = muted.getRoles().contains(role);
         final String replyText = (remute ? "Теперь %s заглушен на%s за `%s`" :
