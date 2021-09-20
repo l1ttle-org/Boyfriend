@@ -37,23 +37,37 @@ public class Boyfriend {
 
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
         builder.disableIntents(GatewayIntent.GUILD_PRESENCES);
-        builder.setActivity(Activity.listening("VS Whitty - Ballistic"));
+        builder.setActivity(Activity.listening("VS Retrospecter - Ectospasm"));
         builder.addEventListeners(new EventListener());
 
         final JDA jda = builder.build().awaitReady();
 
         while (true) {
-            final String[] s = console.readLine().split(" ");
-            if ("shutdown".equals(s[0])) {
-                jda.shutdownNow();
-                break;
-            }
-            final TextChannel tc = jda.getTextChannelById(s[0]);
-            if (tc == null) {
-                console.printf("Канал не существует!");
+            try {
+                final String[] s = console.readLine().split(" ");
+                if ("shutdown".equals(s[0])) {
+                    console.printf("Выключаюсь\n");
+                    jda.shutdownNow();
+                    break;
+                }
+                final TextChannel tc;
+                try {
+                    tc = jda.getTextChannelById(s[0]);
+                } catch (final NumberFormatException e) {
+                    console.printf("Требуется указать ID канала!\n");
+                    continue;
+                }
+                if (tc == null) {
+                    console.printf("Канал не существует!\n");
+                    continue;
+                }
+                tc.sendMessage(StringUtils.join(s, ' ', 1, s.length)).queue();
+                console.printf("Отправлено сообщение в канал #%s\n".formatted(tc.getName()));
+            } catch (final Exception e) {
+                console.printf("Произошла ошибка при обработке команды. Попробуйте ещё раз\n");
+                e.printStackTrace();
                 continue;
             }
-            tc.sendMessage(StringUtils.join(s, ' ', 1, s.length)).queue();
         }
     }
 }
