@@ -26,6 +26,7 @@ import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +50,12 @@ public class Boyfriend {
                     console.printf("Выключаюсь\n");
                     jda.shutdownNow();
                     break;
+                }
+                if ("grant".equals(s[0])) {
+                    final Guild guild = jda.getGuildById(s[1]);
+                    guild.addRoleToMember(s[3], guild.getRoleById(s[2])).complete();
+                    console.printf("Роль успешно выдана!\n");
+                    continue;
                 }
                 final TextChannel tc;
                 try {
