@@ -28,14 +28,18 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.DelayedRunnable;
+import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Remind extends Command {
 
     public Remind() {
-        super("remind", "Создаёт напоминание", "remind", "remind <время напоминания, не больше 2147483647> <текст напоминания>");
+        super("remind", "remind.description", "remind.usage1", "remind.usage2");
     }
 
     public static final @NotNull ThreadGroup REMINDERS_THREAD_GROUP = new ThreadGroup("Reminders");
@@ -46,20 +50,21 @@ public class Remind extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final String text;
+        I18n.activeLocale = getServerSettings(event.getGuild()).getLocale();
         if (author == null)
             throw new InvalidAuthorException();
         if (args.length < 2) {
             final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
             if (userReminders.isEmpty())
-                channel.sendMessage("Нет активных напоминаний").queue();
+                channel.sendMessage(tl("remind.no_active_reminders")).queue();
             else {
-                final StringBuilder listText = new StringBuilder("Активные напоминания:\n");
+                final StringBuilder listText = new StringBuilder(tl("remind.active_reminders"));
                 String append;
                 for (final Entry<DelayedRunnable, Pair<String, Long>> reminder : userReminders.entrySet()) {
                     append = """
 
-                        <t:%s:R> в <#%s>
-                        %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, reminder.getValue().getRight(), reminder.getValue().getLeft());
+                        <t:%s:R> %s <#%s>
+                        %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, tl("in"), reminder.getValue().getRight(), reminder.getValue().getLeft());
                     if (listText.isEmpty())
                         append = append.strip();
                     if (listText.length() + append.length() > 2000) {
@@ -74,25 +79,25 @@ public class Remind extends Command {
             }
             return;
         } else if (args.length < 3)
-            throw new WrongUsageException("Требуется указать текст напоминания!");
+            throw new WrongUsageException(tl("remind.text_required"));
         try {
             duration = Utils.parseDuration(args[1], 0);
         } catch (final @NotNull NumberFormatException e) {
-            throw new WrongUsageException("Неверно указана продолжительность!");
+            throw new WrongUsageException(tl("remind.duration_invalid"));
         } catch (final @NotNull ArithmeticException e) {
-            throw new WrongUsageException("Слишком большая продолжительность!");
+            throw new WrongUsageException(tl("remind.duration_too_big"));
         }
         if (duration <= 0) {
-            throw new WrongUsageException("Продолжительность должна быть положительной и не огромной!");
+            throw new WrongUsageException(tl("remind.duration_negative"));
         }
         text = Utils.wrap(StringUtils.join(args, ' ', 2, args.length));
-        channel.sendMessage("Напоминание успешно установлено. Через %s будет отправлено данное сообщение: %s".formatted(Utils.getDurationText(duration, 0, true), text)).queue();
+        channel.sendMessage(tl("remind.reminder_active", Utils.getDurationText(duration, 0, true), text)).queue();
 
         final DelayedRunnable runnable = new DelayedRunnable(REMINDERS_THREAD_GROUP, (final @NotNull DelayedRunnable dr) -> {
             channel.sendMessage(author.getAsMention() + " " + text).queue();
             REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>()).remove(dr);
         }, "Remind timer " + author.getId(), duration, (final @NotNull DelayedRunnable dr) ->
-                Actions.sendNotification(event.getGuild(), "Прерван таймер напоминания для %s: %s".formatted(author.getAsMention(), text), false));
+                Actions.sendNotification(event.getGuild(), tl("remind.reminder_interrupted", author.getAsMention(), text), false));
         final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
         userReminders.put(runnable, Pair.of(text, channel.getIdLong()));
         REMINDERS.put(author.getIdLong(), userReminders);

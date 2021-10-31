@@ -25,15 +25,19 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Kick extends Command {
 
     public Kick() {
-        super("kick", "Выгоняет участника", "kick <@упоминание или ID> [-s] <причина>");
+        super("kick", "kick.description", "kick.usage");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
@@ -41,9 +45,10 @@ public class Kick extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member kicked = Utils.getMember(args[1], event.getGuild(), channel);
+        I18n.activeLocale = getServerSettings(event.getGuild()).getLocale();
         int reasonIndex = 2;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!");
+            throw new WrongUsageException(tl("common.reason_required"));
         if (author == null)
             throw new InvalidAuthorException();
         if ("-s".equals(args[reasonIndex])) {

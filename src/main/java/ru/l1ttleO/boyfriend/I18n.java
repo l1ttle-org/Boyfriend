@@ -18,11 +18,13 @@
 
 package ru.l1ttleO.boyfriend;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
-import net.dv8tion.jda.api.entities.Guild;
 
 public class I18n {
-    public static String tl(final Guild guild, final String key, final Object... args) {
-        return ResourceBundle.getBundle("messages", Boyfriend.getServerSettings(guild).getLocale()).getString(key).formatted(args);
+    public static Locale activeLocale = new Locale("en"); // This will work perfectly while the bot is synchronous
+
+    public static String tl(final String key, final Object... args) {
+        return ResourceBundle.getBundle("messages", activeLocale).getString(key).formatted(args);
     }
 }

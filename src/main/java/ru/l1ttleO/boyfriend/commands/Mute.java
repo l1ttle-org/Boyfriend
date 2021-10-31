@@ -29,15 +29,19 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Mute extends Command {
 
     public Mute() {
-        super("mute", "Глушит участника", "mute <@упоминание или ID> [<продолжительность>] [-s] <причина>");
+        super("mute", "mute.description", "mute.usage");
     }
 
     public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
@@ -48,8 +52,9 @@ public class Mute extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member muted = Utils.getMember(args[1], event.getGuild(), channel);
+        I18n.activeLocale = getServerSettings(event.getGuild()).getLocale();
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!");
+            throw new WrongUsageException(tl("common.reason_required"));
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.MESSAGE_MANAGE))
@@ -63,7 +68,7 @@ public class Mute extends Command {
             if (!roleList.isEmpty()) break;
         }
         if (roleList.isEmpty()) {
-            channel.sendMessage("Не найдена роль мута!").queue();
+            channel.sendMessage(tl("mute.no_mute_role")).queue();
             return;
         }
         final Role role = roleList.get(0);
@@ -75,7 +80,7 @@ public class Mute extends Command {
         int reasonIndex = 2;
         if (duration > 0) {
             if (args.length < 4)
-                throw new WrongUsageException("Требуется указать причину!");
+                throw new WrongUsageException(tl("common.reason_required"));
             reasonIndex++;
         } else duration = 3600_000;
         final String durationString = " " + Utils.getDurationText(duration, 0, true);

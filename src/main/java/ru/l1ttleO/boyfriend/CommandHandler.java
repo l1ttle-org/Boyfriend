@@ -33,6 +33,7 @@ import ru.l1ttleO.boyfriend.commands.Kick;
 import ru.l1ttleO.boyfriend.commands.Mute;
 import ru.l1ttleO.boyfriend.commands.Ping;
 import ru.l1ttleO.boyfriend.commands.Remind;
+import ru.l1ttleO.boyfriend.commands.Settings;
 import ru.l1ttleO.boyfriend.commands.Unban;
 import ru.l1ttleO.boyfriend.commands.Unmute;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
@@ -44,7 +45,7 @@ public class CommandHandler {
 
     static {
         register(
-                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Remind(), new Unban(), new Unmute());
+                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Remind(), new Settings(), new Unban(), new Unmute());
     }
 
     public static void register(final Command @NotNull ... commands) {

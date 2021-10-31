@@ -23,19 +23,24 @@ import java.util.Comparator;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.CommandHandler;
+import ru.l1ttleO.boyfriend.I18n;
+
+import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Help extends Command {
 
     public Help() {
-        super("help", "Показывает эту справку");
+        super("help", "help.description");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) {
-        final StringBuilder text = new StringBuilder("Справка по командам:");
+        I18n.activeLocale = getServerSettings(event.getGuild()).getLocale();
+        final StringBuilder text = new StringBuilder(tl("help.help"));
         final ArrayList<Command> commands = new ArrayList<>(CommandHandler.COMMAND_LIST.values());
         commands.sort(Comparator.comparing(command -> command.name));
         for (final Command command : commands) {
-            text.append("\n`%s%s` - %s".formatted(CommandHandler.prefix, command.name, command.description));
+            text.append("\n`%s%s` - %s".formatted(CommandHandler.prefix, command.name, tl(command.description)));
             if (command.usages.length > 0)
                 text.append(". ").append(command.getUsages());
             text.append(";");

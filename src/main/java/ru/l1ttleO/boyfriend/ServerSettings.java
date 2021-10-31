@@ -20,6 +20,7 @@ package ru.l1ttleO.boyfriend;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,25 +30,43 @@ import net.dv8tion.jda.api.entities.Guild;
 
 public class ServerSettings {
     private Locale locale;
+    final Properties properties = new Properties();
+    final File file;
 
     public ServerSettings(final Guild guild) {
+        final Path path = Paths.get("settings_" + guild.getId() + ".properties");
+        this.file = path.toFile();
         try {
-            final Path path = Paths.get("settings_" + guild.getId());
-            final Properties properties = new Properties();
-            final File file = path.toFile();
-            if (!file.exists() || file.isDirectory())
-                file.createNewFile();
-            final FileReader r = new FileReader(file);
-            properties.load(r);
-            this.locale = new Locale(properties.getProperty("locale"), "en");
-
+            if (!this.file.exists() || this.file.isDirectory())
+                this.file.createNewFile();
+            final FileReader r = new FileReader(this.file);
+            this.properties.load(r);
         } catch (final IOException e) {
-            
+            e.printStackTrace();
+            guild.getJDA().shutdown();
         }
-        this.locale = new Locale("ru");
+        if (this.properties.getProperty("locale") == null)
+            this.properties.setProperty("locale", "ru");
+        this.locale = new Locale(this.properties.getProperty("locale"));
+        try {
+            this.saveSettings();
+        } catch (final IOException e) {
+            e.printStackTrace();
+            guild.getJDA().shutdown();
+        }
+    }
+
+    public void saveSettings() throws IOException {
+        this.properties.store(new FileWriter(this.file), "Guild configuration file for Boyfriend");
     }
 
     public Locale getLocale() {
         return this.locale;
+    }
+
+    public void setLocale(final Locale locale) throws IOException {
+        this.locale = locale;
+        this.properties.setProperty("locale", this.locale.toString());
+        this.saveSettings();
     }
 }

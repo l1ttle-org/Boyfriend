@@ -29,15 +29,19 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Ban extends Command {
 
     public Ban() {
-        super("ban", "Банит участника", "ban <@упоминание или ID> [<продолжительность>] [-s] <причина>");
+        super("ban", "ban.description", "ban.usage");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
@@ -48,8 +52,10 @@ public class Ban extends Command {
         final Random random = new Random();
         final String reason;
         final User banned;
+        I18n.activeLocale = getServerSettings(guild).getLocale();
+
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!");
+            throw new WrongUsageException(tl("common.reason_required"));
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
@@ -66,10 +72,10 @@ public class Ban extends Command {
         } catch (final @NotNull NumberFormatException | ArithmeticException ignored) {
         }
         int reasonIndex = 2;
-        String durationString = "всегда";
+        String durationString = tl("duration.ever");
         if (duration > 0) {
             if (args.length < 4) {
-                throw new WrongUsageException("Требуется указать причину!");
+                throw new WrongUsageException(tl("common.reason_required"));
             }
             durationString = " " + Utils.getDurationText(duration, 0, true);
             reasonIndex++;
@@ -80,7 +86,7 @@ public class Ban extends Command {
         }
         reason = StringUtils.join(args, ' ', reasonIndex, args.length);
         if (random.nextInt(101) == 100)
-            channel.sendMessage("Я кастую бан!").queue();
+            channel.sendMessage(tl("ban.casting_ban")).queue();
         if (silent)
             channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
         Actions.banMember(channel, author, banned, reason, duration, durationString, silent);

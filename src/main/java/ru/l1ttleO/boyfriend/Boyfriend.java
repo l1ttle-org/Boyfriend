@@ -33,6 +33,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.apache.commons.lang3.StringUtils;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Boyfriend {
     private static final Map<Guild, ServerSettings> settingsMap = new HashMap<Guild, ServerSettings>();
 
@@ -56,31 +58,31 @@ public class Boyfriend {
             try {
                 final String[] s = console.readLine().split(" ");
                 if ("shutdown".equals(s[0])) {
-                    console.printf("Выключаюсь\n");
+                    console.printf(tl("console.shutting_down"));
                     jda.shutdownNow();
                     break;
                 }
                 if ("grant".equals(s[0])) {
                     final Guild guild = jda.getGuildById(s[1]);
                     guild.addRoleToMember(s[3], guild.getRoleById(s[2])).complete();
-                    console.printf("Роль успешно выдана!\n");
+                    console.printf(tl("console.role_granted"));
                     continue;
                 }
                 final TextChannel tc;
                 try {
                     tc = jda.getTextChannelById(s[0]);
                 } catch (final NumberFormatException e) {
-                    console.printf("Требуется указать ID канала!\n");
+                    console.printf(tl("console.id_required"));
                     continue;
                 }
                 if (tc == null) {
-                    console.printf("Канал не существует!\n");
+                    console.printf(tl("console.no_channel"));
                     continue;
                 }
                 tc.sendMessage(StringUtils.join(s, ' ', 1, s.length)).queue();
-                console.printf("Отправлено сообщение в канал #%s\n".formatted(tc.getName()));
+                console.printf(tl("console.message_sent", tc.getName()));
             } catch (final Exception e) {
-                console.printf("Произошла ошибка при обработке команды. Попробуйте ещё раз\n");
+                console.printf(tl("console.error"));
                 e.printStackTrace();
                 continue;
             }
