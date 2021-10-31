@@ -1,3 +1,21 @@
+/*
+    This file is part of Boyfriend
+    Copyright (C) 2021  l1ttleO
+
+    Boyfriend is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Boyfriend is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Boyfriend.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 package ru.l1ttleO.boyfriend;
 
 import java.time.Duration;
@@ -45,7 +63,7 @@ public class Utils {
     }
 
     public static final LinkedHashMap<@NotNull ChronoField, Pair<@NotNull String, @NotNull String[]>> DURATION_TYPES = new LinkedHashMap<>();
-    
+
     static {
         DURATION_TYPES.put(ChronoField.YEAR, Pair.of("y", new String[]{"год", "год", "года", "лет"}));
         DURATION_TYPES.put(ChronoField.MONTH_OF_YEAR, Pair.of("M", new String[]{"месяц", "месяц", "месяца", "месяцев"}));
@@ -117,7 +135,7 @@ public class Utils {
             if (amount != 0)
                 durations.put(unit, amount);
         }
-        
+
         // build a string
         final StringBuilder out = new StringBuilder();
         int i = 0;
@@ -176,7 +194,7 @@ public class Utils {
             input.setLength(input.length() - buffer[1].length());
             durations.put(unit, Integer.parseInt(buffer[1]));
         }
-        
+
         LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(from), ZoneOffset.UTC);
         for (final var type : DURATION_TYPES.entrySet()) {
             if (durations.containsKey(type.getValue().getLeft())) {
@@ -198,7 +216,7 @@ public class Utils {
     public static @NotNull String wrap(final @NotNull String text) {
         return "```" + text.replaceAll("```", "​`​`​`​") + " ```";
     }
-    
+
     public static @NotNull Pair<User, Member> getUserAndMember(final @NotNull String from, final @Nullable JDA jda, final @Nullable Guild guild, final @NotNull MessageChannel channel) {
         User user = null;
         Member member = null;
@@ -230,8 +248,9 @@ public class Utils {
             throw new ImprobableException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
         return botLogChannel;
     }
-    
-    public static void checkInteractions(final @NotNull Guild guild, final @NotNull Member author, final @NotNull Member subject) throws NoPermissionException {
+
+    public static void checkInteractions(final @NotNull Guild guild, final @NotNull Member author,
+            final @NotNull Member subject) throws NoPermissionException {
         final boolean selfInteract = guild.getSelfMember().canInteract(subject);
         final boolean authorInteract = author.canInteract(subject);
         if (!selfInteract || !authorInteract)

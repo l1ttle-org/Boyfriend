@@ -16,11 +16,8 @@
     along with Boyfriend.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.l1ttleO.boyfriend.exceptions;
+package ru.l1ttleO.boyfriend.commands;
 
-public class InvalidAuthorException extends ImprobableException {
-
-    public InvalidAuthorException() {
-        super("Автор является null");
-    }
+public class Settings {
+    // TODO: actually implement this
 }

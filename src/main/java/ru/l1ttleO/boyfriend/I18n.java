@@ -16,11 +16,13 @@
     along with Boyfriend.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package ru.l1ttleO.boyfriend.exceptions;
+package ru.l1ttleO.boyfriend;
 
-public class InvalidAuthorException extends ImprobableException {
+import java.util.ResourceBundle;
+import net.dv8tion.jda.api.entities.Guild;
 
-    public InvalidAuthorException() {
-        super("Автор является null");
+public class I18n {
+    public static String tl(final Guild guild, final String key, final Object... args) {
+        return ResourceBundle.getBundle("messages", Boyfriend.getServerSettings(guild).getLocale()).getString(key).formatted(args);
     }
 }

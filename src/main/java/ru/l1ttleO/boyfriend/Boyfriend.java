@@ -22,6 +22,8 @@ import java.io.Console;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -32,6 +34,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.apache.commons.lang3.StringUtils;
 
 public class Boyfriend {
+    private static final Map<Guild, ServerSettings> settingsMap = new HashMap<Guild, ServerSettings>();
+
     public static void main(final String[] args) throws LoginException, InterruptedException, IOException {
         final JDABuilder builder = JDABuilder.createDefault(Files.readString(Paths.get("token.txt")).trim());
         final Console console = System.console();
@@ -42,6 +46,11 @@ public class Boyfriend {
         builder.addEventListeners(new EventListener());
 
         final JDA jda = builder.build().awaitReady();
+
+        for (final Guild g : jda.getGuilds()) {
+            final ServerSettings settings = new ServerSettings(g);
+            settingsMap.put(g, settings);
+        }
 
         while (true) {
             try {
@@ -76,5 +85,9 @@ public class Boyfriend {
                 continue;
             }
         }
+    }
+
+    public static ServerSettings getServerSettings(final Guild guild) {
+        return settingsMap.get(guild);
     }
 }

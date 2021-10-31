@@ -1,3 +1,21 @@
+/*
+    This file is part of Boyfriend
+    Copyright (C) 2021  l1ttleO
+
+    Boyfriend is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Boyfriend is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Boyfriend.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 package ru.l1ttleO.boyfriend;
 
 import java.util.Arrays;
@@ -15,7 +33,6 @@ import ru.l1ttleO.boyfriend.commands.Kick;
 import ru.l1ttleO.boyfriend.commands.Mute;
 import ru.l1ttleO.boyfriend.commands.Ping;
 import ru.l1ttleO.boyfriend.commands.Remind;
-import ru.l1ttleO.boyfriend.commands.Truth;
 import ru.l1ttleO.boyfriend.commands.Unban;
 import ru.l1ttleO.boyfriend.commands.Unmute;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
@@ -27,7 +44,7 @@ public class CommandHandler {
 
     static {
         register(
-                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Remind(), new Truth(), new Unban(), new Unmute());
+                new Ban(), new Clear(), new Help(), new Kick(), new Mute(), new Ping(), new Remind(), new Unban(), new Unmute());
     }
 
     public static void register(final Command @NotNull ... commands) {
