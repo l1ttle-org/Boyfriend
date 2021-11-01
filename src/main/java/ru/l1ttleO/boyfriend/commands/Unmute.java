@@ -72,7 +72,7 @@ public class Unmute extends Command {
         }
         final Role role = roleList.get(0);
         if (!unmuted.getRoles().contains(role)) {
-            channel.sendMessage("Участник не заглушен!").queue();
+            channel.sendMessage(tl("unmute.member_not_muted")).queue();
             return;
         }
         if ("-s".equals(args[reasonIndex])) {

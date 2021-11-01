@@ -247,7 +247,7 @@ public class Utils {
     public static @NotNull MessageChannel getBotLogChannel(final @NotNull JDA jda) {
         final MessageChannel botLogChannel = jda.getTextChannelById("618044439939645444");
         if (botLogChannel == null)
-            throw new ImprobableException(""); // TODO: rework this too
+            throw new ImprobableException(); // TODO: rework this too
         return botLogChannel;
     }
 

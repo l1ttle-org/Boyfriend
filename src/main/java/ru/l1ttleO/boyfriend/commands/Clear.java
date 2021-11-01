@@ -26,13 +26,11 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
-import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Clear extends Command {
@@ -44,8 +42,6 @@ public class Clear extends Command {
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final MessageChannel channel = event.getChannel();
         final int requested;
-        I18n.activeLocale = getGuildSettings(event.getGuild()).getLocale();
-
         if (event.getMember() == null)
             throw new InvalidAuthorException();
         if (!event.getMember().hasPermission((GuildChannel) event.getChannel(), Permission.MESSAGE_MANAGE))
@@ -61,8 +57,8 @@ public class Clear extends Command {
             throw new WrongUsageException(tl("clear.amount.more_than_99"));
         final List<Message> messages = channel.getHistory().retrievePast(requested).complete();
         final int amount = messages.size();
-        final String plural = Utils.plural(amount, tl("clear.message"), tl("clear.no_message"),
-                tl("clear_no_messages"));
+        final String plural = Utils.plural(amount, tl("clear.message"), tl("clear.parentive.message"),
+                tl("clear.parentive.messages"));
         channel.purgeMessages(messages);
         Actions.sendNotification(event.getGuild(), tl("audit.messages_deleted", event.getAuthor().getAsMention(), amount, plural, channel.getId()), true);
     }

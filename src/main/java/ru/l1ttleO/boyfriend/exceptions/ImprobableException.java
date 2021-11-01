@@ -20,6 +20,11 @@ package ru.l1ttleO.boyfriend.exceptions;
 
 public class ImprobableException extends RuntimeException {
     // used for errors that have a low chance of occurring
+
+    public ImprobableException() {
+        super("An unknown error occurred");
+    }
+
     public ImprobableException(final String message) {
         super(message);
     }

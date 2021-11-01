@@ -29,13 +29,11 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
-import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Ban extends Command {
@@ -52,8 +50,6 @@ public class Ban extends Command {
         final Random random = new Random();
         final String reason;
         final User banned;
-        I18n.activeLocale = getGuildSettings(guild).getLocale();
-
         if (args.length < 3)
             throw new WrongUsageException(tl("common.reason_required"));
         if (author == null)

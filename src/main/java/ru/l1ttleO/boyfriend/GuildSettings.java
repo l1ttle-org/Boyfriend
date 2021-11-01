@@ -48,7 +48,7 @@ public class GuildSettings {
             guild.getJDA().shutdown();
         }
         if (this.properties.getProperty("locale") == null)
-            this.properties.setProperty("locale", "ru");
+            this.properties.setProperty("locale", "en");
         this.locale = new Locale(this.properties.getProperty("locale"));
         try {
             this.saveSettings();
@@ -70,5 +70,6 @@ public class GuildSettings {
         this.locale = locale;
         this.properties.setProperty("locale", this.locale.toString());
         this.saveSettings();
+        I18n.activeLocale = locale;
     }
 }

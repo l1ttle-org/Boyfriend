@@ -31,6 +31,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Actions {
@@ -42,6 +43,7 @@ public class Actions {
 
     public static void unbanMember(final @Nullable MessageChannel channel, final @NotNull Member author, final @NotNull User unbanned, final String reason, final boolean silent) {
         final Guild guild = author.getGuild();
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
         guild.unban(unbanned).queue();
         final Thread existingBan = BANS.getOrDefault(guild.getIdLong(), new HashMap<>()).remove(unbanned.getIdLong());
         if (channel != null) {
@@ -141,6 +143,7 @@ public class Actions {
 
     public static void unmuteMember(final @Nullable MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member unmuted, final String reason, final boolean silent) {
         final Guild guild = author.getGuild();
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
         if (!unmuted.getRoles().contains(role)) return;
         guild.removeRoleFromMember(unmuted, role).queue();
         final Thread existingMute = MUTES.getOrDefault(unmuted.getGuild().getIdLong(), new HashMap<>()).remove(unmuted.getIdLong());
@@ -155,6 +158,7 @@ public class Actions {
 
     public static void sendNotification(final @NotNull Guild guild, final @NotNull String text, final boolean silent) {
         final TextChannel channel = guild.getJDA().getTextChannelById("870929165141032971");
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
         if (channel != null)
             channel.sendMessage(text).queue();
         if (!silent && guild.getSystemChannel() != null)

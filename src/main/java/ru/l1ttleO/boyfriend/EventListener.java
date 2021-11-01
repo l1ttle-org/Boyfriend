@@ -42,24 +42,16 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final @NotNull ReadyEvent event) {
-        Utils.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep() + " Я запустился").queue();
-        final JDA jda = event.getJDA();
-        final Guild g = jda.getGuildById("562979429593120778");
-        if (g == null)
-            return;
-        final Member m = g.getSelfMember();
-        if (m.getNickname() != null) {
-            jda.retrieveUserById("196160375593369600").complete().openPrivateChannel().complete().sendMessage("Ахуел блять?").queue();
-            m.modifyNickname(null).queue();
-        }
+        Utils.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep() + " " + tl("common.ready")).queue();
     }
 
     @Override
     public void onGuildMemberJoin(final @NotNull GuildMemberJoinEvent event) {
         final Guild guild = event.getGuild();
         final TextChannel systemChannel = guild.getSystemChannel();
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
         if (systemChannel != null)
-            systemChannel.sendMessage(event.getMember().getAsMention() + ", добро пожаловать на сервер " + guild.getName()).queue();
+            systemChannel.sendMessage(event.getMember().getAsMention() + tl("common.welcome") + " " + guild.getName()).queue();
     }
 
     @Override
@@ -72,7 +64,7 @@ public class EventListener extends ListenerAdapter {
         final User author = event.getAuthor();
         if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) {
             if (logChannel == null)
-                throw new ImprobableException(""); // TODO: rework private messages
+                throw new ImprobableException(); // TODO: rework private messages
             logChannel.sendMessage(tl("private.received", author.getAsMention(), Utils.wrap(message.getContentDisplay()))).queue();
             return;
         }

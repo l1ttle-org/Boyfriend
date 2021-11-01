@@ -21,10 +21,8 @@ package ru.l1ttleO.boyfriend.commands;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
-import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Ping extends Command {
@@ -35,7 +33,6 @@ public class Ping extends Command {
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) {
         final MessageChannel channel = event.getChannel();
-        I18n.activeLocale = getGuildSettings(event.getGuild()).getLocale();
         channel.getJDA().getRestPing().queue(time ->
             channel.sendMessage("%s %s%s".formatted(Utils.getBeep(), time, tl("ms"))).queue()
         );

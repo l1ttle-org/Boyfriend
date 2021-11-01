@@ -42,7 +42,7 @@ public abstract class Command {
     public abstract void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException;
 
     public String getUsages() {
-        return tl("command.usage", CommandHandler.prefix + StringUtils.join(this.usages, "` или `" + CommandHandler.prefix));
+        return tl("command.usage", CommandHandler.prefix + StringUtils.join(this.usages, tl("command.usage.or") + CommandHandler.prefix));
     }
 
 }

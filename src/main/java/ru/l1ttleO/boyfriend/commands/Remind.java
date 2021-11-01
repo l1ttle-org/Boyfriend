@@ -28,12 +28,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.DelayedRunnable;
-import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Remind extends Command {
@@ -50,7 +48,6 @@ public class Remind extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final String text;
-        I18n.activeLocale = getGuildSettings(event.getGuild()).getLocale();
         if (author == null)
             throw new InvalidAuthorException();
         if (args.length < 2) {
