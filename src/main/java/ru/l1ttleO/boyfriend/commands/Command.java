@@ -26,6 +26,8 @@ import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public abstract class Command {
     public final String name;
     public final String[] usages;
@@ -40,8 +42,7 @@ public abstract class Command {
     public abstract void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException;
 
     public String getUsages() {
-        return "Использование: `%s`"
-                .formatted(CommandHandler.prefix + StringUtils.join(this.usages, "` или `" + CommandHandler.prefix));
+        return tl("command.usage", CommandHandler.prefix + StringUtils.join(this.usages, "` или `" + CommandHandler.prefix));
     }
 
 }

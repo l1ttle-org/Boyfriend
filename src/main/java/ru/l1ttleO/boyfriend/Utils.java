@@ -40,6 +40,8 @@ import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Utils {
     public static final @NotNull Random RANDOM = new Random();
 
@@ -65,13 +67,13 @@ public class Utils {
     public static final LinkedHashMap<@NotNull ChronoField, Pair<@NotNull String, @NotNull String[]>> DURATION_TYPES = new LinkedHashMap<>();
 
     static {
-        DURATION_TYPES.put(ChronoField.YEAR, Pair.of("y", new String[]{"год", "год", "года", "лет"}));
-        DURATION_TYPES.put(ChronoField.MONTH_OF_YEAR, Pair.of("M", new String[]{"месяц", "месяц", "месяца", "месяцев"}));
-        DURATION_TYPES.put(ChronoField.ALIGNED_WEEK_OF_YEAR, Pair.of("w", new String[]{"неделя", "неделю", "недели", "недель"}));
-        DURATION_TYPES.put(ChronoField.DAY_OF_YEAR, Pair.of("d", new String[]{"день", "день", "дня", "дней"}));
-        DURATION_TYPES.put(ChronoField.HOUR_OF_DAY, Pair.of("h", new String[]{"час", "час", "часа", "часов"}));
-        DURATION_TYPES.put(ChronoField.MINUTE_OF_HOUR, Pair.of("m", new String[]{"минута", "минуту", "минуты", "минут"}));
-        DURATION_TYPES.put(ChronoField.SECOND_OF_MINUTE, Pair.of("s", new String[]{"секунда", "секунду", "секунды", "секунд"}));
+        DURATION_TYPES.put(ChronoField.YEAR, Pair.of("y", new String[]{tl("duration.year"), tl("duration.accusative.year"), tl("duration.parentive.year"), tl("duration.parentive.years")}));
+        DURATION_TYPES.put(ChronoField.MONTH_OF_YEAR, Pair.of("M", new String[]{tl("duration.month"), tl("duration.accusative.month"), tl("duration.parentive.month"), tl("duration.parentive.months")}));
+        DURATION_TYPES.put(ChronoField.ALIGNED_WEEK_OF_YEAR, Pair.of("w", new String[]{tl("duration.week"), tl("duration.accusative.week"), tl("duration.parentive.week"), tl("duration.parentive.weeks")}));
+        DURATION_TYPES.put(ChronoField.DAY_OF_YEAR, Pair.of("d", new String[]{tl("duration.day"), tl("duration.accusative.day"), tl("duration.parentive.day"), tl("duration.parentive.days")}));
+        DURATION_TYPES.put(ChronoField.HOUR_OF_DAY, Pair.of("h", new String[]{tl("duration.hour"), tl("duration.accusative.hour"), tl("duration.parentive.hour"), tl("duration.parentive.hours")}));
+        DURATION_TYPES.put(ChronoField.MINUTE_OF_HOUR, Pair.of("m", new String[]{tl("duration.minute"), tl("duration.accusative.minute"), tl("duration.parentive.minute"), tl("duration.parentive.minutes")}));
+        DURATION_TYPES.put(ChronoField.SECOND_OF_MINUTE, Pair.of("s", new String[]{tl("duration.second"), tl("duration.accusative.second"), tl("duration.parentive.second"), tl("duration.parentive.seconds")}));
     }
 
     public static @NotNull String getDurationText(long millis, long from, final boolean accusative) {
@@ -151,7 +153,7 @@ public class Utils {
             i++;
         }
         if (out.isEmpty())
-            return "несколько мгновений";
+            return tl("duration.few_moments");
         return out.toString();
     }
 
@@ -170,7 +172,7 @@ public class Utils {
         try {
             final long result = Long.parseLong(duration);
             if (result >= 0 ^ result * 1000 >= 0)
-                throw new ArithmeticException("Введена слишком большая продолжительность, из-за чего она стала отрицательной");
+                throw new ArithmeticException(tl("duration.overflow"));
             return result * 1000;
         } catch (final @NotNull NumberFormatException ignored) {
             if (duration.matches("<t:(\\d+)(:.)?>"))
@@ -227,9 +229,9 @@ public class Utils {
             if (guild != null)
                 member = guild.retrieveMemberById(id).complete();
         } catch (final IllegalArgumentException e) {
-            channel.sendMessage("Неправильно указан пользователь!").queue();
+            channel.sendMessage(tl("common.user_bad_input")).queue();
         } catch (final ErrorResponseException e) {
-            channel.sendMessage("Указан недействительный пользователь!").queue();
+            channel.sendMessage(tl("common.invalid_user")).queue();
         }
         return Pair.of(user, member);
     }
@@ -245,7 +247,7 @@ public class Utils {
     public static @NotNull MessageChannel getBotLogChannel(final @NotNull JDA jda) {
         final MessageChannel botLogChannel = jda.getTextChannelById("618044439939645444");
         if (botLogChannel == null)
-            throw new ImprobableException("Канал #бот-лог является null. Возможно, в коде указан неверный ID канала");
+            throw new ImprobableException(""); // TODO: rework this too
         return botLogChannel;
     }
 

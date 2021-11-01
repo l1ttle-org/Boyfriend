@@ -32,7 +32,7 @@ import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Clear extends Command {
@@ -44,7 +44,7 @@ public class Clear extends Command {
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final MessageChannel channel = event.getChannel();
         final int requested;
-        I18n.activeLocale = getServerSettings(event.getGuild()).getLocale();
+        I18n.activeLocale = getGuildSettings(event.getGuild()).getLocale();
 
         if (event.getMember() == null)
             throw new InvalidAuthorException();

@@ -28,16 +28,17 @@ import java.util.Locale;
 import java.util.Properties;
 import net.dv8tion.jda.api.entities.Guild;
 
-public class ServerSettings {
+public class GuildSettings {
     private Locale locale;
     final Properties properties = new Properties();
     final File file;
 
-    public ServerSettings(final Guild guild) {
+    public GuildSettings(final Guild guild) {
         final Path path = Paths.get("settings_" + guild.getId() + ".properties");
         this.file = path.toFile();
         try {
             if (!this.file.exists() || this.file.isDirectory())
+                //noinspection ResultOfMethodCallIgnored
                 this.file.createNewFile();
             final FileReader r = new FileReader(this.file);
             this.properties.load(r);

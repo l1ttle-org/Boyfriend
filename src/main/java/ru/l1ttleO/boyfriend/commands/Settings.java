@@ -31,47 +31,44 @@ import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Settings extends Command {
     public Settings() {
-        super("settings", "Настраивает бота", "settings <locale/...> [<значение>]");
+        super("settings", "settings.description", "settings.usage");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Guild guild = event.getGuild();
-        I18n.activeLocale = getServerSettings(guild).getLocale();
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
         if (args.length < 2)
             throw new WrongUsageException(tl("settings.setting_required"));
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.MANAGE_SERVER))
             throw new NoPermissionException(false, false);
-        switch (args[1]) {
-            case "locale":
-                if (args.length < 3) {
-                    channel.sendMessage(tl("setting.current_locale", getServerSettings(guild).getLocale().toString())).queue();
-                    return;
-                }
-                if (!"ru".equals(args[2])) {
-                    channel.sendMessage(tl("settings.locale_not_available")).queue();
-                    return;
-                }
-                final Locale l = new Locale(args[2]);
-                try {
-                    getServerSettings(guild).setLocale(l);
-                } catch (final IOException e) {
-                    channel.sendMessage(tl("settings.locale_change_failed"));
-                    return;
-                }
-                channel.sendMessage(tl("settings.locale_changed", getServerSettings(guild).getLocale().toString())).queue();
-                break;
-            default:
-                channel.sendMessage(tl("settings.no_setting")).queue();
-                break;
+        if ("locale".equals(args[1])) {
+            if (args.length < 3) {
+                channel.sendMessage(tl("settings.current_locale", getGuildSettings(guild).getLocale().toString())).queue();
+                return;
+            }
+            if (!"ru".equals(args[2])) {
+                channel.sendMessage(tl("settings.locale_not_available")).queue();
+                return;
+            }
+            final Locale l = new Locale(args[2]);
+            try {
+                getGuildSettings(guild).setLocale(l);
+            } catch (final IOException e) {
+                channel.sendMessage(tl("settings.locale_change_failed")).queue();
+                return;
+            }
+            channel.sendMessage(tl("settings.locale_changed", getGuildSettings(guild).getLocale().toString())).queue();
+        } else {
+            channel.sendMessage(tl("settings.no_setting")).queue();
         }
     }
 }

@@ -31,6 +31,8 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Actions {
 
     public static final @NotNull ThreadGroup BANS_THREAD_GROUP = new ThreadGroup("Bans");
@@ -46,55 +48,49 @@ public class Actions {
             if (existingBan != null)
                 existingBan.interrupt();
             if (!silent)
-                channel.sendMessage("Возвращён из бана %s за `%s`".formatted(unbanned.getAsMention(), reason)).queue();
+                channel.sendMessage(tl("unban.response", unbanned.getAsMention(), reason)).queue();
         }
-        sendNotification(guild, "%s возвращает из бана %s: `%s`".formatted(author.getAsMention(), unbanned.getAsMention(), reason), silent);
+        sendNotification(guild, tl("audit.member_unbanned", author.getAsMention(), unbanned.getAsMention(), reason), silent);
     }
 
     public static void kickMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull Member kicked, final String reason, final boolean silent) {
         if (kicked.getId().equals("504343489664909322")) {
-            channel.sendMessage("Я не буду выгонять создателя!").queue();
+            channel.sendMessage(tl("kick.creator")).queue();
             return;
         }
         final Guild guild = author.getGuild();
-        String privateText = "Тебя выгнал %s за `%s`.".formatted(author.getAsMention(), reason);
+        String privateText = tl("private.kicked", author.getAsMention(), reason);
         final List<Invite> invites = guild.retrieveInvites().complete();
         if (!invites.isEmpty())
-            privateText += """
-                \n
-                Ты можешь перезайти по этой ссылке:
-                https://discord.gg/%s""".formatted(invites.get(0).getCode());
+            privateText += tl("private.invite", invites.get(0).getCode());
         sendDirectMessage(kicked.getUser(), privateText);
         guild.kick(kicked).queue();
         if (!silent)
-            channel.sendMessage("Выгнан %s за `%s`".formatted(kicked.getAsMention(), reason)).queue();
-        sendNotification(guild, "%s выгоняет %s за `%s`".formatted(author.getAsMention(), kicked.getAsMention(), reason), silent);
+            channel.sendMessage(tl("kick.response", kicked.getAsMention(), reason)).queue();
+        sendNotification(guild, tl("audit.member_kicked", author.getAsMention(), kicked.getAsMention(), reason), silent);
     }
 
     public static void banMember(final @NotNull MessageChannel channel, final @NotNull Member author, final @NotNull User banned, final String reason, final long duration, final String durationString, final boolean silent) {
         if (banned.getId().equals("504343489664909322")) {
-            channel.sendMessage("Я не буду банить создателя!").queue();
+            channel.sendMessage(tl("ban.creator")).queue();
             return;
         }
         final Guild guild = author.getGuild();
-        String privateText = "Тебя забанил %s на%s за `%s`.".formatted(author.getAsMention(), durationString, reason);
+        String privateText = tl("private.banned", author.getAsMention(), durationString, reason);
         String replyText;
         try {
             guild.retrieveBan(banned).complete();
-            replyText = "Теперь %s забанен на%s за `%s`".formatted(banned.getAsMention(), durationString, reason);
+            replyText = tl("ban.response_reban", banned.getAsMention(), durationString, reason);
         } catch (final @NotNull ErrorResponseException e) { /* wasn't banned */
-            replyText = "Забанен %s на%s за `%s`".formatted(banned.getAsMention(), durationString, reason);
+            replyText = tl("ban.response", banned.getAsMention(), durationString, reason);
         }
         if (duration > 0) {
             final List<Invite> invites = guild.retrieveInvites().complete();
             if (!invites.isEmpty())
-                privateText += """
-                               \n
-                               По окончании бана ты сможешь перезайти по этой ссылке:
-                               https://discord.gg/""" + invites.get(0).getCode();
+                privateText += tl("private.invite_tempban", invites.get(0).getCode());
         }
         sendDirectMessage(banned, privateText);
-        final String banEntryReason = "(%s: на%s) %s".formatted(author.getUser().getAsTag(), durationString, reason);
+        final String banEntryReason = "(%s: %s%s) %s".formatted(author.getUser().getAsTag(), tl("duration.for"), durationString, reason);
         guild.ban(banned, 0, banEntryReason).complete();
         final HashMap<Long, Thread> guildBans = BANS.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingBan = guildBans.get(banned.getIdLong());
@@ -104,27 +100,27 @@ public class Actions {
             final DelayedRunnable runnable = new DelayedRunnable(BANS_THREAD_GROUP, (DelayedRunnable dr) -> {
                 if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                     return;
-                unbanMember(null, guild.getSelfMember(), banned, "Время наказания истекло", silent);
+                unbanMember(null, guild.getSelfMember(), banned, tl("common.punishment_expired"), silent);
             }, "Ban timer " + banned.getId(), duration, null);
             guildBans.put(banned.getIdLong(), runnable.thread);
             BANS.put(guild.getIdLong(), guildBans);
         }
         if (!silent)
             channel.sendMessage(replyText).queue();
-        sendNotification(guild, "%s банит %s на%s за `%s`".formatted(author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
+        sendNotification(guild, tl("audit.member_banned", author.getAsMention(), banned.getAsMention(), durationString, reason), silent);
     }
 
     public static void muteMember(final @NotNull MessageChannel channel, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString, final boolean silent) {
         if (muted.getId().equals("504343489664909322")) {
-            channel.sendMessage("Я не буду глушить создателя!").queue();
+            channel.sendMessage(tl("mute.creator")).queue();
             return;
         }
         final Guild guild = author.getGuild();
         final boolean remute = muted.getRoles().contains(role);
-        final String replyText = (remute ? "Теперь %s заглушен на%s за `%s`" :
-            "Заглушен %s на%s за `%s`").formatted(muted.getAsMention(), durationString, reason);
-        final String notificationText = (remute ? "%s меняет длительность заключения %s на%s за `%s`" :
-            "%s глушит %s на%s за `%s`").formatted(author.getAsMention(), muted.getAsMention(), durationString, reason);
+        final String replyText = (remute ? tl("mute.response_remute") :
+            tl("mute.response")).formatted(muted.getAsMention(), durationString, reason);
+        final String notificationText = (remute ? tl("audit.member_remuted") :
+            tl("audit.member_muted")).formatted(author.getAsMention(), muted.getAsMention(), durationString, reason);
         guild.addRoleToMember(muted, role).queue();
         final HashMap<Long, Thread> guildMutes = MUTES.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingMute = guildMutes.get(muted.getIdLong());
@@ -133,7 +129,7 @@ public class Actions {
         if (duration > 0) {
             final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP,
                     (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted,
-                            "Время наказания истекло", silent),
+                            tl("common.punishment_expired"), silent),
                                                                  "Mute timer " + muted.getId(), duration, null);
             guildMutes.put(muted.getIdLong(), runnable.thread);
             MUTES.put(guild.getIdLong(), guildMutes);
@@ -152,9 +148,9 @@ public class Actions {
             if (existingMute != null)
                 existingMute.interrupt();
             if (!silent)
-                channel.sendMessage("Выпущен из карцера %s за `%s`".formatted(unmuted.getAsMention(), reason)).queue();
+                channel.sendMessage(tl("unmute.response", unmuted.getAsMention(), reason)).queue();
         }
-        sendNotification(guild, "%s выпускает из карцера %s: `%s`".formatted(author.getAsMention(), unmuted.getAsMention(), reason), silent);
+        sendNotification(guild, tl("audit.member_unmuted", author.getAsMention(), unmuted.getAsMention(), reason), silent);
     }
 
     public static void sendNotification(final @NotNull Guild guild, final @NotNull String text, final boolean silent) {

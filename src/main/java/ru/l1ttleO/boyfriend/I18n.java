@@ -25,6 +25,9 @@ public class I18n {
     public static Locale activeLocale = new Locale("en"); // This will work perfectly while the bot is synchronous
 
     public static String tl(final String key, final Object... args) {
-        return ResourceBundle.getBundle("messages", activeLocale).getString(key).formatted(args);
+        String s = ResourceBundle.getBundle("messages", activeLocale).getString(key).formatted(args);
+        if (key.startsWith("console"))
+            s += "\n";
+        return s;
     }
 }

@@ -35,6 +35,9 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class EventListener extends ListenerAdapter {
 
     @Override
@@ -69,24 +72,20 @@ public class EventListener extends ListenerAdapter {
         final User author = event.getAuthor();
         if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) {
             if (logChannel == null)
-                throw new ImprobableException("Канал #private-messages является null. Возможно, в коде указан неверный ID канала");
-            logChannel.sendMessage("Я получил следующее сообщение от %s: %s"
-                .formatted(author.getAsMention(), Utils.wrap(message.getContentDisplay()))).queue();
+                throw new ImprobableException(""); // TODO: rework private messages
+            logChannel.sendMessage(tl("private.received", author.getAsMention(), Utils.wrap(message.getContentDisplay()))).queue();
             return;
         }
         final Guild guild = event.getGuild();
-        if (message.getMentionedMembers().size() > 3 && !author.isBot() && member != null && guild.getSelfMember().canInteract(member) && !member.hasPermission((GuildChannel) channel, Permission.MESSAGE_MENTION_EVERYONE)) {
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
+        if ((message.getMentionedMembers().size() > 3 || message.getMentionedRoles().size() > 2) && !author.isBot() && member != null && guild.getSelfMember().canInteract(member) && !member.hasPermission((GuildChannel) channel, Permission.MESSAGE_MENTION_EVERYONE)) {
             try {
-                Actions.banMember(channel, guild.getSelfMember(), author, "Более 3 упоминаний в 1 сообщении", 0, "всегда", false);
+                Actions.banMember(channel, guild.getSelfMember(), author, tl("autoban.reason"), 0, tl("ever"), false);
             } catch (final @NotNull Exception e) {
-                channel.sendMessage("Произошла непредвиденная ошибка во время бана за масс-пинг: `" + e + "`").queue();
+                channel.sendMessage(tl("autoban.failed")).queue();
                 e.printStackTrace();
             }
             return;
-        }
-        if (author.getId().equals("504343489664909322") && message.getContentDisplay().equals("@Boyfriend помоги((")) {
-            channel.sendMessage("Ща помогу").queue();
-            guild.addRoleToMember("504343489664909322", guild.getRoleById("782547802726596618")).queue();
         }
         if (message.mentionsEveryone())
             return;

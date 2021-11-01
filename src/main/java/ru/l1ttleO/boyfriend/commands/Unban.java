@@ -29,15 +29,19 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.I18n;
 import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Unban extends Command {
 
     public Unban() {
-        super("unban", "Возвращает пользователя из бана", "unban <@упоминание или ID> [-s] <причина>");
+        super("unban", "unban.description", "unban.usage");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
@@ -48,8 +52,9 @@ public class Unban extends Command {
         final MessageChannel channel = event.getChannel();
         final User unbanned;
         int reasonIndex = 2;
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!");
+            throw new WrongUsageException(tl("common.reason_required"));
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.BAN_MEMBERS))
@@ -59,7 +64,7 @@ public class Unban extends Command {
         try {
             guild.retrieveBan(unbanned).complete();
         } catch (final @NotNull ErrorResponseException e) {
-            channel.sendMessage("Пользователь не забанен!").queue();
+            channel.sendMessage(tl("unban.user_not_banned")).queue();
             return;
         }
         if ("-s".equals(args[reasonIndex])) {

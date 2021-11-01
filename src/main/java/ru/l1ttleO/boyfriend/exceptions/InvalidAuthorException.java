@@ -18,9 +18,11 @@
 
 package ru.l1ttleO.boyfriend.exceptions;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class InvalidAuthorException extends ImprobableException {
 
     public InvalidAuthorException() {
-        super("Автор является null");
+        super(tl("common.author_is_null"));
     }
 }

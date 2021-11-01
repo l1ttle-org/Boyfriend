@@ -35,7 +35,7 @@ import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Mute extends Command {
@@ -52,7 +52,7 @@ public class Mute extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Member muted = Utils.getMember(args[1], event.getGuild(), channel);
-        I18n.activeLocale = getServerSettings(event.getGuild()).getLocale();
+        I18n.activeLocale = getGuildSettings(event.getGuild()).getLocale();
         if (args.length < 3)
             throw new WrongUsageException(tl("common.reason_required"));
         if (author == null)
@@ -68,7 +68,7 @@ public class Mute extends Command {
             if (!roleList.isEmpty()) break;
         }
         if (roleList.isEmpty()) {
-            channel.sendMessage(tl("mute.no_mute_role")).queue();
+            channel.sendMessage(tl("common.no_mute_role")).queue();
             return;
         }
         final Role role = roleList.get(0);

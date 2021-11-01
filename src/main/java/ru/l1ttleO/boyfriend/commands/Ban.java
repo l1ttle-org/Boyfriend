@@ -35,7 +35,7 @@ import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Ban extends Command {
@@ -52,7 +52,7 @@ public class Ban extends Command {
         final Random random = new Random();
         final String reason;
         final User banned;
-        I18n.activeLocale = getServerSettings(guild).getLocale();
+        I18n.activeLocale = getGuildSettings(guild).getLocale();
 
         if (args.length < 3)
             throw new WrongUsageException(tl("common.reason_required"));

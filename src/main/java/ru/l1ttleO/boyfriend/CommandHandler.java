@@ -39,6 +39,8 @@ import ru.l1ttleO.boyfriend.commands.Unmute;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class CommandHandler {
     public static final @NotNull String prefix = "!";
     public static final @NotNull HashMap<String, Command> COMMAND_LIST = new HashMap<>();
@@ -62,7 +64,7 @@ public class CommandHandler {
         String name = args[0].substring(prefix.length()).toLowerCase();
         if (name.isEmpty()) name = "help";
         if (!COMMAND_LIST.containsKey(name)) {
-            channel.sendMessage("Неизвестная команда! Попробуй `%shelp`".formatted(prefix)).queue();
+            channel.sendMessage(tl("command.unknown", prefix)).queue();
             return;
         }
         final Command command = COMMAND_LIST.get(name);
@@ -74,14 +76,14 @@ public class CommandHandler {
             return;
         try {
             if (command.usages.length > 0 && args.length == 1 && Arrays.stream(command.usages).noneMatch(name::equals))
-                throw new WrongUsageException("Нету аргументов!");
+                throw new WrongUsageException(tl("command.no_arguments"));
             command.run(event, args);
         } catch (final @NotNull WrongUsageException e) {
             channel.sendMessage(e.getMessage() + " " + command.getUsages()).queue();
         } catch (final @NotNull NoPermissionException e) {
             channel.sendMessage(e.getMessage()).queue();
         } catch (final @NotNull Exception e) {
-            channel.sendMessage("Произошла непредвиденная ошибка во время выполнения команды: `" + e + "`").queue();
+            channel.sendMessage(tl("command.error", e)).queue();
             e.printStackTrace();
         }
     }

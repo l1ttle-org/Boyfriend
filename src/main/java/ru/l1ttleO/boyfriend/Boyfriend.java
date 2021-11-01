@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Boyfriend {
-    private static final Map<Guild, ServerSettings> settingsMap = new HashMap<Guild, ServerSettings>();
+    private static final Map<Guild, GuildSettings> settingsMap = new HashMap<>();
 
     public static void main(final String[] args) throws LoginException, InterruptedException, IOException {
         final JDABuilder builder = JDABuilder.createDefault(Files.readString(Paths.get("token.txt")).trim());
@@ -50,7 +51,7 @@ public class Boyfriend {
         final JDA jda = builder.build().awaitReady();
 
         for (final Guild g : jda.getGuilds()) {
-            final ServerSettings settings = new ServerSettings(g);
+            final GuildSettings settings = new GuildSettings(g);
             settingsMap.put(g, settings);
         }
 
@@ -64,7 +65,16 @@ public class Boyfriend {
                 }
                 if ("grant".equals(s[0])) {
                     final Guild guild = jda.getGuildById(s[1]);
-                    guild.addRoleToMember(s[3], guild.getRoleById(s[2])).complete();
+                    if (guild == null) {
+                        console.printf(tl("console.no_guild"));
+                        continue;
+                    }
+                    final Role role = guild.getRoleById(s[2]);
+                    if (role == null) {
+                        console.printf(tl("console.no_role"));
+                        continue;
+                    }
+                    guild.addRoleToMember(s[3], role).complete();
                     console.printf(tl("console.role_granted"));
                     continue;
                 }
@@ -84,12 +94,11 @@ public class Boyfriend {
             } catch (final Exception e) {
                 console.printf(tl("console.error"));
                 e.printStackTrace();
-                continue;
             }
         }
     }
 
-    public static ServerSettings getServerSettings(final Guild guild) {
+    public static GuildSettings getGuildSettings(final Guild guild) {
         return settingsMap.get(guild);
     }
 }

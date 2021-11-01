@@ -34,10 +34,12 @@ import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class Unmute extends Command {
 
     public Unmute() {
-        super("unmute", "Возвращает участника из мута", "unmute <@упоминание или ID> [-s] <причина>");
+        super("unmute", "unmute.description", "unmute.usage");
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
@@ -48,7 +50,7 @@ public class Unmute extends Command {
         final MessageChannel channel = event.getChannel();
         int reasonIndex = 2;
         if (args.length < 3)
-            throw new WrongUsageException("Требуется указать причину!");
+            throw new WrongUsageException(tl("common.reason_required"));
         if (author == null)
             throw new InvalidAuthorException();
         if (!author.hasPermission(Permission.MESSAGE_MANAGE))
@@ -57,7 +59,7 @@ public class Unmute extends Command {
         if (unmuted == null)
             return;
         if (author.getIdLong() == unmuted.getIdLong())
-            throw new NoPermissionException("Ты не можешь выпустить самого себя из карцера!");
+            throw new NoPermissionException(tl("unmute.self_unmute"));
         Utils.checkInteractions(guild, author, unmuted);
         List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
@@ -65,7 +67,7 @@ public class Unmute extends Command {
             if (!roleList.isEmpty()) break;
         }
         if (roleList.isEmpty()) {
-            channel.sendMessage("Не найдена роль мута!").queue();
+            channel.sendMessage(tl("common.no_mute_role")).queue();
             return;
         }
         final Role role = roleList.get(0);

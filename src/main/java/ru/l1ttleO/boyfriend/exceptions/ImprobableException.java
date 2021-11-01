@@ -19,7 +19,7 @@
 package ru.l1ttleO.boyfriend.exceptions;
 
 public class ImprobableException extends RuntimeException {
-    // used for errors that have a low chance of occuring
+    // used for errors that have a low chance of occurring
     public ImprobableException(final String message) {
         super(message);
     }

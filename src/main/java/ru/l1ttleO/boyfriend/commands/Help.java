@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.CommandHandler;
 import ru.l1ttleO.boyfriend.I18n;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getServerSettings;
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Help extends Command {
@@ -35,7 +35,7 @@ public class Help extends Command {
     }
 
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) {
-        I18n.activeLocale = getServerSettings(event.getGuild()).getLocale();
+        I18n.activeLocale = getGuildSettings(event.getGuild()).getLocale();
         final StringBuilder text = new StringBuilder(tl("help.help"));
         final ArrayList<Command> commands = new ArrayList<>(CommandHandler.COMMAND_LIST.values());
         commands.sort(Comparator.comparing(command -> command.name));

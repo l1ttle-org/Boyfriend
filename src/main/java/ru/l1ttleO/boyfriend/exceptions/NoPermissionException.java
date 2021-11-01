@@ -20,6 +20,8 @@ package ru.l1ttleO.boyfriend.exceptions;
 
 import org.jetbrains.annotations.NotNull;
 
+import static ru.l1ttleO.boyfriend.I18n.tl;
+
 public class NoPermissionException extends Exception {
 
     public NoPermissionException(final @NotNull String message) {
@@ -32,9 +34,8 @@ public class NoPermissionException extends Exception {
 
     public static String getMessage(final boolean selfInteract, final boolean userInteract) {
         if (!selfInteract && !userInteract)
-            return "У тебя недостаточно прав для использования этой команды!";
-        return "У %s недостаточно прав для взаимодействия с данным пользователем!".formatted(
-            selfInteract && userInteract ? "нас" :
-            selfInteract ? "меня" : "тебя");
+            return tl("command.no_permissions");
+        return tl("interact.cant", selfInteract && userInteract ? tl("interact.us") :
+                selfInteract ? tl("interact.i") : tl("interact.you"));
     }
 }
