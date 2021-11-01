@@ -29,6 +29,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -76,6 +77,26 @@ public class Boyfriend {
                     }
                     guild.addRoleToMember(s[3], role).complete();
                     console.printf(tl("console.role_granted"));
+                    continue;
+                }
+                if ("ungrant".equals(s[0])) {
+                    final Guild guild = jda.getGuildById(s[1]);
+                    if (guild == null) {
+                        console.printf(tl("console.no_guild"));
+                        continue;
+                    }
+                    final Role role = guild.getRoleById(s[2]);
+                    if (role == null) {
+                        console.printf(tl("console.no_role"));
+                        continue;
+                    }
+                    final Member member = guild.retrieveMemberById(s[3]).complete();
+                    if (!member.getRoles().contains(role)) {
+                        console.printf(tl("console.user_no_role"));
+                        continue;
+                    }
+                    guild.removeRoleFromMember(member, role).complete();
+                    console.printf(tl("console.role_removed"));
                     continue;
                 }
                 final TextChannel tc;
