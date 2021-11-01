@@ -63,7 +63,7 @@ public class Unban extends Command {
         if (unbanned == null) return;
         try {
             guild.retrieveBan(unbanned).complete();
-        } catch (final @NotNull ErrorResponseException e) {
+        } catch (final ErrorResponseException e) {
             channel.sendMessage(tl("unban.user_not_banned")).queue();
             return;
         }

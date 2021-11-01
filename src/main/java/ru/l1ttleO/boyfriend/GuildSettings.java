@@ -27,13 +27,14 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Properties;
 import net.dv8tion.jda.api.entities.Guild;
+import org.jetbrains.annotations.NotNull;
 
 public class GuildSettings {
     private Locale locale;
     final Properties properties = new Properties();
-    final File file;
+    final @NotNull File file;
 
-    public GuildSettings(final Guild guild) {
+    public GuildSettings(final @NotNull Guild guild) {
         final Path path = Paths.get("settings_" + guild.getId() + ".properties");
         this.file = path.toFile();
         try {

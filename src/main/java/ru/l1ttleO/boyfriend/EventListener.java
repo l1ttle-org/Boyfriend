@@ -81,7 +81,7 @@ public class EventListener extends ListenerAdapter {
         if ((message.getMentionedMembers().size() > 3 || message.getMentionedRoles().size() > 2) && !author.isBot() && member != null && guild.getSelfMember().canInteract(member) && !member.hasPermission((GuildChannel) channel, Permission.MESSAGE_MENTION_EVERYONE)) {
             try {
                 Actions.banMember(channel, guild.getSelfMember(), author, tl("autoban.reason"), 0, tl("ever"), false);
-            } catch (final @NotNull Exception e) {
+            } catch (final Exception e) {
                 channel.sendMessage(tl("autoban.failed")).queue();
                 e.printStackTrace();
             }

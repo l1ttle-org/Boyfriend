@@ -174,7 +174,7 @@ public class Utils {
             if (result >= 0 ^ result * 1000 >= 0)
                 throw new ArithmeticException(tl("duration.overflow"));
             return result * 1000;
-        } catch (final @NotNull NumberFormatException ignored) {
+        } catch (final NumberFormatException ignored) {
             if (duration.matches("<t:(\\d+)(:.)?>"))
                 return Long.parseLong(duration.split("\\D+$")[0].substring(3)) * 1000 - from;
         }

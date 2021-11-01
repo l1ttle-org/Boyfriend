@@ -52,7 +52,7 @@ public class Clear extends Command {
             throw new NoPermissionException(false, false);
         try {
             requested = Integer.parseInt(args[1]) + 1;
-        } catch (final @NotNull NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new WrongUsageException(tl("clear.amount.invalid"));
         }
         if (requested < 2)

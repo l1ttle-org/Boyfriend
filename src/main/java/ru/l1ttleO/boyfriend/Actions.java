@@ -81,7 +81,7 @@ public class Actions {
         try {
             guild.retrieveBan(banned).complete();
             replyText = tl("ban.response_reban", banned.getAsMention(), durationString, reason);
-        } catch (final @NotNull ErrorResponseException e) { /* wasn't banned */
+        } catch (final ErrorResponseException e) { /* wasn't banned */
             replyText = tl("ban.response", banned.getAsMention(), durationString, reason);
         }
         if (duration > 0) {
@@ -164,6 +164,6 @@ public class Actions {
     public static void sendDirectMessage(final @NotNull User user, final @NotNull String message) {
         try {
             user.openPrivateChannel().complete().sendMessage(message).complete();
-        } catch (final @NotNull ErrorResponseException e) { /* can't DM to this user */ }
+        } catch (final ErrorResponseException e) { /* can't DM to this user */ }
     }
 }

@@ -78,11 +78,11 @@ public class CommandHandler {
             if (command.usages.length > 0 && args.length == 1 && Arrays.stream(command.usages).noneMatch(name::equals))
                 throw new WrongUsageException(tl("command.no_arguments"));
             command.run(event, args);
-        } catch (final @NotNull WrongUsageException e) {
+        } catch (final WrongUsageException e) {
             channel.sendMessage(e.getMessage() + " " + command.getUsages()).queue();
-        } catch (final @NotNull NoPermissionException e) {
+        } catch (final NoPermissionException e) {
             channel.sendMessage(e.getMessage()).queue();
-        } catch (final @NotNull Exception e) {
+        } catch (final Exception e) {
             channel.sendMessage(tl("command.error", e)).queue();
             e.printStackTrace();
         }

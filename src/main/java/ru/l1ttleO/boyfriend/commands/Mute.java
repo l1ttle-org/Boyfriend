@@ -75,7 +75,7 @@ public class Mute extends Command {
         long duration = 0;
         try {
             duration = Math.max(Utils.parseDuration(args[2], 0), 0);
-        } catch (final @NotNull NumberFormatException | ArithmeticException ignored) {
+        } catch (final NumberFormatException | ArithmeticException ignored) {
         }
         int reasonIndex = 2;
         if (duration > 0) {

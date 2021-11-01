@@ -82,9 +82,9 @@ public class Remind extends Command {
             throw new WrongUsageException(tl("remind.text_required"));
         try {
             duration = Utils.parseDuration(args[1], 0);
-        } catch (final @NotNull NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new WrongUsageException(tl("remind.duration_invalid"));
-        } catch (final @NotNull ArithmeticException e) {
+        } catch (final ArithmeticException e) {
             throw new WrongUsageException(tl("remind.duration_too_big"));
         }
         if (duration <= 0) {
