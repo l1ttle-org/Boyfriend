@@ -39,7 +39,7 @@ public class Help extends Command {
         for (final Command command : commands) {
             text.append("\n`%s%s` - %s".formatted(CommandHandler.prefix, command.name, tl(command.description)));
             if (command.usages.length > 0)
-                text.append(". ").append(command.getUsages());
+                text.append(". ").append(tl(command.getUsages()));
             text.append(";");
         }
         text.deleteCharAt(text.length() - 1);

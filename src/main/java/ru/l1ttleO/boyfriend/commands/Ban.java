@@ -34,6 +34,7 @@ import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
+import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Ban extends Command {
@@ -81,7 +82,7 @@ public class Ban extends Command {
             reasonIndex++;
         }
         reason = StringUtils.join(args, ' ', reasonIndex, args.length);
-        if (random.nextInt(101) == 100)
+        if (random.nextInt(101) == 100 && "ru".equals(getGuildSettings(guild).getLocale().toString()))
             channel.sendMessage(tl("ban.casting_ban")).queue();
         if (silent)
             channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad

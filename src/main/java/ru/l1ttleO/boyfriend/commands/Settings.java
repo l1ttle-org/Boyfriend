@@ -19,6 +19,8 @@
 package ru.l1ttleO.boyfriend.commands;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -42,6 +44,9 @@ public class Settings extends Command {
         final Member author = event.getMember();
         final MessageChannel channel = event.getChannel();
         final Guild guild = event.getGuild();
+        final List<String> availableLocales = new ArrayList<>();
+        availableLocales.add("ru"); // I hope there's a better way to do this
+        availableLocales.add("en");
         if (args.length < 2)
             throw new WrongUsageException(tl("settings.setting_required"));
         if (author == null)
@@ -53,7 +58,7 @@ public class Settings extends Command {
                 channel.sendMessage(tl("settings.current_locale", getGuildSettings(guild).getLocale().toString())).queue();
                 return;
             }
-            if (!"ru".equals(args[2])) {
+            if (!availableLocales.contains(args[2])) {
                 channel.sendMessage(tl("settings.locale_not_available")).queue();
                 return;
             }
