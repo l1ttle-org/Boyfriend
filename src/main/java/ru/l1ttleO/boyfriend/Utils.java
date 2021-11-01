@@ -50,8 +50,8 @@ public class Utils {
     }
 
     public static String getBeep() {
-        final String[] letters = {"а", "о", "и"};
-        return "Б%sп!".formatted(randomElement(letters));
+        final String[] letters = {tl("beep.a"), tl("beep.b"), tl("beep.c")};
+        return tl("beep", randomElement(letters));
     }
 
     public static <T> T plural(long amount, final T one, final T twoToFour, final T fiveToZero) {
