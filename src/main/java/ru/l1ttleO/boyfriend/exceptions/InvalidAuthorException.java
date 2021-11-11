@@ -18,11 +18,14 @@
 
 package ru.l1ttleO.boyfriend.exceptions;
 
+import org.jetbrains.annotations.NotNull;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
+
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class InvalidAuthorException extends ImprobableException {
 
-    public InvalidAuthorException() {
-        super(tl("common.author_is_null"));
+    public InvalidAuthorException(final @NotNull BotLocale locale) {
+        super(tl("common.no_message_author", locale));
     }
 }

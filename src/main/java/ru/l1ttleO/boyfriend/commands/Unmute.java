@@ -23,65 +23,70 @@ import java.util.List;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.commands.util.CommandReader;
+import ru.l1ttleO.boyfriend.commands.util.Sender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.I18n.tl;
-
-public class Unmute extends Command {
+public class Unmute extends Command implements IChatCommand, IConsoleCommand {
 
     public Unmute() {
-        super("unmute", "unmute.description", "unmute.usage");
+        super("unmute", Permission.MESSAGE_MANAGE, Permission.MANAGE_ROLES);
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    @Override
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(event.getGuild(), event.getMessage(), reader, sender);
+    }
+
+    @Override
+    public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(IConsoleCommand.readGuild(this, reader, sender), null, reader, sender);
+    }
+
+    public static void run(final @NotNull Guild guild, final @Nullable Message message, final @NotNull CommandReader reader,
+        final @NotNull Sender sender) throws WrongUsageException, NoPermissionException {
+
         boolean silent = false;
-        final Guild guild = event.getGuild();
-        final Member author = event.getMember();
-        final Member unmuted;
-        final MessageChannel channel = event.getChannel();
-        int reasonIndex = 2;
-        if (args.length < 3)
-            throw new WrongUsageException(tl("common.reason_required"));
-        if (author == null)
-            throw new InvalidAuthorException();
-        if (!author.hasPermission(Permission.MESSAGE_MANAGE))
-            throw new NoPermissionException(false, false);
-        unmuted = Utils.getMember(args[1], event.getGuild(), channel);
-        if (unmuted == null)
-            return;
-        if (author.getIdLong() == unmuted.getIdLong())
-            throw new NoPermissionException(tl("unmute.self_unmute"));
-        Utils.checkInteractions(guild, author, unmuted);
+        final BotLocale locale = sender.getLocale();
+        final Member author = message == null ? guild.getSelfMember() : message.getMember();
+        final Member unmuted = reader.nextMember(guild);
+        Utils.checkInteractions(message == null ? null : author, unmuted, locale);
         List<Role> roleList = new ArrayList<>();
         for (final String name : Mute.ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);
             if (!roleList.isEmpty()) break;
         }
         if (roleList.isEmpty()) {
-            channel.sendMessage(tl("common.no_mute_role")).queue();
+            sender.replyTl("actions.mute.no_role");
             return;
         }
         final Role role = roleList.get(0);
         if (!unmuted.getRoles().contains(role)) {
-            channel.sendMessage(tl("unmute.member_not_muted")).queue();
+            sender.replyTl("actions.unmute.not_muted");
             return;
         }
-        if ("-s".equals(args[reasonIndex])) {
+        String reason = reader.next("reason");
+        if ("-s".equals(reason)) {
             silent = true;
-            reasonIndex++;
+            reason = "";
         }
-        if (silent)
-            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
-        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
-        Actions.unmuteMember(channel, role, author, unmuted, reason, silent);
+        reason = reader.getRemaining(reason);
+        if (reason.isEmpty())
+            throw reader.noArgumentException("reason");
+        if (silent) Utils.purge(message);
+        Actions.unmuteMember(silent ? null : sender, role, author, unmuted, reason, silent);
     }
 }

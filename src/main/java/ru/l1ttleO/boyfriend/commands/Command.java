@@ -18,31 +18,65 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import java.util.ArrayList;
+import java.util.stream.Stream;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import ru.l1ttleO.boyfriend.CommandHandler;
-import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import org.jetbrains.annotations.Nullable;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
+import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
-import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public abstract class Command {
-    public final String name;
-    public final String[] usages;
-    public final String description;
+    public final @NotNull String @NotNull [] aliases;
+    public final @NotNull Permission[] userPermissions;
+    public final @NotNull Permission[] botPermissions;
 
-    public Command(final String name, final String description, final String... usages) {
-        this.name = name;
-        this.usages = usages;
-        this.description = description;
+    public Command(final @NotNull String name, final @NotNull Permission @NotNull [] userPermissions, final @NotNull Permission @NotNull [] botPermissions, final @NotNull String @NotNull ... aliases) {
+        this.aliases = Stream.concat(Stream.of(name), Stream.of(aliases)).toArray(String[]::new);
+        this.botPermissions = botPermissions;
+        this.userPermissions = userPermissions;
     }
 
-    public abstract void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException;
-
-    public String getUsages() {
-        return tl("command.usage", CommandHandler.prefix + StringUtils.join(this.usages, tl("command.usage.or") + CommandHandler.prefix));
+    public Command(final @NotNull String name, final @NotNull Permission @NotNull [] permissions, final @NotNull String... aliases) {
+        this(name, permissions, permissions, aliases);
     }
 
+    public Command(final @NotNull String name, final @NotNull Permission userPermission, final @NotNull Permission botPermission, final @NotNull String... aliases) {
+        this(name, new Permission[]{userPermission}, new Permission[]{botPermission}, aliases);
+    }
+
+    public Command(final @NotNull String name, final @NotNull Permission permission, final @NotNull String... aliases) {
+        this(name, permission, permission, aliases);
+    }
+
+    public Command(final @NotNull String name, final @NotNull String... aliases) {
+        this(name, new Permission[]{}, aliases);
+    }
+
+    public @Nullable String getUsages(final @NotNull String prefix, final @NotNull BotLocale locale, final boolean isConsole, final boolean useFallback) {
+        final ArrayList<String> usages = new ArrayList<>();
+        int currentUsage = 1;
+        String usage = tl("command." + this.aliases[0] + ".usage" + (isConsole ? "_console" : ""), locale, this.aliases[0]);
+        if (usage == null) {
+            if (!useFallback)
+                return null;
+            usage = this.aliases[0];
+        }
+        while (usage != null) {
+            usages.add(usage);
+            currentUsage++;
+            usage = tl("command." + this.aliases[0] + ".usage_" + (isConsole ? "console" : "") + currentUsage, locale, this.aliases[0]);
+        }
+        return tl("command.usage", locale, prefix + StringUtils.join(usages, tl("command.usage.or", locale) + prefix));
+    }
+
+    public void checkSelfPermissions(final @NotNull Guild guild, final @NotNull BotLocale locale) throws NoPermissionException {
+        if (!Utils.hasPermission(guild.getSelfMember(), this.botPermissions))
+            throw new NoPermissionException(true, false, "action", locale);
+    }
 }

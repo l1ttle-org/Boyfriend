@@ -18,34 +18,28 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
-import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.commands.util.CommandReader;
-import ru.l1ttleO.boyfriend.commands.util.Sender;
 import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
-import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
+import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
+import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-public class Ping extends Command implements IChatCommand, IConsoleCommand {
+public class Grant extends Command implements IConsoleCommand {
 
-    public Ping() {
-        super("ping");
+    public Grant() {
+        super("grant", Permission.MANAGE_ROLES);
     }
 
     @Override
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender) {
-        run(event.getJDA(), sender);
-    }
-
-    @Override
-    public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender) {
-        run(sender.jda, sender);
-    }
-
-    public static void run(final @NotNull JDA jda, final @NotNull Sender sender) {
-        jda.getRestPing().queue(time ->
-            sender.replyTl("command.ping.reply", Utils.getBeep(sender.getLocale()), time)
-        );
+    public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender) throws NoPermissionException, WrongUsageException {
+        final Guild guild = IConsoleCommand.readGuild(this, reader, sender);
+        final Role role = reader.nextRole(guild);
+        final Member member = reader.nextMember(guild);
+        guild.addRoleToMember(member, role).complete();
+        sender.replyTl("command.grant.done", role.getName(), member.getUser().getAsTag(), guild.getName());
     }
 }

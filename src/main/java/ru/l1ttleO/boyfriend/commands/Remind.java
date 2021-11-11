@@ -20,83 +20,86 @@ package ru.l1ttleO.boyfriend.commands;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.DelayedRunnable;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.commands.util.CommandReader;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
+import ru.l1ttleO.boyfriend.settings.GuildSettings;
 
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
-public class Remind extends Command {
+public class Remind extends Command implements IChatCommand {
 
     public Remind() {
-        super("remind", "remind.description", "remind.usage1", "remind.usage2");
+        super("remind");
     }
 
     public static final @NotNull ThreadGroup REMINDERS_THREAD_GROUP = new ThreadGroup("Reminders");
     public static final @NotNull HashMap<Long, HashMap<DelayedRunnable, Pair<String, Long>>> REMINDERS = new HashMap<>();
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, WrongUsageException {
+    @Override
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender) throws WrongUsageException {
         final long duration;
         final Member author = event.getMember();
-        final MessageChannel channel = event.getChannel();
         final String text;
-        if (author == null)
-            throw new InvalidAuthorException();
-        if (args.length < 2) {
+        final BotLocale locale = sender.getLocale();
+        if (!reader.hasNext()) {
             final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
             if (userReminders.isEmpty())
-                channel.sendMessage(tl("remind.no_active_reminders")).queue();
+                sender.replyTl("command.remind.no_active_reminders");
             else {
-                final StringBuilder listText = new StringBuilder(tl("remind.active_reminders"));
+                final StringBuilder listText = new StringBuilder(tl("command.remind.active_reminders", locale));
                 String append;
                 for (final Entry<DelayedRunnable, Pair<String, Long>> reminder : userReminders.entrySet()) {
                     append = """
 
                         <t:%s:R> %s <#%s>
-                        %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, tl("in"), reminder.getValue().getRight(), reminder.getValue().getLeft());
+                        %s""".formatted((reminder.getKey().startedAt + reminder.getKey().duration) / 1000, tl("common.in_channel", locale), reminder.getValue().getRight(), reminder.getValue().getLeft());
                     if (listText.isEmpty())
                         append = append.strip();
                     if (listText.length() + append.length() > 2000) {
-                        channel.sendMessage(listText).queue();
+                        sender.reply(listText);
                         listText.setLength(0); // clear
                         if (append.length() > 2000)
                             append = append.substring(0, 1994) + "..." + append.substring(append.length() - 3);
                     }
                     listText.append(append);
                 }
-                channel.sendMessage(listText).queue();
+                sender.reply(listText);
             }
             return;
-        } else if (args.length < 3)
-            throw new WrongUsageException(tl("remind.text_required"));
+        }
         try {
-            duration = Utils.parseDuration(args[1], 0);
+            duration = Utils.parseDuration(reader.next("duration"), 0);
         } catch (final NumberFormatException e) {
-            throw new WrongUsageException(tl("remind.duration_invalid"));
+            throw reader.badArgumentException("duration");
         } catch (final ArithmeticException e) {
-            throw new WrongUsageException(tl("remind.duration_too_big"));
+            throw reader.badArgumentException("duration.too_big");
         }
         if (duration <= 0) {
-            throw new WrongUsageException(tl("remind.duration_negative"));
+            throw reader.badArgumentException("duration.not_positive");
         }
-        text = Utils.wrap(StringUtils.join(args, ' ', 2, args.length));
-        channel.sendMessage(tl("remind.reminder_active", Utils.getDurationText(duration, 0, true), text)).queue();
+        if (!reader.hasNext())
+            throw reader.noArgumentException("remind_text");
+        text = Utils.wrap(reader.getRemaining());
+        sender.replyTl("command.remind.reminder_set", Utils.getDurationText(duration, 0, true, locale), text);
 
+        final Guild guild = event.getGuild();
         final DelayedRunnable runnable = new DelayedRunnable(REMINDERS_THREAD_GROUP, (final @NotNull DelayedRunnable dr) -> {
-            channel.sendMessage(author.getAsMention() + " " + text).queue();
+            sender.reply(author.getAsMention() + " " + text);
             REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>()).remove(dr);
         }, "Remind timer " + author.getId(), duration, (final @NotNull DelayedRunnable dr) ->
-                Actions.sendNotification(event.getGuild(), tl("remind.reminder_interrupted", author.getAsMention(), text), false));
+                Actions.sendNotification(guild, tl("common.reminder_interrupted", GuildSettings.LOCALE.get(guild), author.getAsMention(), text), false));
         final var userReminders = REMINDERS.getOrDefault(author.getIdLong(), new HashMap<>());
-        userReminders.put(runnable, Pair.of(text, channel.getIdLong()));
+        userReminders.put(runnable, Pair.of(text, event.getChannel().getIdLong()));
         REMINDERS.put(author.getIdLong(), userReminders);
     }
 }

@@ -18,59 +18,64 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.commands.util.CommandReader;
+import ru.l1ttleO.boyfriend.commands.util.Sender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.I18n.tl;
-
-public class Unban extends Command {
+public class Unban extends Command implements IChatCommand, IConsoleCommand {
 
     public Unban() {
-        super("unban", "unban.description", "unban.usage");
+        super("unban", Permission.BAN_MEMBERS);
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    @Override
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender)
+        throws WrongUsageException {
+        run(event.getGuild(), event.getMessage(), reader, sender);
+    }
+
+    @Override
+    public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(IConsoleCommand.readGuild(this, reader, sender), null, reader, sender);
+    }
+
+    public static void run(final @NotNull Guild guild, final @Nullable Message message, final @NotNull CommandReader reader,
+        final @NotNull Sender sender) throws WrongUsageException {
+
         boolean silent = false;
-        final Guild guild = event.getGuild();
-        final JDA jda = guild.getJDA();
-        final Member author = event.getMember();
-        final MessageChannel channel = event.getChannel();
-        final User unbanned;
-        int reasonIndex = 2;
-        if (args.length < 3)
-            throw new WrongUsageException(tl("common.reason_required"));
-        if (author == null)
-            throw new InvalidAuthorException();
-        if (!author.hasPermission(Permission.BAN_MEMBERS))
-            throw new NoPermissionException(false, false);
-        unbanned = Utils.getUser(args[1], jda, channel);
-        if (unbanned == null) return;
+        final Member author = message == null ? guild.getSelfMember() : message.getMember();
+        final User unbanned = reader.nextUser(guild.getJDA());
         try {
             guild.retrieveBan(unbanned).complete();
         } catch (final ErrorResponseException e) {
-            channel.sendMessage(tl("unban.user_not_banned")).queue();
+            sender.replyTl("actions.unban.not_banned");
             return;
         }
-        if ("-s".equals(args[reasonIndex])) {
+        String reason = reader.next("reason");
+        if ("-s".equals(reason)) {
             silent = true;
-            reasonIndex++;
+            reason = "";
         }
-        if (silent)
-            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
-        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
-        Actions.unbanMember(channel, author, unbanned, reason, silent);
+        reason = reader.getRemaining(reason);
+        if (reason.isEmpty())
+            throw reader.noArgumentException("reason");
+
+        if (silent) Utils.purge(message);
+        Actions.unbanMember(silent ? null : sender, author, unbanned, reason, silent);
     }
 }

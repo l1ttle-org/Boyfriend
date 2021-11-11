@@ -19,6 +19,7 @@
 package ru.l1ttleO.boyfriend.exceptions;
 
 import org.jetbrains.annotations.NotNull;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
 
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
@@ -28,14 +29,12 @@ public class NoPermissionException extends Exception {
         super(message);
     }
 
-    public NoPermissionException(final boolean selfInteract, final boolean userInteract) {
-        super(getMessage(selfInteract, userInteract));
+    public NoPermissionException(final boolean noSelfPermissions, final boolean noUserPermissions, final @NotNull String type, final @NotNull BotLocale locale) {
+        super(getMessage(noSelfPermissions, noUserPermissions, type, locale));
     }
 
-    public static String getMessage(final boolean selfInteract, final boolean userInteract) {
-        if (!selfInteract && !userInteract)
-            return tl("command.no_permissions");
-        return tl("interact.cant", selfInteract && userInteract ? tl("interact.us") :
-                selfInteract ? tl("interact.i") : tl("interact.you"));
+    public static String getMessage(final boolean noSelfPermissions, final boolean noUserPermissions, final @NotNull String type, final @NotNull BotLocale locale) {
+        return tl("permission.missing", locale, noSelfPermissions && noUserPermissions ? tl("permission.pronoun.we", locale) :
+                noSelfPermissions ? tl("permission.pronoun.i", locale) : tl("permission.pronoun.you", locale), tl("permission.missing." + type, locale));
     }
 }

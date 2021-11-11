@@ -18,60 +18,62 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
+import java.util.stream.Collectors;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
-import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
-import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
+import ru.l1ttleO.boyfriend.commands.util.CommandReader;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
+import ru.l1ttleO.boyfriend.settings.GuildSettings;
+import ru.l1ttleO.boyfriend.settings.Settings.Entry;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
-public class Settings extends Command {
+public class Settings extends Command implements IChatCommand {
     public Settings() {
-        super("settings", "settings.description", "settings.usage");
+        super("settings", Permission.MANAGE_SERVER, "config");
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
-        final Member author = event.getMember();
-        final MessageChannel channel = event.getChannel();
+    @Override
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender) throws WrongUsageException {
         final Guild guild = event.getGuild();
-        final List<String> availableLocales = new ArrayList<>();
-        availableLocales.add("ru"); // I hope there's a better way to do this
-        availableLocales.add("en");
-        if (args.length < 2)
-            throw new WrongUsageException(tl("settings.setting_required"));
-        if (author == null)
-            throw new InvalidAuthorException();
-        if (!author.hasPermission(Permission.MANAGE_SERVER))
-            throw new NoPermissionException(false, false);
-        if ("locale".equals(args[1])) {
-            if (args.length < 3) {
-                channel.sendMessage(tl("settings.current_locale", getGuildSettings(guild).getLocale().toString())).queue();
-                return;
+        final BotLocale locale = sender.getLocale();
+        final List<Entry<Guild, ?>> availableSettings = Arrays.asList(GuildSettings.LOCALE, GuildSettings.PREFIX);
+        if (!reader.hasNext()) {
+            final StringBuilder listText = new StringBuilder(tl("command.settings.list", locale, guild.getName()));
+            for (final Entry<Guild, ?> entry : availableSettings) {
+                listText.append("\n`").append(entry.name).append("`: ").append(entry.formatted(guild));
             }
-            if (!availableLocales.contains(args[2])) {
-                channel.sendMessage(tl("settings.locale_not_available")).queue();
-                return;
-            }
-            final Locale l = new Locale(args[2]);
-            try {
-                getGuildSettings(guild).setLocale(l);
-            } catch (final IOException e) {
-                channel.sendMessage(tl("settings.locale_change_failed")).queue();
-                return;
-            }
-            channel.sendMessage(tl("settings.locale_changed", getGuildSettings(guild).getLocale().toString())).queue();
-        } else {
-            channel.sendMessage(tl("settings.no_setting")).queue();
+            sender.reply(listText);
+            return;
         }
+        String settingStr = reader.next("setting");
+        final boolean isReset = "reset".equals(settingStr);
+        if (isReset) settingStr = reader.next("setting");
+        final Entry<Guild, ?> entry = availableSettings.stream().collect(Collectors.toMap(e -> e.name, e -> e)).get(settingStr);
+        if (entry == null)
+            throw reader.badArgumentException("setting");
+        if (isReset) {
+            entry.reset(guild);
+            sender.update();
+            sender.replyTl("settings." + entry.name + ".reset");
+            return;
+        }
+        if (!reader.hasNext()) {
+            sender.replyTl("settings." + entry.name + ".current", entry.formatted(guild));
+            return;
+        }
+        try {
+            entry.setFormatted(guild, reader.next(entry.type));
+        } catch (final IllegalArgumentException e) {
+            throw reader.badArgumentException(entry.type);
+        }
+        sender.update();
+        sender.replyTl("settings." + entry.name + ".changed", entry.formatted(guild));
     }
 }

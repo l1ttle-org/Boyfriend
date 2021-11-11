@@ -19,16 +19,42 @@
 package ru.l1ttleO.boyfriend;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import net.dv8tion.jda.api.entities.Guild;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class I18n {
-    public static Locale activeLocale = new Locale("en"); // This will work perfectly while the bot is synchronous
+    public static @Nullable String tl(final @NotNull String key, final @NotNull BotLocale locale, final Object... args) {
+        try {
+            return ResourceBundle.getBundle("lang.common", locale.locale).getString(key).formatted(args);
+        } catch (final @NotNull MissingResourceException e) {
+            return null;
+        }
+    }
 
-    public static String tl(final @NotNull String key, final Object... args) {
-        String s = ResourceBundle.getBundle("messages", activeLocale).getString(key).formatted(args);
-        if (key.startsWith("console"))
-            s += "\n";
-        return s;
+    public enum BotLocale {
+        EN("en"),
+        RU("ru");
+
+        public Locale locale;
+
+        BotLocale(final String language) {
+            this.locale = new Locale(language);
+        }
+
+        public static @NotNull BotLocale detect(final @Nullable Guild guild) {
+            if (guild == null)
+                return getDefault();
+            final Locale locale = guild.getLocale();
+            if (locale.getLanguage().equals(RU.locale.getLanguage()))
+                return RU;
+            return getDefault();
+        }
+
+        public static @NotNull BotLocale getDefault() {
+            return EN;
+        }
     }
 }

@@ -28,15 +28,20 @@ import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
+import java.util.Set;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Guild.Ban;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
 import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 
@@ -45,13 +50,18 @@ import static ru.l1ttleO.boyfriend.I18n.tl;
 public class Utils {
     public static final @NotNull Random RANDOM = new Random();
 
-    public static <T> T randomElement(final T @NotNull [] array) {
+    @SafeVarargs
+    public static <T> T[] toArray(final @NotNull T... array) {
+        return array;
+    }
+
+    @SafeVarargs
+    public static <T> T randomElement(final @NotNull T... array) {
         return array[RANDOM.nextInt(array.length)];
     }
 
-    public static String getBeep() {
-        final String[] letters = {tl("beep.a"), tl("beep.b"), tl("beep.c")};
-        return tl("beep", randomElement(letters));
+    public static String getBeep(final BotLocale locale) {
+        return tl("common.beep." + randomElement("a", "b", "c"), locale);
     }
 
     public static <T> T plural(long amount, final T one, final T twoToFour, final T fiveToZero) {
@@ -64,19 +74,19 @@ public class Utils {
         return twoToFour;
     }
 
-    public static final LinkedHashMap<@NotNull ChronoField, Pair<@NotNull String, @NotNull String[]>> DURATION_TYPES = new LinkedHashMap<>();
+    public static final LinkedHashMap<@NotNull ChronoField, Pair<@NotNull String, @NotNull String>> DURATION_TYPES = new LinkedHashMap<>();
 
     static {
-        DURATION_TYPES.put(ChronoField.YEAR, Pair.of("y", new String[]{tl("duration.year"), tl("duration.accusative.year"), tl("duration.parentive.year"), tl("duration.parentive.years")}));
-        DURATION_TYPES.put(ChronoField.MONTH_OF_YEAR, Pair.of("M", new String[]{tl("duration.month"), tl("duration.accusative.month"), tl("duration.parentive.month"), tl("duration.parentive.months")}));
-        DURATION_TYPES.put(ChronoField.ALIGNED_WEEK_OF_YEAR, Pair.of("w", new String[]{tl("duration.week"), tl("duration.accusative.week"), tl("duration.parentive.week"), tl("duration.parentive.weeks")}));
-        DURATION_TYPES.put(ChronoField.DAY_OF_YEAR, Pair.of("d", new String[]{tl("duration.day"), tl("duration.accusative.day"), tl("duration.parentive.day"), tl("duration.parentive.days")}));
-        DURATION_TYPES.put(ChronoField.HOUR_OF_DAY, Pair.of("h", new String[]{tl("duration.hour"), tl("duration.accusative.hour"), tl("duration.parentive.hour"), tl("duration.parentive.hours")}));
-        DURATION_TYPES.put(ChronoField.MINUTE_OF_HOUR, Pair.of("m", new String[]{tl("duration.minute"), tl("duration.accusative.minute"), tl("duration.parentive.minute"), tl("duration.parentive.minutes")}));
-        DURATION_TYPES.put(ChronoField.SECOND_OF_MINUTE, Pair.of("s", new String[]{tl("duration.second"), tl("duration.accusative.second"), tl("duration.parentive.second"), tl("duration.parentive.seconds")}));
+        DURATION_TYPES.put(ChronoField.YEAR, Pair.of("y", "year"));
+        DURATION_TYPES.put(ChronoField.MONTH_OF_YEAR, Pair.of("M", "month"));
+        DURATION_TYPES.put(ChronoField.ALIGNED_WEEK_OF_YEAR, Pair.of("w", "week"));
+        DURATION_TYPES.put(ChronoField.DAY_OF_YEAR, Pair.of("d", "day"));
+        DURATION_TYPES.put(ChronoField.HOUR_OF_DAY, Pair.of("h", "hour"));
+        DURATION_TYPES.put(ChronoField.MINUTE_OF_HOUR, Pair.of("m", "minute"));
+        DURATION_TYPES.put(ChronoField.SECOND_OF_MINUTE, Pair.of("s", "second"));
     }
 
-    public static @NotNull String getDurationText(long millis, long from, final boolean accusative) {
+    public static @NotNull String getDurationText(long millis, long from, final boolean accusative, final BotLocale locale) {
         if (from == 0)
             from = System.currentTimeMillis();
         final LinkedHashMap<ChronoField, Integer> durations = new LinkedHashMap<>();
@@ -141,10 +151,10 @@ public class Utils {
         // build a string
         final StringBuilder out = new StringBuilder();
         int i = 0;
-        String[] names;
+        String name;
         for (final var entry : durations.entrySet()) {
-            names = DURATION_TYPES.get(entry.getKey()).getRight();
-            out.append(negative && entry.getValue() > 0 ? "-" : "").append(entry.getValue()).append(" ").append(plural(entry.getValue(), names[accusative ? 1 : 0], names[2], names[3]));
+            name = "duration." + DURATION_TYPES.get(entry.getKey()).getRight() + plural(entry.getValue(), accusative ? ".accusative" : "", ".parentive", "s.parentive");
+            out.append(negative && entry.getValue() > 0 ? "-" : "").append(entry.getValue()).append(" ").append(tl(name, locale));
             if (i < durations.size() - 2) {
                 out.append(", ");
             } else if (i == durations.size() - 2) {
@@ -153,7 +163,7 @@ public class Utils {
             i++;
         }
         if (out.isEmpty())
-            return tl("duration.few_moments");
+            return tl("duration.few_moments", locale);
         return out.toString();
     }
 
@@ -170,13 +180,16 @@ public class Utils {
         if (from == 0)
             from = System.currentTimeMillis();
         try {
-            final long result = Long.parseLong(duration);
-            if (result >= 0 ^ result * 1000 >= 0)
-                throw new ArithmeticException(tl("duration.overflow"));
-            return result * 1000;
-        } catch (final NumberFormatException ignored) {
-            if (duration.matches("<t:(\\d+)(:.)?>"))
-                return Long.parseLong(duration.split("\\D+$")[0].substring(3)) * 1000 - from;
+            return Math.multiplyExact(Long.parseLong(duration), 1000);
+        } catch (final NumberFormatException e) {
+            if (duration.matches("<t:(\\d+)(:.)?>")) {
+                try {
+                    final long result = Long.parseLong(duration.split("\\D+$")[0].substring(3));
+                    return Math.multiplyExact(result - from / 1000, 1000) - from % 1000; // result * 1000 - from, but more overflow-safe
+                } catch (final NumberFormatException e2) {
+                    throw new ArithmeticException("long overflow");
+                }
+            }
         }
 
         final StringBuilder input = new StringBuilder(duration);
@@ -215,11 +228,18 @@ public class Utils {
         return date.toInstant(ZoneOffset.UTC).toEpochMilli() - from;
     }
 
-    public static @NotNull String wrap(final @NotNull String text) {
-        return "```" + text.replaceAll("```", "​`​`​`​") + " ```";
+    public static @NotNull String wrap(@NotNull String text) {
+        text = text.replaceAll("```", "​`​`​`​");
+        return "```" + text + (text.endsWith("`") || text.isEmpty() ? " " : "") + "```";
     }
 
-    public static @NotNull Pair<User, Member> getUserAndMember(final @NotNull String from, final @Nullable JDA jda, final @Nullable Guild guild, final @NotNull MessageChannel channel) {
+    public static void purge(final @Nullable Message message) {
+        if (message != null)
+            message.getChannel().purgeMessages(message); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
+    }
+
+    public static @NotNull Pair<@Nullable User, @Nullable Member> getUserAndMember(final @NotNull String from,
+        final @Nullable JDA jda, final @Nullable Guild guild) throws IllegalArgumentException {
         User user = null;
         Member member = null;
         try {
@@ -228,20 +248,17 @@ public class Utils {
                 user = jda.retrieveUserById(id).complete();
             if (guild != null)
                 member = guild.retrieveMemberById(id).complete();
-        } catch (final IllegalArgumentException e) {
-            channel.sendMessage(tl("common.user_bad_input")).queue();
-        } catch (final ErrorResponseException e) {
-            channel.sendMessage(tl("common.invalid_user")).queue();
-        }
+        } catch (final ErrorResponseException e) { // unknown user or member, remains null
+        } 
         return Pair.of(user, member);
     }
 
-    public static User getUser(final @NotNull String from, final @Nullable JDA jda, final @NotNull MessageChannel channel) {
-        return getUserAndMember(from, jda, null, channel).getLeft();
+    public static @Nullable User getUser(final @NotNull String from, final @NotNull JDA jda) throws IllegalArgumentException {
+        return getUserAndMember(from, jda, null).getLeft();
     }
 
-    public static Member getMember(final @NotNull String from, final @Nullable Guild guild, final @NotNull MessageChannel channel) {
-        return getUserAndMember(from, null, guild, channel).getRight();
+    public static @Nullable Member getMember(final @NotNull String from, final @NotNull Guild guild) throws IllegalArgumentException {
+        return getUserAndMember(from, null, guild).getRight();
     }
 
     public static @NotNull MessageChannel getBotLogChannel(final @NotNull JDA jda) {
@@ -251,11 +268,31 @@ public class Utils {
         return botLogChannel;
     }
 
-    public static void checkInteractions(final @NotNull Guild guild, final @NotNull Member author,
-            final @NotNull Member subject) throws NoPermissionException {
-        final boolean selfInteract = guild.getSelfMember().canInteract(subject);
-        final boolean authorInteract = author.canInteract(subject);
+    public static boolean isCreator(final long userID) {
+        return Set.of(504343489664909322L, 459726660359553025L).contains(userID);
+    }
+
+    public static boolean hasPermission(final @NotNull Member member, final @NotNull Permission... permissions) {
+        return member.hasPermission(permissions) || member.equals(member.getGuild().getOwner());
+    }
+
+    public static void checkInteractions(final @Nullable Member author, final @NotNull Member subject,
+        final @NotNull BotLocale locale) throws NoPermissionException {
+        if (author != null && isCreator(author.getIdLong()))
+            return;
+        if (subject.equals(author))
+            throw new NoPermissionException(false, true, "interact_yourself", locale);
+        final boolean selfInteract = subject.getGuild().getSelfMember().canInteract(subject);
+        final boolean authorInteract = author == null || author.canInteract(subject);
         if (!selfInteract || !authorInteract)
-            throw new NoPermissionException(!selfInteract, !authorInteract);
+            throw new NoPermissionException(!selfInteract, !authorInteract, "interact_user", locale);
+    }
+
+    public static @Nullable Ban getBan(final @NotNull Guild guild, final @NotNull User user) {
+        try {
+            return guild.retrieveBan(user).complete();
+        } catch (final ErrorResponseException e) {
+            return null;
+        }
     }
 }

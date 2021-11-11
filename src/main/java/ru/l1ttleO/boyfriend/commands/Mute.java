@@ -23,71 +23,78 @@ import java.util.List;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.commands.util.CommandReader;
+import ru.l1ttleO.boyfriend.commands.util.Sender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.I18n.tl;
-
-public class Mute extends Command {
+public class Mute extends Command implements IChatCommand, IConsoleCommand {
 
     public Mute() {
-        super("mute", "mute.description", "mute.usage");
+        super("mute", Permission.MESSAGE_MANAGE, Permission.MANAGE_ROLES);
     }
 
+    // TODO use config (mute role)
     public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    @Override
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(event.getGuild(), event.getMessage(), reader, sender);
+    }
+
+    @Override
+    public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(IConsoleCommand.readGuild(this, reader, sender), null, reader, sender);
+    }
+
+    public static void run(final @NotNull Guild guild, final @Nullable Message message, final @NotNull CommandReader reader,
+        final @NotNull Sender sender) throws WrongUsageException, NoPermissionException {
+
         boolean silent = false;
-        final Guild guild = event.getGuild();
-        final Member author = event.getMember();
-        final MessageChannel channel = event.getChannel();
-        final Member muted = Utils.getMember(args[1], event.getGuild(), channel);
-        if (args.length < 3)
-            throw new WrongUsageException(tl("common.reason_required"));
-        if (author == null)
-            throw new InvalidAuthorException();
-        if (!author.hasPermission(Permission.MESSAGE_MANAGE))
-            throw new NoPermissionException(false, false);
-        if (muted == null)
-            return;
-        Utils.checkInteractions(guild, author, muted);
+        final BotLocale locale = sender.getLocale();
+        final Member author = message == null ? guild.getSelfMember() : message.getMember();
+        final Member muted = reader.nextMember(guild);
+        Utils.checkInteractions(message == null ? null : author, muted, locale);
         List<Role> roleList = new ArrayList<>();
         for (final String name : ROLE_NAMES) {
             roleList = guild.getRolesByName(name, true);
             if (!roleList.isEmpty()) break;
         }
         if (roleList.isEmpty()) {
-            channel.sendMessage(tl("common.no_mute_role")).queue();
+            sender.replyTl("actions.mute.no_role");
             return;
         }
-        final Role role = roleList.get(0);
+        String reason = reader.next("reason");
         long duration = 0;
         try {
-            duration = Math.max(Utils.parseDuration(args[2], 0), 0);
+            duration = Math.max(Utils.parseDuration(reason, 0), 0);
         } catch (final NumberFormatException | ArithmeticException ignored) {
         }
-        int reasonIndex = 2;
-        if (duration > 0) {
-            if (args.length < 4)
-                throw new WrongUsageException(tl("common.reason_required"));
-            reasonIndex++;
-        } else duration = 3600_000;
-        final String durationString = " " + Utils.getDurationText(duration, 0, true);
-        if ("-s".equals(args[reasonIndex])) {
+        if (duration != 0)
+            reason = reader.next("reason");
+        else
+            duration = 3600_000;
+        final String durationString = " " + Utils.getDurationText(duration, 0, true, locale);
+        if ("-s".equals(reason)) {
             silent = true;
-            reasonIndex++;
+            reason = "";
         }
-        if (silent)
-            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
-        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
-        Actions.muteMember(channel, role, author, muted, reason, duration, durationString, silent);
+        reason = reader.getRemaining(reason);
+        if (reason.isEmpty())
+            throw reader.noArgumentException("reason");
+        if (silent) Utils.purge(message);
+        Actions.muteMember(silent ? null : sender, roleList.get(0), author, muted, reason, duration, durationString);
     }
 }

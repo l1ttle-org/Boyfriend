@@ -22,70 +22,74 @@ import java.util.Random;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.Actions;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
 import ru.l1ttleO.boyfriend.Utils;
-import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
+import ru.l1ttleO.boyfriend.commands.util.CommandReader;
+import ru.l1ttleO.boyfriend.commands.util.Sender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
-public class Ban extends Command {
+public class Ban extends Command implements IChatCommand, IConsoleCommand {
 
     public Ban() {
-        super("ban", "ban.description", "ban.usage");
+        super("ban", Permission.BAN_MEMBERS);
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    @Override
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(event.getGuild(), event.getMessage(), reader, sender);
+    }
+
+    @Override
+    public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(IConsoleCommand.readGuild(this, reader, sender), null, reader, sender);
+    }
+
+    public static void run(final @NotNull Guild guild, final @Nullable Message message, final @NotNull CommandReader reader,
+        final @NotNull Sender sender) throws WrongUsageException, NoPermissionException {
+
         boolean silent = false;
-        final Guild guild = event.getGuild();
-        final Member author = event.getMember();
-        final MessageChannel channel = event.getChannel();
-        final Random random = new Random();
-        final String reason;
-        final User banned;
-        if (args.length < 3)
-            throw new WrongUsageException(tl("common.reason_required"));
-        if (author == null)
-            throw new InvalidAuthorException();
-        if (!author.hasPermission(Permission.BAN_MEMBERS))
-            throw new NoPermissionException(false, false);
-        banned = Utils.getUser(args[1], event.getJDA(), channel);
-        if (banned == null)
-            return;
+        final BotLocale locale = sender.getLocale();
+        final Member author = message == null ? guild.getSelfMember() : message.getMember();
+        final User banned = reader.nextUser(guild.getJDA());
         try {
-            Utils.checkInteractions(guild, author, guild.retrieveMember(banned).complete());
+            Utils.checkInteractions(message == null ? null : author, guild.retrieveMember(banned).complete(), locale);
         } catch (final ErrorResponseException e) { /* not on the server */ }
+        String reason = reader.next("reason");
         long duration = 0;
         try {
-            duration = Math.max(Utils.parseDuration(args[2], 0), 0);
+            duration = Math.max(Utils.parseDuration(reason, 0), 0);
         } catch (final NumberFormatException | ArithmeticException ignored) {
         }
-        int reasonIndex = 2;
-        String durationString = tl("duration.ever");
+        String durationString = tl("duration.ever", locale);
         if (duration > 0) {
-            if (args.length < 4) {
-                throw new WrongUsageException(tl("common.reason_required"));
-            }
-            durationString = " " + Utils.getDurationText(duration, 0, true);
-            reasonIndex++;
+            reason = reader.next("reason");
+            durationString = " " + Utils.getDurationText(duration, 0, true, locale);
         }
-        if ("-s".equals(args[reasonIndex])) {
+        if ("-s".equals(reason)) {
             silent = true;
-            reasonIndex++;
+            reason = "";
         }
-        reason = StringUtils.join(args, ' ', reasonIndex, args.length);
-        if (random.nextInt(101) == 100 && "ru".equals(getGuildSettings(guild).getLocale().toString()))
-            channel.sendMessage(tl("ban.casting_ban")).queue();
-        if (silent)
-            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
-        Actions.banMember(channel, author, banned, reason, duration, durationString, silent);
+        reason = reader.getRemaining(reason);
+        if (reason.isEmpty())
+            throw reader.noArgumentException("reason");
+
+        if (new Random().nextInt(101) == 100 && locale == BotLocale.RU)
+            sender.reply("Я кастую бан!");
+        if (silent) Utils.purge(message);
+        Actions.banMember(silent ? null : sender, author, banned, reason, duration, durationString);
     }
 }

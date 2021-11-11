@@ -18,34 +18,33 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
-import ru.l1ttleO.boyfriend.Utils;
+import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.commands.util.CommandReader;
-import ru.l1ttleO.boyfriend.commands.util.Sender;
 import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
-import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 
-public class Ping extends Command implements IChatCommand, IConsoleCommand {
+public class Shutdown extends Command implements IConsoleCommand {
 
-    public Ping() {
-        super("ping");
-    }
-
-    @Override
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender) {
-        run(event.getJDA(), sender);
+    public Shutdown() {
+        super("shutdown", new Permission[0], "stop");
     }
 
     @Override
     public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender) {
-        run(sender.jda, sender);
-    }
-
-    public static void run(final @NotNull JDA jda, final @NotNull Sender sender) {
-        jda.getRestPing().queue(time ->
-            sender.replyTl("command.ping.reply", Utils.getBeep(sender.getLocale()), time)
-        );
+        sender.replyTl("common.shutting_down");
+        for (final var reminders : Remind.REMINDERS.values()) {
+            for (final var reminder : reminders.keySet())
+                reminder.thread.interrupt();
+        }
+        for (final var mutes : Actions.MUTES.values()) {
+            for (final var mute : mutes.values())
+                mute.interrupt();
+        }
+        for (final var bans : Actions.BANS.values()) {
+            for (final var ban : bans.values())
+                ban.interrupt();
+        }
+        sender.jda.shutdownNow();
     }
 }

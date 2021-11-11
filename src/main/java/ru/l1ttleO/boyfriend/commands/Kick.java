@@ -19,47 +19,56 @@
 package ru.l1ttleO.boyfriend.commands;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.Actions;
 import ru.l1ttleO.boyfriend.Utils;
+import ru.l1ttleO.boyfriend.commands.util.CommandReader;
+import ru.l1ttleO.boyfriend.commands.util.Sender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.InvalidAuthorException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.I18n.tl;
-
-public class Kick extends Command {
+public class Kick extends Command implements IChatCommand, IConsoleCommand {
 
     public Kick() {
-        super("kick", "kick.description", "kick.usage");
+        super("kick", Permission.KICK_MEMBERS);
     }
 
-    public void run(final @NotNull MessageReceivedEvent event, final @NotNull String @NotNull [] args) throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+    @Override
+    public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender)
+        throws NoPermissionException, WrongUsageException {
+        run(event.getGuild(), event.getMessage(), reader, sender);
+    }
+
+    @Override
+    public void run(final @NotNull CommandReader reader, final @NotNull ConsoleSender sender)
+        throws InvalidAuthorException, NoPermissionException, WrongUsageException {
+        run(IConsoleCommand.readGuild(this, reader, sender), null, reader, sender);
+    }
+
+    public static void run(final @NotNull Guild guild, final @Nullable Message message, final @NotNull CommandReader reader,
+        final @NotNull Sender sender) throws NoPermissionException, WrongUsageException {
+
         boolean silent = false;
-        final Member author = event.getMember();
-        final MessageChannel channel = event.getChannel();
-        final Member kicked = Utils.getMember(args[1], event.getGuild(), channel);
-        int reasonIndex = 2;
-        if (args.length < 3)
-            throw new WrongUsageException(tl("common.reason_required"));
-        if (author == null)
-            throw new InvalidAuthorException();
-        if ("-s".equals(args[reasonIndex])) {
+        final Member author = message == null ? guild.getSelfMember() : message.getMember();
+        final Member kicked = reader.nextMember(guild);
+        Utils.checkInteractions(author, kicked, sender.getLocale());
+        String reason = reader.next("reason");
+        if ("-s".equals(reason)) {
             silent = true;
-            reasonIndex++;
+            reason = "";
         }
-        final String reason = StringUtils.join(args, ' ', reasonIndex, args.length);
-        if (!author.hasPermission(Permission.KICK_MEMBERS))
-            throw new NoPermissionException(false, false);
-        if (kicked == null)
-            return;
-        Utils.checkInteractions(event.getGuild(), author, kicked);
-        if (silent)
-            channel.purgeMessages(event.getMessage()); // We don't use 'Message.delete()' to make sure alfred doesn't get mad
-        Actions.kickMember(channel, author, kicked, reason, silent);
+        reason = reader.getRemaining(reason);
+        if (reason.isEmpty())
+            throw reader.noArgumentException("reason");
+        if (silent) Utils.purge(message);
+        Actions.kickMember(sender, author, kicked, reason);
     }
 }

@@ -33,25 +33,27 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
+import ru.l1ttleO.boyfriend.I18n.BotLocale;
+import ru.l1ttleO.boyfriend.commands.util.CommandHandler;
+import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
+import ru.l1ttleO.boyfriend.settings.GuildSettings;
 
-import static ru.l1ttleO.boyfriend.Boyfriend.getGuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final @NotNull ReadyEvent event) {
-        Utils.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep() + " " + tl("common.ready")).queue();
+        Utils.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep(BotLocale.RU) + " " + tl("common.ready", BotLocale.RU)).queue();
     }
 
     @Override
     public void onGuildMemberJoin(final @NotNull GuildMemberJoinEvent event) {
         final Guild guild = event.getGuild();
         final TextChannel systemChannel = guild.getSystemChannel();
-        I18n.activeLocale = getGuildSettings(guild).getLocale();
+        final BotLocale locale = GuildSettings.LOCALE.get(guild);
         if (systemChannel != null)
-            systemChannel.sendMessage(event.getMember().getAsMention() + tl("common.welcome") + " " + guild.getName()).queue();
+            systemChannel.sendMessage(tl("common.welcome", locale, event.getMember().getAsMention(), guild.getName())).queue();
     }
 
     @Override
@@ -62,25 +64,25 @@ public class EventListener extends ListenerAdapter {
         final MessageChannel channel = event.getChannel();
         final TextChannel logChannel = jda.getTextChannelById("860066351430238248");
         final User author = event.getAuthor();
-        if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) {
-            if (logChannel == null)
-                throw new ImprobableException(); // TODO: rework private messages
-            logChannel.sendMessage(tl("private.received", author.getAsMention(), Utils.wrap(message.getContentDisplay()))).queue();
+        if (message.isFromType(ChannelType.PRIVATE) && !author.isBot()) { // TODO: rework private messages
+            if (logChannel != null)
+                logChannel.sendMessage(tl("common.private_received", BotLocale.RU, author.getAsMention(), Utils.wrap(message.getContentDisplay()))).queue();
             return;
         }
-        final Guild guild = event.getGuild();
-        I18n.activeLocale = getGuildSettings(guild).getLocale();
-        if ((message.getMentionedMembers().size() > 3 || message.getMentionedRoles().size() > 2) && !author.isBot() && member != null && guild.getSelfMember().canInteract(member) && !member.hasPermission((GuildChannel) channel, Permission.MESSAGE_MENTION_EVERYONE)) {
+        final Member selfMember = event.getGuild().getSelfMember();
+        final BotLocale locale = GuildSettings.LOCALE.get(event.getGuild());
+        final MessageSender sender = new MessageSender(message, locale);
+        if ((message.getMentionedMembers().size() > 3 || message.getMentionedRoles().size() > 2) && !author.isBot() && member != null && selfMember.canInteract(member) && !member.hasPermission((GuildChannel) channel, Permission.MESSAGE_MENTION_EVERYONE)) {
             try {
-                Actions.banMember(channel, guild.getSelfMember(), author, tl("autoban.reason"), 0, tl("ever"), false);
+                Actions.banMember(sender, selfMember, author, tl("actions.ban.massping.reason", locale), 0, tl("ever", locale));
             } catch (final Exception e) {
-                channel.sendMessage(tl("autoban.failed")).queue();
+                channel.sendMessage(tl("actions.ban.massping.failed", locale)).queue();
                 e.printStackTrace();
             }
             return;
         }
         if (message.mentionsEveryone())
             return;
-        CommandHandler.onMessageReceived(event);
+        CommandHandler.handleCommand(event, message.getContentRaw(), sender);
     }
 }
