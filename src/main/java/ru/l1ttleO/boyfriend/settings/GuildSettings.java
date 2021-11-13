@@ -34,7 +34,7 @@ public class GuildSettings extends Settings {
             return has(key) ? super.get(key) : BotLocale.detect(key);
         }
     };
-    public static final StringEntry<Guild> PREFIX = new StringEntry<>(GuildSettings::get, "prefix", "t!");
+    public static final StringEntry<Guild> PREFIX = new StringEntry<>(GuildSettings::get, "prefix", "!");
 
     public GuildSettings(final @NotNull Guild guild) {
         super(guild.getId(), "Guild configuration file for Boyfriend");
