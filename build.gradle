@@ -14,17 +14,13 @@ version 'dev'
 
 repositories {
     mavenCentral()
-    maven {
-        name 'm2-dv8tion'
-        url 'https://m2.dv8tion.net/releases'
-    }
 }
 
 compileJava.options.encoding = 'UTF-8'
 
 dependencies {
-    implementation('ch.qos.logback:logback-classic:1.2.5')
-    implementation('net.dv8tion:JDA:4.3.0_339')
+    implementation('ch.qos.logback:logback-classic:1.2.7')
+    implementation('net.dv8tion:JDA:5.0.0-alpha.2')
     implementation('org.apache.commons:commons-lang3:3.12.0')
 }
 
