@@ -55,7 +55,7 @@ public abstract class Sender {
 
         @Override
         public void reply(final @NotNull CharSequence text) {
-            System.out.println(Utils.toPlainText(text, jda));
+            System.out.println(Utils.toPlainText(text, this.jda));
         }
 
         @Override

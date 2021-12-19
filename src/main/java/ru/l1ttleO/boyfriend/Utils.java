@@ -32,9 +32,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.AbstractChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Guild.Ban;
+import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -48,6 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.I18n.BotLocale;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.settings.GuildSettings;
+
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Utils {
@@ -276,7 +277,7 @@ public class Utils {
     }
 
     public static void sendBotLog(final @NotNull JDA jda, final @NotNull CharSequence message) {
-        for (Guild guild : jda.getGuilds()) {
+        for (final Guild guild : jda.getGuilds()) {
             final MessageChannel channel = GuildSettings.BOT_LOG_CHANNEL.get(guild);
             if (channel != null)
                 channel.sendMessage(message).queue();
@@ -311,11 +312,11 @@ public class Utils {
         }
     }
     
-    public static Pattern getMentionPattern(@NotNull String symbols) {
+    public static Pattern getMentionPattern(final @NotNull String symbols) {
         return Pattern.compile("<" + symbols + "([0-9]+)>");
     }
     
-    public static @Nullable String stripID(@NotNull String from, @NotNull String begin, @NotNull String end) {
+    public static @Nullable String stripID(@NotNull String from, final @NotNull String begin, final @NotNull String end) {
         if (from.startsWith(begin) && from.endsWith(end))
             from = from.substring(begin.length(), from.length() - end.length());
         return from.matches("[0-9]+") ? from : null;
@@ -329,19 +330,19 @@ public class Utils {
         return stripID(from, "<@&", ">");
     }
 
-    public static @NotNull String toPlainText(@NotNull CharSequence from, @NotNull JDA jda) {
+    public static @NotNull String toPlainText(@NotNull CharSequence from, final @NotNull JDA jda) {
         from = USER_PATTERN.matcher(from).replaceAll(result -> {
-            User user = jda.retrieveUserById(result.group(1)).complete();
+            final User user = jda.retrieveUserById(result.group(1)).complete();
             return user == null ? result.group() : "@" + user.getAsTag();
-            });
+        });
         from = CHANNEL_PATTERN.matcher(from).replaceAll(result -> {
-            AbstractChannel channel = jda.getGuildChannelById(result.group(1));
+            final GuildChannel channel = jda.getGuildChannelById(result.group(1));
             return channel == null ? result.group() : "#" + channel.getName();
-            });
+        });
         from = ROLE_PATTERN.matcher(from).replaceAll(result -> {
-            Role role = jda.getRoleById(result.group(1));
+            final Role role = jda.getRoleById(result.group(1));
             return role == null ? result.group() : "@" + role.getName();
-            });
+        });
         return MarkdownSanitizer.sanitize(from.toString());
     }
 }

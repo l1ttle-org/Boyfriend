@@ -71,8 +71,8 @@ public class Boyfriend {
 
     public static JDA getJDA() {
         if (!hasJDA) {
-            synchronized(hasJDA) { // just wait until it's available,
-            }                      // another synchronized section should be already running at this point
+            synchronized(hasJDA) { // just wait until it's available, another synchronized section should be already running at this point
+            }
         }
         return jda;
     }

@@ -50,7 +50,7 @@ public class Settings extends Command implements IChatCommand {
         if (!reader.hasNext()) {
             final StringBuilder listText = new StringBuilder(tl("command.settings.list", locale, guild.getName()));
             for (final Entry<Guild, ?> entry : availableSettings) {
-                listText.append("\n`").append(entry.name).append("`: ").append(getEntryValue(entry, guild, locale));
+                listText.append("\n`").append(entry.name).append("`: ").append(this.getEntryValue(entry, guild, locale));
             }
             sender.reply(listText);
             return;
@@ -68,7 +68,7 @@ public class Settings extends Command implements IChatCommand {
             return;
         }
         if (!reader.hasNext()) {
-            sender.replyTl("settings." + entry.name + ".current", getEntryValue(entry, guild, locale));
+            sender.replyTl("settings." + entry.name + ".current", this.getEntryValue(entry, guild, locale));
             return;
         }
         try {
@@ -77,7 +77,7 @@ public class Settings extends Command implements IChatCommand {
             throw reader.badArgumentException(entry.type);
         }
         sender.update();
-        sender.replyTl("settings." + entry.name + ".changed", getEntryValue(entry, guild, locale));
+        sender.replyTl("settings." + entry.name + ".changed", this.getEntryValue(entry, guild, locale));
     }
     
     private @NotNull String getEntryValue(final @NotNull Entry<Guild, ?> entry, final @NotNull Guild guild, final @NotNull BotLocale locale) {

@@ -68,7 +68,7 @@ public abstract class Settings {
         try {
             if (this.hasProperty(entry.name))
                 entry.putFromString(key, this.getProperty(entry.name));
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             System.err.println(e);
         }
     }
@@ -124,7 +124,7 @@ public abstract class Settings {
 
         public @Nullable String formatted(final K key) {
             final String str = this.getString(key);
-            return str == null ? null : "`"+str+"`";
+            return str == null ? null : "`" + str + "`";
         }
 
         public V setFormatted(final K key, final String str) throws IllegalArgumentException {
@@ -158,7 +158,7 @@ public abstract class Settings {
 
         @Override
         public BotLocale putFromString(final K key, final String str) throws IllegalArgumentException {
-            BotLocale locale;
+            final BotLocale locale;
             try {
                 locale = BotLocale.valueOf(str.toUpperCase());
             } catch (final IllegalArgumentException e) {
@@ -190,7 +190,7 @@ public abstract class Settings {
 
         @Override
         public TextChannel putFromString(final K key, final String str) throws IllegalArgumentException {
-            TextChannel channel;
+            final TextChannel channel;
             try {
                 channel = Boyfriend.getJDA().getTextChannelById(str);
                 if (channel == null)
@@ -203,7 +203,7 @@ public abstract class Settings {
         }
 
         public @Nullable String formatted(final K key) {
-            TextChannel channel = this.get(key);
+            final TextChannel channel = this.get(key);
             return channel == null ? null : channel.getAsMention();
         }
 
@@ -228,7 +228,7 @@ public abstract class Settings {
 
         @Override
         public Role putFromString(final K key, final String str) throws IllegalArgumentException {
-            Role role;
+            final Role role;
             try {
                 role = Boyfriend.getJDA().getRoleById(str);
                 if (role == null)
