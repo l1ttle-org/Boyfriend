@@ -38,8 +38,6 @@ import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
 
-import static ru.l1ttleO.boyfriend.I18n.tl;
-
 public class Ban extends Command implements IChatCommand, IConsoleCommand {
 
     public Ban() {
@@ -71,14 +69,11 @@ public class Ban extends Command implements IChatCommand, IConsoleCommand {
         String reason = reader.next("reason");
         long duration = 0;
         try {
-            duration = Math.max(Utils.parseDuration(reason, 0), 0);
+            duration = Math.max(Utils.parseDuration(reason), 0);
         } catch (final NumberFormatException | ArithmeticException ignored) {
         }
-        String durationString = tl("duration.ever", locale);
-        if (duration > 0) {
+        if (duration > 0)
             reason = reader.next("reason");
-            durationString = " " + Utils.getDurationText(duration, 0, true, locale);
-        }
         if ("-s".equals(reason)) {
             silent = true;
             reason = "";
@@ -90,6 +85,6 @@ public class Ban extends Command implements IChatCommand, IConsoleCommand {
         if (new Random().nextInt(101) == 100 && locale == BotLocale.RU)
             sender.reply("Я кастую бан!");
         if (silent) Utils.purge(message);
-        Actions.banMember(silent ? null : sender, author, banned, reason, duration, durationString);
+        Actions.banMember(silent ? null : sender, author, banned, reason, duration);
     }
 }

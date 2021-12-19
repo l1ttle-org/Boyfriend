@@ -18,8 +18,6 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -37,6 +35,7 @@ import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
 import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
+import ru.l1ttleO.boyfriend.settings.GuildSettings;
 
 public class Unmute extends Command implements IChatCommand, IConsoleCommand {
 
@@ -64,16 +63,7 @@ public class Unmute extends Command implements IChatCommand, IConsoleCommand {
         final Member author = message == null ? guild.getSelfMember() : message.getMember();
         final Member unmuted = reader.nextMember(guild);
         Utils.checkInteractions(message == null ? null : author, unmuted, locale);
-        List<Role> roleList = new ArrayList<>();
-        for (final String name : Mute.ROLE_NAMES) {
-            roleList = guild.getRolesByName(name, true);
-            if (!roleList.isEmpty()) break;
-        }
-        if (roleList.isEmpty()) {
-            sender.replyTl("actions.mute.no_role");
-            return;
-        }
-        final Role role = roleList.get(0);
+        final Role role = reader.requireSetting(guild, GuildSettings.MUTE_ROLE);
         if (!unmuted.getRoles().contains(role)) {
             sender.replyTl("actions.unmute.not_muted");
             return;

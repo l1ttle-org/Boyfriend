@@ -112,7 +112,7 @@ public class CommandReader {
     public <K, V> @NotNull V requireSetting(final K key, final Settings.Entry<K, V> entry) throws WrongUsageException {
         final V value = entry.get(key);
         if (value == null)
-            throw new WrongUsageException(tl("common.setting_required", this.sender.getLocale(), entry.name)); // TODO rework exception
+            throw new WrongUsageException(tl("common.setting_required", this.sender.getLocale(), entry.name));
         return value;
     }
 }

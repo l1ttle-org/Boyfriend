@@ -8,8 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import ru.l1ttleO.boyfriend.Boyfriend;
 import ru.l1ttleO.boyfriend.I18n.BotLocale;
+import ru.l1ttleO.boyfriend.Utils;
 
 public abstract class Settings {
     protected final Properties properties = new Properties(); // what will be saved and what was loaded from disk
@@ -60,8 +65,12 @@ public abstract class Settings {
     }
 
     protected <K> void loadEntry(final K key, final @NotNull Entry<K, ?> entry) {
-        if (this.hasProperty(entry.name))
-            entry.putFromString(key, this.getProperty(entry.name));
+        try {
+            if (this.hasProperty(entry.name))
+                entry.putFromString(key, this.getProperty(entry.name));
+        } catch (IllegalArgumentException e) {
+            System.err.println(e);
+        }
     }
 
     public static abstract class Entry<K, V> {
@@ -78,8 +87,8 @@ public abstract class Settings {
             this.defaultValue = defaultValue;
         }
 
-        protected void save(final K key) {
-            this.settingsGetter.apply(key).save(key, this);
+        protected boolean save(final K key) {
+            return this.settingsGetter.apply(key).save(key, this);
         }
 
         public boolean has(final K key) {
@@ -106,15 +115,16 @@ public abstract class Settings {
             this.save(key);
         }
 
-        public String getString(final K key) {
+        public @Nullable String getString(final K key) {
             final V value = this.get(key);
             return value == null ? null : value.toString();
         }
 
         public abstract V putFromString(final K key, final @NotNull String str);
 
-        public String formatted(final K key) {
-            return this.getString(key);
+        public @Nullable String formatted(final K key) {
+            final String str = this.getString(key);
+            return str == null ? null : "`"+str+"`";
         }
 
         public V setFormatted(final K key, final String str) throws IllegalArgumentException {
@@ -130,7 +140,7 @@ public abstract class Settings {
         }
 
         @Override
-        public String putFromString(final K key, final String str) {
+        public String putFromString(final K key, final String str) throws IllegalArgumentException {
             put(key, str);
             return str;
         }
@@ -147,12 +157,12 @@ public abstract class Settings {
         }
 
         @Override
-        public BotLocale putFromString(final K key, final String str) {
+        public BotLocale putFromString(final K key, final String str) throws IllegalArgumentException {
             BotLocale locale;
             try {
                 locale = BotLocale.valueOf(str.toUpperCase());
             } catch (final IllegalArgumentException e) {
-                locale = BotLocale.getDefault();
+                throw new IllegalArgumentException("Locale is unavailable: " + str);
             }
             put(key, locale);
             return locale;
@@ -164,6 +174,82 @@ public abstract class Settings {
             put(key, locale);
             save(key);
             return locale;
+        }
+    }
+
+    public static class TextChannelEntry<K> extends Entry<K, TextChannel> {
+        public TextChannelEntry(final @NotNull Function<K, Settings> keyGetter, final @NotNull String name) {
+            super(keyGetter, name, "channel", null);
+        }
+
+        @Override
+        public @Nullable String getString(final K key) {
+            final TextChannel channel = this.get(key);
+            return channel == null ? null : channel.getId();
+        }
+
+        @Override
+        public TextChannel putFromString(final K key, final String str) throws IllegalArgumentException {
+            TextChannel channel;
+            try {
+                channel = Boyfriend.getJDA().getTextChannelById(str);
+                if (channel == null)
+                    throw new IllegalArgumentException("Unable to find channel with ID " + str);
+            } catch (final NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid channel ID: " + str);
+            }
+            put(key, channel);
+            return channel;
+        }
+
+        public @Nullable String formatted(final K key) {
+            TextChannel channel = this.get(key);
+            return channel == null ? null : channel.getAsMention();
+        }
+
+        @Override
+        public TextChannel setFormatted(final K key, final @NotNull String str) throws IllegalArgumentException {
+            final TextChannel channel = this.putFromString(key, Utils.stripChannelID(str));
+            this.save(key);
+            return channel;
+        }
+    }
+
+    public static class RoleEntry<K> extends Entry<K, Role> {
+        public RoleEntry(final @NotNull Function<K, Settings> keyGetter, final @NotNull String name) {
+            super(keyGetter, name, "role", null);
+        }
+
+        @Override
+        public @Nullable String getString(final K key) {
+            final Role role = this.get(key);
+            return role == null ? null : role.getId();
+        }
+
+        @Override
+        public Role putFromString(final K key, final String str) throws IllegalArgumentException {
+            Role role;
+            try {
+                role = Boyfriend.getJDA().getRoleById(str);
+                if (role == null)
+                    throw new IllegalArgumentException("Unable to find role with ID " + str);
+            } catch (final NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid role ID: " + str);
+            }
+            put(key, role);
+            return role;
+        }
+
+        public @Nullable String formatted(final K key) {
+            final Role role = this.get(key);
+            return role == null ? null : role.getAsMention();
+        }
+
+        @Override
+        public Role setFormatted(final K key, final @NotNull String str) throws IllegalArgumentException {
+            final Role role = this.putFromString(key, Utils.stripRoleID(str));
+            this.save(key);
+            return role;
         }
     }
 }

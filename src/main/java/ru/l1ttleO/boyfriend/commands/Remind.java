@@ -78,7 +78,7 @@ public class Remind extends Command implements IChatCommand {
             return;
         }
         try {
-            duration = Utils.parseDuration(reader.next("duration"), 0);
+            duration = Utils.parseDuration(reader.next("duration"));
         } catch (final NumberFormatException e) {
             throw reader.badArgumentException("duration");
         } catch (final ArithmeticException e) {
@@ -90,7 +90,7 @@ public class Remind extends Command implements IChatCommand {
         if (!reader.hasNext())
             throw reader.noArgumentException("remind_text");
         text = Utils.wrap(reader.getRemaining());
-        sender.replyTl("command.remind.reminder_set", Utils.getDurationText(duration, 0, true, locale), text);
+        sender.replyTl("command.remind.reminder_set", Utils.getDurationText(duration, true, locale), text);
 
         final Guild guild = event.getGuild();
         final DelayedRunnable runnable = new DelayedRunnable(REMINDERS_THREAD_GROUP, (final @NotNull DelayedRunnable dr) -> {

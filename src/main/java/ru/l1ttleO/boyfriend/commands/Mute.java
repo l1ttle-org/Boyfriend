@@ -18,8 +18,6 @@
 
 package ru.l1ttleO.boyfriend.commands;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -37,15 +35,13 @@ import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
 import ru.l1ttleO.boyfriend.commands.util.Sender.MessageSender;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
 import ru.l1ttleO.boyfriend.exceptions.WrongUsageException;
+import ru.l1ttleO.boyfriend.settings.GuildSettings;
 
 public class Mute extends Command implements IChatCommand, IConsoleCommand {
 
     public Mute() {
         super("mute", Permission.MESSAGE_MANAGE, Permission.MANAGE_ROLES);
     }
-
-    // TODO use config (mute role)
-    public static final String @NotNull [] ROLE_NAMES = {"заключённый", "заключённые", "muted"};
 
     @Override
     public void run(final @NotNull MessageReceivedEvent event, final @NotNull CommandReader reader, final @NotNull MessageSender sender)
@@ -67,26 +63,17 @@ public class Mute extends Command implements IChatCommand, IConsoleCommand {
         final Member author = message == null ? guild.getSelfMember() : message.getMember();
         final Member muted = reader.nextMember(guild);
         Utils.checkInteractions(message == null ? null : author, muted, locale);
-        List<Role> roleList = new ArrayList<>();
-        for (final String name : ROLE_NAMES) {
-            roleList = guild.getRolesByName(name, true);
-            if (!roleList.isEmpty()) break;
-        }
-        if (roleList.isEmpty()) {
-            sender.replyTl("actions.mute.no_role");
-            return;
-        }
+        final Role role = reader.requireSetting(guild, GuildSettings.MUTE_ROLE);
         String reason = reader.next("reason");
         long duration = 0;
         try {
-            duration = Math.max(Utils.parseDuration(reason, 0), 0);
+            duration = Math.max(Utils.parseDuration(reason), 0);
         } catch (final NumberFormatException | ArithmeticException ignored) {
         }
         if (duration != 0)
             reason = reader.next("reason");
         else
             duration = 3600_000;
-        final String durationString = " " + Utils.getDurationText(duration, 0, true, locale);
         if ("-s".equals(reason)) {
             silent = true;
             reason = "";
@@ -95,6 +82,6 @@ public class Mute extends Command implements IChatCommand, IConsoleCommand {
         if (reason.isEmpty())
             throw reader.noArgumentException("reason");
         if (silent) Utils.purge(message);
-        Actions.muteMember(silent ? null : sender, roleList.get(0), author, muted, reason, duration, durationString);
+        Actions.muteMember(silent ? null : sender, role, author, muted, reason, duration);
     }
 }

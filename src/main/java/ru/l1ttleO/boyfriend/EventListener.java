@@ -44,7 +44,9 @@ public class EventListener extends ListenerAdapter {
 
     @Override
     public void onReady(final @NotNull ReadyEvent event) {
-        Utils.getBotLogChannel(event.getJDA()).sendMessage(Utils.getBeep(BotLocale.RU) + " " + tl("common.ready", BotLocale.RU)).queue();
+        new Thread(() ->
+            Utils.sendBotLog(event.getJDA(), Utils.getBeep(BotLocale.RU) + " " + tl("common.ready", BotLocale.RU))
+            ).start();
     }
 
     @Override
@@ -74,7 +76,7 @@ public class EventListener extends ListenerAdapter {
         final MessageSender sender = new MessageSender(message, locale);
         if ((message.getMentionedMembers().size() > 3 || message.getMentionedRoles().size() > 2) && !author.isBot() && member != null && selfMember.canInteract(member) && !member.hasPermission((GuildChannel) channel, Permission.MESSAGE_MENTION_EVERYONE)) {
             try {
-                Actions.banMember(sender, selfMember, author, tl("actions.ban.massping.reason", locale), 0, tl("ever", locale));
+                Actions.banMember(sender, selfMember, author, tl("actions.ban.massping.reason", locale), 0);
             } catch (final Exception e) {
                 channel.sendMessage(tl("actions.ban.massping.failed", locale)).queue();
                 e.printStackTrace();

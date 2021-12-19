@@ -36,7 +36,7 @@ import static ru.l1ttleO.boyfriend.I18n.tl;
 public class Help extends Command implements IChatCommand, IConsoleCommand {
 
     public Help() {
-        super("help");
+        super("help", "?");
     }
 
     @Override

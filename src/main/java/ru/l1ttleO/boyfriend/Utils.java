@@ -29,26 +29,32 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Set;
+import java.util.regex.Pattern;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.AbstractChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Guild.Ban;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.utils.MarkdownSanitizer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.l1ttleO.boyfriend.I18n.BotLocale;
-import ru.l1ttleO.boyfriend.exceptions.ImprobableException;
 import ru.l1ttleO.boyfriend.exceptions.NoPermissionException;
-
+import ru.l1ttleO.boyfriend.settings.GuildSettings;
 import static ru.l1ttleO.boyfriend.I18n.tl;
 
 public class Utils {
     public static final @NotNull Random RANDOM = new Random();
+    public static final @NotNull Pattern USER_PATTERN = getMentionPattern("@!?");
+    public static final @NotNull Pattern CHANNEL_PATTERN = getMentionPattern("#");
+    public static final @NotNull Pattern ROLE_PATTERN = getMentionPattern("@&");
 
     @SafeVarargs
     public static <T> T[] toArray(final @NotNull T... array) {
@@ -86,9 +92,7 @@ public class Utils {
         DURATION_TYPES.put(ChronoField.SECOND_OF_MINUTE, Pair.of("s", "second"));
     }
 
-    public static @NotNull String getDurationText(long millis, long from, final boolean accusative, final BotLocale locale) {
-        if (from == 0)
-            from = System.currentTimeMillis();
+    public static @NotNull String getDurationText(long millis, final long from, final boolean accusative, final BotLocale locale) {
         final LinkedHashMap<ChronoField, Integer> durations = new LinkedHashMap<>();
         final boolean negative = millis < 0;
         if (negative)
@@ -167,18 +171,24 @@ public class Utils {
         return out.toString();
     }
 
+    public static @NotNull String getDurationText(final long millis, final boolean accusative, final BotLocale locale) {
+        return getDurationText(millis, System.currentTimeMillis(), accusative, locale);
+    }
+
+    public static @NotNull String getDurationSuffix(final long millis, final BotLocale locale) {
+        return millis > 0 ? " " + getDurationText(millis, true, locale) : tl("duration.ever", locale);
+    }
+
     /**
      * Converts the string representation of the duration to milliseconds.
 
      * @param duration string to parse. If plain number, treated as seconds. Can be in Discord time format.
-     * @param from timestamp used to calculate months & etc. properly. If 0, current timestamp is used.
+     * @param from timestamp used to calculate months & etc. properly.
      * @return milliseconds
      * @throws NumberFormatException if {@code duration} doesn't match any of the used formats
      * @throws ArithmeticException if {@code duration} is too big to fit in {@code long}
      */
-    public static long parseDuration(final @NotNull String duration, long from) throws NumberFormatException, ArithmeticException {
-        if (from == 0)
-            from = System.currentTimeMillis();
+    public static long parseDuration(final @NotNull String duration, final long from) throws NumberFormatException, ArithmeticException {
         try {
             return Math.multiplyExact(Long.parseLong(duration), 1000);
         } catch (final NumberFormatException e) {
@@ -227,6 +237,10 @@ public class Utils {
             throw new NumberFormatException("Unknown time unit \"%s\"".formatted(durations.keySet().toArray()[0]));
         return date.toInstant(ZoneOffset.UTC).toEpochMilli() - from;
     }
+    
+    public static long parseDuration(final @NotNull String duration) throws NumberFormatException, ArithmeticException {
+        return parseDuration(duration, System.currentTimeMillis());
+    }
 
     public static @NotNull String wrap(@NotNull String text) {
         text = text.replaceAll("```", "​`​`​`​");
@@ -261,11 +275,12 @@ public class Utils {
         return getUserAndMember(from, null, guild).getRight();
     }
 
-    public static @NotNull MessageChannel getBotLogChannel(final @NotNull JDA jda) {
-        final MessageChannel botLogChannel = jda.getTextChannelById("618044439939645444");
-        if (botLogChannel == null)
-            throw new ImprobableException(); // TODO: rework this too
-        return botLogChannel;
+    public static void sendBotLog(final @NotNull JDA jda, final @NotNull CharSequence message) {
+        for (Guild guild : jda.getGuilds()) {
+            final MessageChannel channel = GuildSettings.BOT_LOG_CHANNEL.get(guild);
+            if (channel != null)
+                channel.sendMessage(message).queue();
+        }
     }
 
     public static boolean isCreator(final long userID) {
@@ -294,5 +309,39 @@ public class Utils {
         } catch (final ErrorResponseException e) {
             return null;
         }
+    }
+    
+    public static Pattern getMentionPattern(@NotNull String symbols) {
+        return Pattern.compile("<" + symbols + "([0-9]+)>");
+    }
+    
+    public static @Nullable String stripID(@NotNull String from, @NotNull String begin, @NotNull String end) {
+        if (from.startsWith(begin) && from.endsWith(end))
+            from = from.substring(begin.length(), from.length() - end.length());
+        return from.matches("[0-9]+") ? from : null;
+    }
+
+    public static @Nullable String stripChannelID(final @NotNull String from) {
+        return stripID(from, "<#", ">");
+    }
+
+    public static @Nullable String stripRoleID(final @NotNull String from) {
+        return stripID(from, "<@&", ">");
+    }
+
+    public static @NotNull String toPlainText(@NotNull CharSequence from, @NotNull JDA jda) {
+        from = USER_PATTERN.matcher(from).replaceAll(result -> {
+            User user = jda.retrieveUserById(result.group(1)).complete();
+            return user == null ? result.group() : "@" + user.getAsTag();
+            });
+        from = CHANNEL_PATTERN.matcher(from).replaceAll(result -> {
+            AbstractChannel channel = jda.getGuildChannelById(result.group(1));
+            return channel == null ? result.group() : "#" + channel.getName();
+            });
+        from = ROLE_PATTERN.matcher(from).replaceAll(result -> {
+            Role role = jda.getRoleById(result.group(1));
+            return role == null ? result.group() : "@" + role.getName();
+            });
+        return MarkdownSanitizer.sanitize(from.toString());
     }
 }

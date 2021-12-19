@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import ru.l1ttleO.boyfriend.Boyfriend;
 import ru.l1ttleO.boyfriend.I18n.BotLocale;
+import ru.l1ttleO.boyfriend.Utils;
 import ru.l1ttleO.boyfriend.settings.GuildSettings;
 
 import static ru.l1ttleO.boyfriend.I18n.tl;
@@ -54,7 +55,7 @@ public abstract class Sender {
 
         @Override
         public void reply(final @NotNull CharSequence text) {
-            System.out.println(text);
+            System.out.println(Utils.toPlainText(text, jda));
         }
 
         @Override

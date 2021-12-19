@@ -70,7 +70,7 @@ public abstract class Command {
         while (usage != null) {
             usages.add(usage);
             currentUsage++;
-            usage = tl("command." + this.aliases[0] + ".usage_" + (isConsole ? "console" : "") + currentUsage, locale, this.aliases[0]);
+            usage = tl("command." + this.aliases[0] + ".usage" + (isConsole ? "_console" : "") + currentUsage, locale, this.aliases[0]);
         }
         return tl("command.usage", locale, prefix + StringUtils.join(usages, tl("command.usage.or", locale) + prefix));
     }

@@ -33,6 +33,7 @@ import ru.l1ttleO.boyfriend.commands.util.CommandHandler;
 import ru.l1ttleO.boyfriend.commands.util.Sender.ConsoleSender;
 
 public class Boyfriend {
+    private static Boolean hasJDA = false;
     private static JDA jda;
     public static BotLocale consoleLocale = BotLocale.EN;
 
@@ -44,7 +45,10 @@ public class Boyfriend {
         builder.setActivity(Activity.listening("VS Retrospecter - Ectospasm"));
         builder.addEventListeners(new EventListener());
 
-        jda = builder.build().awaitReady();
+        synchronized(hasJDA) {
+            jda = builder.build().awaitReady();
+            hasJDA = true;
+        }
         final ConsoleSender sender = new ConsoleSender(jda);
         final Scanner scanner = new Scanner(System.in);
 
@@ -63,5 +67,13 @@ public class Boyfriend {
     public static boolean isRunning() {
         final JDA.Status status = jda.getStatus();
         return status != Status.SHUTDOWN && status != Status.SHUTTING_DOWN;
+    }
+
+    public static JDA getJDA() {
+        if (!hasJDA) {
+            synchronized(hasJDA) { // just wait until it's available,
+            }                      // another synchronized section should be already running at this point
+        }
+        return jda;
     }
 }

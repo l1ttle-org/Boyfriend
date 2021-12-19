@@ -48,7 +48,7 @@ public class Actions {
         final BotLocale locale = GuildSettings.LOCALE.get(guild);
         if (Utils.isCreator(kicked.getIdLong())) {
             if (sender != null)
-                sender.reply(tl("actions.kick.creator", locale));
+                sender.replyTl("actions.kick.creator");
             return;
         }
         String privateText = tl("actions.kick.private", locale, author.getAsMention(), reason);
@@ -62,25 +62,24 @@ public class Actions {
         sendNotification(guild, tl("actions.kick.audit", locale, author.getAsMention(), kicked.getAsMention(), reason), sender == null);
     }
 
-    public static void banMember(final @Nullable Sender sender, final @NotNull Member author, final @NotNull User banned, final String reason, final long duration, final String durationString) {
+    public static void banMember(final @Nullable Sender sender, final @NotNull Member author, final @NotNull User banned, final String reason, final long duration) {
         final Guild guild = author.getGuild();
-        final BotLocale locale = GuildSettings.LOCALE.get(guild);
+        final BotLocale guildLocale = GuildSettings.LOCALE.get(guild);
+        final String durationString = Utils.getDurationSuffix(duration, guildLocale);
         if (Utils.isCreator(banned.getIdLong())) {
             if (sender != null)
-                sender.reply(tl("actions.ban.creator", locale));
+                sender.replyTl("actions.ban.creator");
             return;
         }
         final Ban prevBan = Utils.getBan(guild, banned);
-        String privateText = tl("actions.ban.private", locale, author.getAsMention(), durationString, reason);
-        final String replyText = tl(prevBan == null ? "actions.ban.response" : "actions.ban.response.reapply",
-            locale, banned.getAsMention(), durationString, reason);
+        String privateText = tl("actions.ban.private", guildLocale, author.getAsMention(), durationString, reason);
         if (duration > 0) {
             final List<Invite> invites = guild.retrieveInvites().complete();
             if (!invites.isEmpty())
-                privateText += tl("actions.ban.private.invite", locale, "https://discord.gg/" + invites.get(0).getCode());
+                privateText += tl("actions.ban.private.invite", guildLocale, "https://discord.gg/" + invites.get(0).getCode());
         }
         sendDirectMessage(banned, privateText);
-        final String banEntryReason = "(%s: %s%s) %s".formatted(author.getUser().getAsTag(), tl("duration.for", locale), durationString, reason);
+        final String banEntryReason = "(%s: %s%s) %s".formatted(author.getUser().getAsTag(), tl("duration.for", guildLocale), durationString, reason);
         if (prevBan != null && !banEntryReason.equals(prevBan.getReason()))
             guild.unban(banned).queue();
         guild.ban(banned, 0, banEntryReason).complete();
@@ -92,14 +91,15 @@ public class Actions {
             final DelayedRunnable runnable = new DelayedRunnable(BANS_THREAD_GROUP, (DelayedRunnable dr) -> {
                 if (!banEntryReason.equals(guild.retrieveBan(banned).complete().getReason()))
                     return;
-                unbanMember(null, guild.getSelfMember(), banned, tl("common.punishment_expired", locale), sender == null);
+                unbanMember(null, guild.getSelfMember(), banned, tl("common.punishment_expired", guildLocale), sender == null);
             }, "Ban timer " + banned.getId(), duration, null);
             guildBans.put(banned.getIdLong(), runnable.thread);
             BANS.put(guild.getIdLong(), guildBans);
         }
         if (sender != null)
-            sender.reply(replyText);
-        final String notificationText = tl("actions.ban.audit" + (prevBan != null ? ".reapply" : ""), locale,
+            sender.reply(tl(prevBan == null ? "actions.ban.response" : "actions.ban.response.reapply",
+                guildLocale, banned.getAsMention(), Utils.getDurationSuffix(duration, sender.getLocale()), reason));
+        final String notificationText = tl("actions.ban.audit" + (prevBan != null ? ".reapply" : ""), guildLocale,
             author.getAsMention(), banned.getAsMention(), durationString, reason);
         sendNotification(guild, notificationText, sender == null);
     }
@@ -119,17 +119,15 @@ public class Actions {
         sendNotification(guild, notificationText, silent);
     }
 
-    public static void muteMember(final @Nullable Sender sender, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration, final String durationString) {
+    public static void muteMember(final @Nullable Sender sender, final @NotNull Role role, final @NotNull Member author, final @NotNull Member muted, final String reason, final long duration) {
         final Guild guild = author.getGuild();
-        final BotLocale locale = GuildSettings.LOCALE.get(guild);
+        final BotLocale guildLocale = GuildSettings.LOCALE.get(guild);
         if (Utils.isCreator(muted.getIdLong())) {
             if (sender != null)
-                sender.reply(tl("actions.mute.creator", locale));
+                sender.replyTl("actions.mute.creator");
             return;
         }
         final boolean remute = muted.getRoles().contains(role);
-        final String replyText = tl("actions.mute.response" + (remute ? ".reapply" : ""), locale,
-            muted.getAsMention(), durationString, reason);
         guild.addRoleToMember(muted, role).queue();
         final HashMap<Long, Thread> guildMutes = MUTES.getOrDefault(guild.getIdLong(), new HashMap<>());
         final Thread existingMute = guildMutes.get(muted.getIdLong());
@@ -137,21 +135,22 @@ public class Actions {
             existingMute.interrupt();
         if (duration > 0) {
             final DelayedRunnable runnable = new DelayedRunnable(MUTES_THREAD_GROUP,
-                    (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), muted,
-                            tl("common.punishment_expired", locale), sender == null),
+                    (DelayedRunnable thisDR) -> unmuteMember(null, role, guild.getSelfMember(), guild.retrieveMember(muted.getUser()).complete(),
+                            tl("common.punishment_expired", guildLocale), sender == null),
                                                                  "Mute timer " + muted.getId(), duration, null);
             guildMutes.put(muted.getIdLong(), runnable.thread);
             MUTES.put(guild.getIdLong(), guildMutes);
         }
         if (sender != null)
-            sender.reply(replyText);
-        final String notificationText = tl("actions.mute.audit" + (remute ? ".reapply" : ""), locale,
-            author.getAsMention(), muted.getAsMention(), durationString, reason);
+            sender.replyTl("actions.mute.response" + (remute ? ".reapply" : ""),
+                muted.getAsMention(), Utils.getDurationSuffix(duration, sender.getLocale()), reason);
+        final String notificationText = tl("actions.mute.audit" + (remute ? ".reapply" : ""), guildLocale,
+            author.getAsMention(), muted.getAsMention(), Utils.getDurationSuffix(duration, guildLocale), reason);
         sendNotification(guild, notificationText, sender == null);
     }
 
     public static void unmuteMember(final @Nullable Sender sender, final @NotNull Role role, final @NotNull Member author, final @NotNull Member unmuted, final String reason, final boolean silent) {
-        if (!unmuted.getRoles().contains(role)) return;
+        if (unmuted == null || !unmuted.getRoles().contains(role)) return;
         final Guild guild = author.getGuild();
         final BotLocale locale = GuildSettings.LOCALE.get(guild);
         guild.removeRoleFromMember(unmuted, role).queue();
@@ -164,13 +163,13 @@ public class Actions {
     }
 
     public static void sendNotification(final @NotNull Guild guild, final @NotNull String text, final boolean silent) {
-        // TODO use config (admin notifications channel)
-        final TextChannel adminNotifChannel = guild.getJDA().getTextChannelById("870929165141032971");
+        final TextChannel adminNotifChannel = GuildSettings.ADMIN_LOG_CHANNEL.get(guild);
         if (!Boyfriend.isRunning()) return;
         if (adminNotifChannel != null)
             adminNotifChannel.sendMessage(text).queue();
-        if (!silent && guild.getSystemChannel() != null)
-            guild.getSystemChannel().sendMessage(text).queue();
+        final TextChannel systemChannel = guild.getSystemChannel();
+        if (!silent && adminNotifChannel != systemChannel && systemChannel != null)
+            systemChannel.sendMessage(text).queue();
     }
 
     public static void sendDirectMessage(final @NotNull User user, final @NotNull String message) {

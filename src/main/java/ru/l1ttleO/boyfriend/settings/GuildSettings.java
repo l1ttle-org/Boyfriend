@@ -35,12 +35,18 @@ public class GuildSettings extends Settings {
         }
     };
     public static final StringEntry<Guild> PREFIX = new StringEntry<>(GuildSettings::get, "prefix", "!");
+    public static final RoleEntry<Guild> MUTE_ROLE = new RoleEntry<>(GuildSettings::get, "muteRole");
+    public static final TextChannelEntry<Guild> ADMIN_LOG_CHANNEL = new TextChannelEntry<>(GuildSettings::get, "adminLogChannel");
+    public static final TextChannelEntry<Guild> BOT_LOG_CHANNEL = new TextChannelEntry<>(GuildSettings::get, "botLogChannel");
 
     public GuildSettings(final @NotNull Guild guild) {
         super(guild.getId(), "Guild configuration file for Boyfriend");
 
         loadEntry(guild, LOCALE);
         loadEntry(guild, PREFIX);
+        loadEntry(guild, MUTE_ROLE);
+        loadEntry(guild, ADMIN_LOG_CHANNEL);
+        loadEntry(guild, BOT_LOG_CHANNEL);
     }
 
     @Override
